@@ -37,7 +37,7 @@ all:	xPLLib examples
 
 install: libxPL.so xPL.a xPL.h
 	install -m 0644 xPL.h $(INCDIR)
-	install -m 0755 xPL.a $(LIBDIR)/xPL.a
+	install -m 0755 xPL.a $(LIBDIR)/libxPL.a
 	install -m 0755 libxPL.so $(LIBDIR)/libxPL.so.$(VERSION)
 	ln -f -s $(LIBDIR)/libxPL.so.$(VERSION) $(LIBDIR)/libxPL.so
 
