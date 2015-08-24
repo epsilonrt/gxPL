@@ -6,6 +6,7 @@
 # For LINUX, use the following
 CCOPTS = -g -DLINUX -pedantic -Wall
 LIBS = -g -lm 
+BINDIR = /usr/local/bin
 
 # For UnixWare systems, use the following
 # CCOPTS = -O2 -DUNIXWARE
@@ -53,6 +54,11 @@ hubdist: rebuild
 
 rebuild: clean all
 
+install: all
+	install -m 0755 xPL_Hub $(BINDIR)
+	install -m 0755 xPL_Logger $(BINDIR)
+	install -m 0755 xPLSend $(BINDIR)
+	install -m 0755 xPL_Clock $(BINDIR)
 
 
 

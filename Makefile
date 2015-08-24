@@ -8,7 +8,8 @@ CCOPTS = -O2 -DLINUX -pedantic -Wall -g
 LIBS = -lm
 LIBDIR = /usr/local/lib
 INCDIR = /usr/local/include
-
+VERSION = 1.3a
+TARGET = xPL
 
 # For UnixWare systems, use the following
 # CCOPTS = -O2 -DUNIXWARE
@@ -35,9 +36,11 @@ LIB_OBJS = xPL-io.o xPL-utils.o xPL-service.o xPL-message.o xPL-listeners.o xPL-
 all:	xPLLib examples
 
 install: libxPL.so xPL.a xPL.h
-	cp -f libxPL.so $(LIBDIR)
-	cp -f xPL.a $(LIBDIR)
-	cp -f xPL.h $(INCDIR)
+	install -m 0644 xPL.h $(INCDIR)
+	install -m 0755 xPL.a $(LIBDIR)/xPL.a
+	install -m 0755 libxPL.so $(LIBDIR)/libxPL.so.$(VERSION)
+	ln -f -s $(LIBDIR)/libxPL.so.$(VERSION) $(LIBDIR)/libxPL.so
+
 	ldconfig
 
 xPLLib: $(LIB_OBJS) libxPL.so xPL.a
