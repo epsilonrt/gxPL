@@ -3,7 +3,11 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include "../xPL.h"
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include <xPL.h>
 
 #define LOGGER_VERSION "1.1"
 
@@ -11,10 +15,10 @@
 #define LOG_APPEND_CFG_NAME "append2Log"
 
 static FILE * logFile = NULL;
-static String logFileName = "";
-static Bool appendToLog = FALSE;
+static char * logFileName = "";
+static bool appendToLog = FALSE;
 
-static xPL_ServicePtr loggerService = NULL;
+static xPL_Service * loggerService = NULL;
 
 void shutdownHandler(int onSignal) {
   xPL_setServiceEnabled(loggerService, FALSE);
@@ -28,8 +32,8 @@ void shutdownHandler(int onSignal) {
 /** and parsing it into your code in a seperate function so it can   */
 /** be used by your configChangedHandler and your startup code that  */
 /** will want to parse the same data after a config file is loaded   */
-static void parseConfig(xPL_ServicePtr theService) {
-  String configValue;
+static void parseConfig(xPL_Service * theService) {
+  char * configValue;
   FILE * newLogFile = NULL;
 
   /* Get append status */
@@ -69,13 +73,13 @@ static void parseConfig(xPL_ServicePtr theService) {
 }
 
 /** Handle a change to the logger service configuration */
-static void configChangedHandler(xPL_ServicePtr theService, xPL_ObjectPtr userData) {
+static void configChangedHandler(xPL_Service * theService, xPL_Object * userData) {
   /* Read config items for service and install */
   parseConfig(theService);
 }
 
 /* Write a date/time stamp */
-void printTimestamp() {
+void printTimestamp(void) {
   char dateTimeBuffer[41];
   time_t rightNow;
 
@@ -85,7 +89,7 @@ void printTimestamp() {
 }
 
 /* Print info on incoming messages */
-void printXPLMessage(xPL_MessagePtr theMessage, xPL_ObjectPtr userValue) {
+void printXPLMessage(xPL_Message * theMessage, xPL_Object * userValue) {
   printTimestamp();
   fprintf(logFile, "[xPL_MSG] TYPE=");
   switch(xPL_getMessageType(theMessage)) {
@@ -132,7 +136,7 @@ void printXPLMessage(xPL_MessagePtr theMessage, xPL_ObjectPtr userValue) {
   fprintf(logFile, "\n");
 }
 
-int main(int argc, String argv[]) {
+int main(int argc, char * argv[]) {
   /* Parse the command line */
   if (!xPL_parseCommonArgs(&argc, argv, FALSE)) exit(1);
 

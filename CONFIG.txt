@@ -45,7 +45,10 @@ It's a VERY good idea to put your programs version number into the service
 your program uses.  This version number will show up in the xPL configuration
 programs and it allows a user to see what version all their apps are from a
 common location.  In general, the version number should be plain (i.e. 1.1 is
-preferred over V1.1), though that does not have to be the rule.  You do want the version number to be connected automatically to your programs version number so you do not have to remember to seek the xPL service version value out and change it (it's easy to forget).  For example
+preferred over V1.1), though that does not have to be the rule.  You do want the 
+version number to be connected automatically to your programs version number so 
+you do not have to remember to seek the xPL service version value out and change
+ it (it's easy to forget).  For example
 
 
 You should insure that every message you send that is supposed to come from

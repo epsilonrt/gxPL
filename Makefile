@@ -1,95 +1,55 @@
-#
-# Makefile for xPL4Linux's xPLLib
-#
+###############################################################################
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# All rights reserved.                                                        #
+# Licensed under the Apache License, Version 2.0 (the "License")              #
+###############################################################################
+SUBDIRS = lib
 
-#
-# For LINUX, use the following
-CCOPTS = -O2 -DLINUX -pedantic -Wall -g
-LIBS = -lm
-LIBDIR = /usr/local/lib
-INCDIR = /usr/local/include
-VERSION = 1.3a
-TARGET = xPL
+# Chemin relatif du répertoire racine de xPL4Linux
+PROJECT_ROOT = .
 
-# For UnixWare systems, use the following
-# CCOPTS = -O2 -DUNIXWARE
-# LIBS = -lnsl -lsocket -lm
+# Choix de l'architecture matérielle du système
+#ARCH = ARCH_GENERIC_LINUX
+ARCH = ARCH_ARM_RASPBERRYPI
 
-#
-# For Alpha/DEC OSF/Tru64
-#
-# CCOPTS = -O2 -DTRU64
-# LIBS = -lm
+# Enabling Debug information (ON / OFF)
+#DEBUG = ON
 
-# *******************************************************
-# ******* No more customizations from here down *********
-# *******************************************************
+#---------------- Install Options ----------------
+prefix=/usr/local
 
-LDOPTS	= -O
-CC	=	cc $(CCOPTS)
-LIBCC	=	$(CC) -fPIC
-LD	= 	cc $(LDOPTS)
+INSTALL_BINDIR=$(prefix)/bin
+INSTALL_DATDIR=$(prefix)/share
+MSG_INSTALL = [INSTALL]
+MSG_UNINSTALL = [UNINSTALL]
 
-INCLUDES = xPL.h xPL_priv.h
-LIB_OBJS = xPL-io.o xPL-utils.o xPL-service.o xPL-message.o xPL-listeners.o xPL-store.o xPL-config.o xPL-hub.o
+all: $(SUBDIRS)
+rebuild: $(SUBDIRS)
+clean: $(SUBDIRS)
+distclean: $(SUBDIRS)
+install: install_utils $(SUBDIRS)
+uninstall: uninstall_utils $(SUBDIRS)
 
-all:	xPLLib examples
+install_utils: uninstall_utils
+	@echo "$(MSG_INSTALL) $(TARGET) utils and templates in $(prefix)"
+	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl
+	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl/template
+	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl/template/cpp
+	@-install -m 0644 $(PROJECT_ROOT)/util/template/Makefile $(INSTALL_DATDIR)/xpl/template
+	@-install -m 0644 $(PROJECT_ROOT)/util/template/template.c $(INSTALL_DATDIR)/xpl/template
+	@-install -m 0644 $(PROJECT_ROOT)/util/template/template.project $(INSTALL_DATDIR)/xpl/template
+	@-install -m 0644 $(PROJECT_ROOT)/util/template/cpp/* $(INSTALL_DATDIR)/xpl/template/cpp
+	@-install -m 0755 $(PROJECT_ROOT)/util/bin/xpl-prj $(INSTALL_BINDIR)
+	@-install -m 0755 $(PROJECT_ROOT)/util/bin/git-version $(INSTALL_BINDIR)
+	@sed -i -e "s#INSTALLED_TEMPLATE_DIR#$(INSTALL_DATDIR)/xpl/template#g" $(INSTALL_BINDIR)/xpl-prj
 
-install: libxPL.so xPL.a xPL.h
-	install -m 0644 xPL.h $(INCDIR)
-	install -m 0755 xPL.a $(LIBDIR)/libxPL.a
-	install -m 0755 libxPL.so $(LIBDIR)/libxPL.so.$(VERSION)
-	ln -f -s $(LIBDIR)/libxPL.so.$(VERSION) $(LIBDIR)/libxPL.so
+uninstall_utils:
+	@echo "$(MSG_UNINSTALL) $(TARGET) utils and templates from $(prefix)"
+	@-rm -fr $(INSTALL_DATDIR)/xpl
+	@-rm -fr $(INSTALL_BINDIR)/xpl-prj
+	@-rm -fr $(INSTALL_BINDIR)/git-version
 
-	ldconfig
+$(SUBDIRS):
+	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
-xPLLib: $(LIB_OBJS) libxPL.so xPL.a
-
-libxPL.so: $(LIB_OBJS)
-	@echo "Creating libxPL.so..."
-	@ld -shared -o libxPL.so $(LIB_OBJS)
-
-xPL.a: $(LIB_OBJS)
-	@echo "Creating xPL.a..."
-	@rm -f xPL.a
-	@ar q xPL.a $(LIB_OBJS)
-
-xPL-utils.o: $(INCLUDES) xPL-utils.c
-	$(LIBCC) -c xPL-utils.c
-
-xPL-config.o: $(INCLUDES) xPL-config.c
-	$(LIBCC) -c xPL-config.c
-
-xPL-io.o:	$(INCLUDES) xPL-io.c
-	$(LIBCC) -c xPL-io.c
-
-xPL-service.o:	$(INCLUDES) xPL-service.c
-	$(LIBCC) -c xPL-service.c
-
-xPL-message.o:	$(INCLUDES) xPL-message.c
-	$(LIBCC) -c xPL-message.c
-
-xPL-listeners.o:	$(INCLUDES) xPL-listeners.c
-	$(LIBCC) -c xPL-listeners.c
-
-xPL-store.o:	$(INCLUDES) xPL-store.c
-	$(LIBCC) -c xPL-store.c
-
-xPL-hub.o:	$(INCLUDES) xPL-hub.c
-	$(LIBCC) -c xPL-hub.c
-
-
-clean:
-	-rm -f *.o *.a *.so core
-dist:
-	rm -rf /tmp/xPLLib
-	mkdir /tmp/xPLLib
-	cp *.[ch] Makefile *.txt  /tmp/xPLLib
-	mkdir /tmp/xPLLib/examples
-	cp examples/*.[ch] examples/*.txt examples/Makefile /tmp/xPLLib/examples
-
-	CURDIR=`pwd`
-	rm -f ${CURDIR}/web/xPLLib.tgz
-	cd /tmp; tar czf ${CURDIR}/../web/xPLLib.tgz xPLLib
-	cd ${CURDIR}
-	rm -rf /tmp/xPLLib
+.PHONY: all rebuild clean distclean install uninstall $(SUBDIRS)

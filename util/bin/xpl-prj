@@ -1,0 +1,118 @@
+#!/bin/bash
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT
+# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License")
+
+XPL4LINUX_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
+#----------------------------------------------------------------------------
+
+
+if [ ! -d ${XPL4LINUX_TEMPLATE_DIR} ]; then
+cat << EOF
+<<ERREUR>> Le répertoire racine n'a pas été localisé.
+Vous devez installer correctement xPL4Linux (sudo make install)
+EOF
+exit 1
+fi
+
+usage()
+{
+cat << EOF
+usage: $(basename $0) [Options] [project_name]
+
+Ce script permet de créer un nouveau projet pour xPL4Linux.
+
+  project_name  nom du projet à créer. Si le nom de projet n'est pas fourni,
+  c'est le nom du répertoire courant qui est utilisé.
+  Sans l'option -s, seul un fichier projet CodeLite est créé.
+  
+OPTIONS:
+  -h    Affiche ce message
+  -f    Force l'écrasement de fichiers existants.
+  -g    Ajoute les fichiers créés au dépôt git du répertoire courant
+  -s    Créé aussi un fichier Makefile et un fichier source C (ou C++)
+  -p    Indique que le projet à créer est un projet C++
+EOF
+}
+
+while getopts ":fgsph" opt; do
+  case $opt in
+    f)
+      FORCE="ON"
+      ;;
+    g)
+      GIT="ON"
+      ;;
+    s)
+      SOURCE="ON"
+      ;;
+    p)
+      CPP="ON"
+      ;;
+    h)
+      usage
+      exit 1
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      exit
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+PROJECT_DIR=$(pwd)
+
+if [ $# -lt 1 ]; then
+  PROJECT_NAME=$(basename ${PROJECT_DIR})
+else
+  PROJECT_NAME=$1
+fi
+
+PROJECT_FILE=${PROJECT_DIR}/${PROJECT_NAME}.project
+if [ "_$CPP" = "_ON" ]; then
+  SOURCE_FILE=${PROJECT_DIR}/${PROJECT_NAME}.cpp
+else
+  SOURCE_FILE=${PROJECT_DIR}/${PROJECT_NAME}.c
+fi
+MAKE_FILE=${PROJECT_DIR}/Makefile
+#echo "PROJECT_DIR=$PROJECT_DIR"
+#echo "PROJECT_FILE=$PROJECT_FILE"
+
+if [ -f ${PROJECT_FILE} ]; then
+  echo "$PROJECT_FILE exists !"
+  if [ "_$FORCE" = "_" ]; then
+    echo "Error: you need to put the -f option to overwrite the file !"
+    exit 1
+  fi
+fi
+
+if [ "_$CPP" = "_ON" ]; then
+  cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
+else
+  cp ${XPL4LINUX_TEMPLATE_DIR}/template.project ${PROJECT_FILE}
+fi
+sed -i -e "s#template#$PROJECT_NAME#g" ${PROJECT_FILE}
+if [ "_$GIT" = "_ON" ]; then
+  git add ${PROJECT_FILE}
+fi
+
+
+if [ "_$SOURCE" = "_ON" ]; then
+  if [ "_$CPP" = "_ON" ]; then
+    cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
+    cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
+  else
+    cp ${XPL4LINUX_TEMPLATE_DIR}/template.c ${SOURCE_FILE}
+    cp ${XPL4LINUX_TEMPLATE_DIR}/Makefile ${MAKE_FILE}
+  fi
+  sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
+  sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
+  if [ "_$GIT" = "_ON" ]; then
+    git add ${MAKE_FILE} ${SOURCE_FILE}
+  fi
+fi
+
+exit 0

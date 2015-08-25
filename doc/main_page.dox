@@ -1,0 +1,53 @@
+/**
+
+@file main_page.dox
+@brief Page de garde de la documentation
+  Copyright © 2015 Pascal JEAN aka epsilonRT <pascal.jean--AT--btssn.net>
+  All rights reserved.
+  This software is governed by the CeCILL license <http://www.cecill.info>
+
+@mainpage Présentation
+
+  @htmlonly
+    <a href="http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html">
+      <img src="osi.png" alt="osi.png" align="right" valign="top">
+    </a>
+  @endhtmlonly
+
+  SysIo est un projet Open Source sous <a href="http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html">CeCILL Free Software License Version 2.1</a>
+  dont l'objectif est d'offrir une bibliothèque C, C++ et Python pour accèder
+  aux ressources matérielles du système par une interface standardisée. \n
+
+  La partie spécifique à une architecture matérielle a été séparée de
+  façon à permettre le portage vers une autre plateforme. Pour l'instant,
+  la seule plateforme prise en charge est linux sous architecture ARMv6 (Raspberry Pi). \n
+
+  Vous pouvez récupérer la toute dernière version de développement grâce à git :\n
+@code
+$ git clone git://www.epsilonrt.com/sysio
+@endcode
+
+  @author Pascal Jean, epsilonRT \htmlonly &#60;<a href="mailto:&#101;&#112;&#115;&#105;&#108;&#111;&#110;&#114;&#116;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;">&#101;&#112;&#115;&#105;&#108;&#111;&#110;&#114;&#116;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;</a>&#62;\endhtmlonly \n Copyright © 2009-2014 All rights reserved.
+
+  Ce projet est en perpétuelle évolution et nécessite un travail important, si vous souhaitez me soutenir, n'hésitez pas à me faire un don !
+
+  @htmlonly
+    <center>
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+      <input type="hidden" name="cmd" value="_s-xclick">
+      <input type="hidden"
+        name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+      <input
+        type="image"
+        src="https://www.paypalobjects.com/fr_FR/FR/i/btn/btn_donateCC_LG.gif"
+        border="0"
+        name="submit"
+        alt="PayPal - la solution de paiement en ligne la plus simple et la plus sécurisée !">
+      <img
+        alt="" border="0"
+        src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif"
+        width="1" height="1">
+    </form>
+    </center>
+  @endhtmlonly
+*/

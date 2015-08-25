@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="xPL4Linux" Database="" SWTLW="No">
+  <Project Name="xpl-clock" Path="examples/clock/xpl-clock.project" Active="Yes"/>
+  <Project Name="xpl-config-clock" Path="examples/config-clock/xpl-config-clock.project" Active="No"/>
+  <Project Name="xPL4Linux" Path="xPL4Linux.project" Active="No"/>
+  <Project Name="xPLLib" Path="lib/xPLLib.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="no">
+      <Project Name="xPL_Lib" ConfigName="Debug"/>
+      <Project Name="xpl-clock" ConfigName="Debug"/>
+      <Project Name="xpl-config-clock" ConfigName="Debug"/>
+      <Project Name="xpl-logger" ConfigName="Debug"/>
+      <Project Name="xpl-send" ConfigName="Debug"/>
+      <Project Name="xpl-hub" ConfigName="Debug"/>
+      <Project Name="xPL4Linux" ConfigName="Debug"/>
+      <Project Name="xPLLib" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Project Name="xPL_Lib" ConfigName="Release"/>
+      <Project Name="xpl-clock" ConfigName="Release"/>
+      <Project Name="xpl-config-clock" ConfigName="Release"/>
+      <Project Name="xpl-logger" ConfigName="Release"/>
+      <Project Name="xpl-send" ConfigName="Release"/>
+      <Project Name="xpl-hub" ConfigName="Release"/>
+      <Project Name="xPL4Linux" ConfigName="Release"/>
+      <Project Name="xPLLib" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
