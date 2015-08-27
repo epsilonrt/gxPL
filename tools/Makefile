@@ -14,6 +14,8 @@ cleanlib: $(SUBDIRS)
 extcoff: $(SUBDIRS)
 program: $(SUBDIRS)
 debug: $(SUBDIRS)
+install: $(SUBDIRS)
+uninstall: $(SUBDIRS)
 
 elf: $(SUBDIRS)
 hex: $(SUBDIRS)
