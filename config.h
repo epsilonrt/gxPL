@@ -20,6 +20,7 @@ extern "C" {
 /* build options ============================================================ */
 #define CONFIG_HEARTBEAT_INTERVAL 60
 #define CONFIG_HUB_DISCOVERY_INTERVAL 3
+#define CONFIG_MSG_BUFF_SIZE 2048
 
 /* ========================================================================== */
 #ifdef __cplusplus

@@ -11,30 +11,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "xPL-private.h"
 
+#include "message_p.h"
+#include "service_p.h"
+#include "io_p.h"
+
+/* macros =================================================================== */
+/* constants ================================================================ */
 #define GROW_LIST_BY 16
-
+/* structures =============================================================== */
 typedef struct _messageListener {
   xPL_messageListener theListener;
   xPL_Object * userValue;
 } messageListener;
-
-static int messageListenerCount = 0;
-static int messageAllocListenerCount = 0;
-static messageListener * messageListenerList = NULL;
 
 typedef struct _rawListener {
   xPL_rawListener theListener;
   xPL_Object * userValue;
 } rawListener;
 
+/* types ==================================================================== */
+/* private variables ======================================================== */
+static int messageListenerCount = 0;
+static int messageAllocListenerCount = 0;
+static messageListener * messageListenerList = NULL;
 static int rawListenerCount = 0;
-static int rawAllocListenerCount = 0;
 static rawListener * rawListenerList = NULL;
 
-/* Add a raw listener */
-void xPL_addRawListener (xPL_rawListener theHandler, xPL_Object * userValue) {
+/* public variables ========================================================= */
+
+/* static functions ========================================================= */
+
+#ifdef LISTENERS_UNUSED
+static int rawAllocListenerCount = 0;
+// TODO ?
+/* -----------------------------------------------------------------------------
+ * Add a raw listener */
+static void 
+xPL_addRawListener (xPL_rawListener theHandler, xPL_Object * userValue) {
   rawListener * theListener;
 
   /* See if there is a slot to install and allocate more if not */
@@ -50,8 +64,10 @@ void xPL_addRawListener (xPL_rawListener theHandler, xPL_Object * userValue) {
   theListener->userValue = userValue;
 }
 
-/* Remove a raw listener */
-bool xPL_removeRawListener (xPL_rawListener theHandler) {
+/* -----------------------------------------------------------------------------
+ * Remove a raw listener */
+static bool 
+xPL_removeRawListener (xPL_rawListener theHandler) {
   int listenerIndex;
   rawListener * theListener;
 
@@ -74,26 +90,13 @@ bool xPL_removeRawListener (xPL_rawListener theHandler) {
   /* Didn't find it! */
   return FALSE;
 }
+#endif
 
-/* Dispatch raw messages */
-bool xPL_dispatchRawEvent (char * theData, int dataLen) {
-  bool messageDispatched = FALSE;
-  rawListener * theRawListener;
-  int listenerIndex;
+/* public functions ========================================================= */
 
-  for (listenerIndex = rawListenerCount - 1; listenerIndex >= 0; listenerIndex--) {
-    theRawListener = &rawListenerList[listenerIndex];
-
-    /* Dispatch the message */
-    theRawListener->theListener (theData, dataLen, theRawListener->userValue);
-    messageDispatched = TRUE;
-  }
-
-  /* And we are done */
-  return messageDispatched;
-}
-
-/* Add a message listener */
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a message listener */
 void xPL_addMessageListener (xPL_messageListener theHandler, xPL_Object * userValue) {
   messageListener * theListener;
 
@@ -110,7 +113,9 @@ void xPL_addMessageListener (xPL_messageListener theHandler, xPL_Object * userVa
   theListener->userValue = userValue;
 }
 
-/* Remove a message listener */
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove a message listener */
 bool xPL_removeMessageListener (xPL_messageListener theHandler) {
   int listenerIndex;
   messageListener * theListener;
@@ -135,25 +140,9 @@ bool xPL_removeMessageListener (xPL_messageListener theHandler) {
   return FALSE;
 }
 
-/* Dispatch messages */
-bool xPL_dispatchMessageEvent (xPL_Message * theMessage) {
-  bool messageDispatched = FALSE;
-  messageListener * theMessageListener;
-  int listenerIndex;
-
-  for (listenerIndex = messageListenerCount - 1; listenerIndex >= 0; listenerIndex--) {
-    theMessageListener = &messageListenerList[listenerIndex];
-
-    /* Dispatch the message */
-    theMessageListener->theListener (theMessage, theMessageListener->userValue);
-    messageDispatched = TRUE;
-  }
-
-  /* And we are done */
-  return messageDispatched;
-}
-
-/* Add a service listener */
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a service listener */
 void xPL_addServiceListener (xPL_Service * theService, xPL_ServiceListener theListener, xPL_MessageType messageType, char * schemaClass, char * schemaType, xPL_Object * userValue) {
   xPL_ServiceListenerDef * theServiceListener;
 
@@ -181,7 +170,9 @@ void xPL_addServiceListener (xPL_Service * theService, xPL_ServiceListener theLi
   theServiceListener->userValue = userValue;
 }
 
-/* Remove a service listener */
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove a service listener */
 bool xPL_removeServiceListener (xPL_Service * theService, xPL_ServiceListener theListener) {
   int listenerIndex;
   xPL_ServiceListenerDef * theServiceListener;
@@ -210,7 +201,99 @@ bool xPL_removeServiceListener (xPL_Service * theService, xPL_ServiceListener th
   return FALSE;
 }
 
-/* Dispatch service messages to appropriate listeners*/
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a service config change listener */
+void xPL_addServiceConfigChangedListener (xPL_Service * theService, xPL_ServiceConfigChangedListener theListener, xPL_Object * userValue) {
+  xPL_ServiceChangedListenerDef * theChangeListener;
+
+  /* See if there is a slot to install and allocate more if not */
+  if (theService->configChangedCount == theService->configChangedAllocCount) {
+    theService->configChangedAllocCount += GROW_LIST_BY;
+    theService->changedListenerList = realloc (theService->changedListenerList, sizeof (xPL_ServiceChangedListenerDef) * theService->configChangedAllocCount);
+  }
+
+  theChangeListener = & (theService->changedListenerList[theService->configChangedCount++]);
+  bzero (theChangeListener, sizeof (xPL_ServiceChangedListenerDef));
+
+  /* Install values */
+  theChangeListener->changeListener = theListener;
+  theChangeListener->userValue = userValue;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove a config change listener */
+bool xPL_removeServiceConfigChangedListener (xPL_Service * theService, xPL_ServiceConfigChangedListener theListener) {
+  int listenerIndex;
+  xPL_ServiceChangedListenerDef * theChangeListener;
+
+  for (listenerIndex = 0; listenerIndex < theService->configChangedCount; listenerIndex++) {
+    theChangeListener = (xPL_ServiceChangedListenerDef *) & (theService->changedListenerList[listenerIndex]);
+    if (theChangeListener->changeListener != theListener) {
+      continue;
+    }
+
+    /* Remove it from the listener list */
+    theService->configChangedCount--;
+    if (listenerIndex < theService->configChangedCount)
+      memcpy (& (theService->changedListenerList[listenerIndex]), & (theService->changedListenerList[listenerIndex + 1]),
+              sizeof (xPL_ServiceChangedListenerDef) * (theService->configChangedCount - listenerIndex));
+
+    /* And we are done */
+    return TRUE;
+  }
+
+  /* Didn't find it! */
+  return FALSE;
+}
+
+/* private functions ======================================================== */
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Dispatch raw messages */
+bool xPL_dispatchRawEvent (char * theData, int dataLen) {
+  bool messageDispatched = FALSE;
+  rawListener * theRawListener;
+  int listenerIndex;
+
+  for (listenerIndex = rawListenerCount - 1; listenerIndex >= 0; listenerIndex--) {
+    theRawListener = &rawListenerList[listenerIndex];
+
+    /* Dispatch the message */
+    theRawListener->theListener (theData, dataLen, theRawListener->userValue);
+    messageDispatched = TRUE;
+  }
+
+  /* And we are done */
+  return messageDispatched;
+}
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Dispatch service messages to appropriate listeners*/
+bool xPL_dispatchServiceConfigChangedEvent (xPL_Service * theService) {
+  bool messageDispatched = FALSE;
+  xPL_ServiceChangedListenerDef * theListener;
+  int listenerIndex;
+
+  for (listenerIndex = theService->configChangedCount - 1; listenerIndex >= 0; listenerIndex--) {
+    theListener = & (theService->changedListenerList[listenerIndex]);
+
+    /* Dispatch the message */
+    ( (xPL_ServiceConfigChangedListener) theListener->changeListener) (theService, theListener->userValue);
+    messageDispatched = TRUE;
+  }
+
+  /* And we are done */
+  return messageDispatched;
+}
+
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Dispatch service messages to appropriate listeners*/
 bool xPL_dispatchServiceEvent (xPL_Service * theService, xPL_Message * theMessage) {
   bool messageDispatched = FALSE;
   xPL_ServiceListenerDef * theListener;
@@ -250,65 +333,24 @@ bool xPL_dispatchServiceEvent (xPL_Service * theService, xPL_Message * theMessag
 }
 
 
-/**** Configuration Listeners *****/
-
-/* Add a service config change listener */
-void xPL_addServiceConfigChangedListener (xPL_Service * theService, xPL_ServiceConfigChangedListener theListener, xPL_Object * userValue) {
-  xPL_ServiceChangedListenerDef * theChangeListener;
-
-  /* See if there is a slot to install and allocate more if not */
-  if (theService->configChangedCount == theService->configChangedAllocCount) {
-    theService->configChangedAllocCount += GROW_LIST_BY;
-    theService->changedListenerList = realloc (theService->changedListenerList, sizeof (xPL_ServiceChangedListenerDef) * theService->configChangedAllocCount);
-  }
-
-  theChangeListener = & (theService->changedListenerList[theService->configChangedCount++]);
-  bzero (theChangeListener, sizeof (xPL_ServiceChangedListenerDef));
-
-  /* Install values */
-  theChangeListener->changeListener = theListener;
-  theChangeListener->userValue = userValue;
-}
-
-/* Remove a config change listener */
-bool xPL_removeServiceConfigChangedListener (xPL_Service * theService, xPL_ServiceConfigChangedListener theListener) {
-  int listenerIndex;
-  xPL_ServiceChangedListenerDef * theChangeListener;
-
-  for (listenerIndex = 0; listenerIndex < theService->configChangedCount; listenerIndex++) {
-    theChangeListener = (xPL_ServiceChangedListenerDef *) & (theService->changedListenerList[listenerIndex]);
-    if (theChangeListener->changeListener != theListener) {
-      continue;
-    }
-
-    /* Remove it from the listener list */
-    theService->configChangedCount--;
-    if (listenerIndex < theService->configChangedCount)
-      memcpy (& (theService->changedListenerList[listenerIndex]), & (theService->changedListenerList[listenerIndex + 1]),
-              sizeof (xPL_ServiceChangedListenerDef) * (theService->configChangedCount - listenerIndex));
-
-    /* And we are done */
-    return TRUE;
-  }
-
-  /* Didn't find it! */
-  return FALSE;
-}
-
-/* Dispatch service messages to appropriate listeners*/
-bool xPL_dispatchServiceConfigChangedEvent (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Private
+ * Dispatch messages */
+bool xPL_dispatchMessageEvent (xPL_Message * theMessage) {
   bool messageDispatched = FALSE;
-  xPL_ServiceChangedListenerDef * theListener;
+  messageListener * theMessageListener;
   int listenerIndex;
 
-  for (listenerIndex = theService->configChangedCount - 1; listenerIndex >= 0; listenerIndex--) {
-    theListener = & (theService->changedListenerList[listenerIndex]);
+  for (listenerIndex = messageListenerCount - 1; listenerIndex >= 0; listenerIndex--) {
+    theMessageListener = &messageListenerList[listenerIndex];
 
     /* Dispatch the message */
-    ( (xPL_ServiceConfigChangedListener) theListener->changeListener) (theService, theListener->userValue);
+    theMessageListener->theListener (theMessage, theMessageListener->userValue);
     messageDispatched = TRUE;
   }
 
   /* And we are done */
   return messageDispatched;
 }
+
+/* ========================================================================== */

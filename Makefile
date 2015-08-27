@@ -9,8 +9,8 @@ SUBDIRS = lib
 PROJECT_ROOT = .
 
 # Choix de l'architecture matérielle du système
-#ARCH = ARCH_GENERIC_LINUX
-ARCH = ARCH_ARM_RASPBERRYPI
+ARCH = ARCH_GENERIC_LINUX
+#ARCH = ARCH_ARM_RASPBERRYPI
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON

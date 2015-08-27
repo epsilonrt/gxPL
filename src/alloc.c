@@ -1,5 +1,5 @@
 /**
- * @file xPL-store.c
+ * @file xPL-alloc.c
  * Memory management for xPLLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -13,46 +13,59 @@
 #include <string.h>
 #include <strings.h>
 
-#include "xPL-private.h"
+#include "utils_p.h"
 
+/* macros =================================================================== */
+#define CONFIRM_CACHE_OK if (NameValueCache == NULL) initCaches();
 
+/* constants ================================================================ */
 #define STRING_CACHE_MAX 256
 #define GROW_CACHE_BY 16
 
-#define CONFIRM_CACHE_OK if (NameValueCache == NULL) initCaches();
-
-/* Structured cache info */
-typedef void * cachedItem;
-typedef char * itemCacheList;
-typedef struct {
-  itemCacheList *cachedItems;
-  int cacheAllocCount;
-  int cacheCount;
-} itemCache;
-
+/* private variables ======================================================== */
 /* Caches */
 static itemCache * NameValueCache = NULL;
 static itemCache * NameValueListCache = NULL;
-static itemCache * MessageCache = NULL;
-static itemCache * ServiceCache = NULL;
 
 static int totalNameValueAlloc = 0;
 static int totalNameValueListAlloc = 0;
-static int totalMessageAlloc = 0;
-static int totalServiceAlloc = 0;
 
 /* String cache */
 static itemCache * StringCache[STRING_CACHE_MAX];
 
-/* Allocate a new cache pointer */
-static itemCache * allocItemCache (void) {
+
+/* static functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ * Initialize the caches */
+static void 
+initCaches (void) {
+  
+  NameValueCache = xPL_AllocItemCache();
+  NameValueListCache = xPL_AllocItemCache();
+
+  bzero (StringCache, sizeof (StringCache));
+}
+
+/* private functions ======================================================== */
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Allocate a new cache pointer */
+itemCache * 
+xPL_AllocItemCache (void) {
+  
   itemCache * theCache = malloc (sizeof (itemCache));
   bzero (theCache, sizeof (itemCache));
   return theCache;
 }
 
-/* Put an item into the cache */
-static void releaseItem (cachedItem theItem, itemCache * theCache) {
+/* -----------------------------------------------------------------------------
+ * Private
+ * Put an item into the cache */
+void 
+xPL_ReleaseItem (cachedItem theItem, itemCache * theCache) {
+  
   /* See if the cache needs more room */
   if (theCache->cacheCount == theCache->cacheAllocCount) {
     theCache->cacheAllocCount += GROW_CACHE_BY;
@@ -61,36 +74,39 @@ static void releaseItem (cachedItem theItem, itemCache * theCache) {
   theCache->cachedItems[theCache->cacheCount++] = theItem;
 }
 
-/* Get an item from the cache */
-static cachedItem allocItem (itemCache * theCache) {
+/* -----------------------------------------------------------------------------
+ * Private
+ * Get an item from the cache */
+cachedItem 
+xPL_AllocItem (itemCache * theCache) {
+  
   if (theCache->cacheCount == 0) {
     return NULL;
   }
   return theCache->cachedItems[-- (theCache->cacheCount)];
 }
 
-/* Initialize the caches */
-static void initCaches (void) {
-  NameValueCache = allocItemCache();
-  NameValueListCache = allocItemCache();
-  MessageCache = allocItemCache();
-  ServiceCache = allocItemCache();
-
-  bzero (StringCache, sizeof (StringCache));
-}
-
-void xPL_FreeNVPair (xPL_NameValuePair * thePair) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+void 
+xPL_FreeNVPair (xPL_NameValuePair * thePair) {
+  
   CONFIRM_CACHE_OK;
   xPL_Debug ("STORE:: Releasing NameValuePair @ %p back to cache pool", thePair);
-  releaseItem (thePair, NameValueCache);
+  xPL_ReleaseItem (thePair, NameValueCache);
 }
 
-xPL_NameValuePair * xPL_AllocNVPair (void) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+xPL_NameValuePair * 
+xPL_AllocNVPair (void) {
   xPL_NameValuePair * thePair;
   CONFIRM_CACHE_OK;
 
   /* Try for a cached item */
-  if ( (thePair = (xPL_NameValuePair *) allocItem (NameValueCache)) == NULL) {
+  if ( (thePair = (xPL_NameValuePair *) xPL_AllocItem (NameValueCache)) == NULL) {
     thePair = malloc (sizeof (xPL_NameValuePair));
     xPL_Debug ("STORE:: Allocating new xPL_NameValuePair @ %p, now %d pairs allocated", thePair, ++totalNameValueAlloc);
   }
@@ -102,18 +118,28 @@ xPL_NameValuePair * xPL_AllocNVPair (void) {
   return thePair;
 }
 
-void xPL_FreeNVList (xPL_NameValueList * theList) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+void 
+xPL_FreeNVList (xPL_NameValueList * theList) {
+
   CONFIRM_CACHE_OK;
   xPL_Debug ("STORE:: Releasing NameValueList @ %p back to cache pool", theList);
-  releaseItem (theList, NameValueListCache);
+  xPL_ReleaseItem (theList, NameValueListCache);
 }
 
-xPL_NameValueList * xPL_AllocNVList (void) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+xPL_NameValueList * 
+xPL_AllocNVList (void) {
   xPL_NameValueList * theList;
+
   CONFIRM_CACHE_OK;
 
   /* Try for a cached item */
-  if ( (theList = (xPL_NameValueList *) allocItem (NameValueListCache)) == NULL) {
+  if ( (theList = (xPL_NameValueList *) xPL_AllocItem (NameValueListCache)) == NULL) {
     theList = malloc (sizeof (xPL_NameValueList));
     bzero (theList, sizeof (xPL_NameValueList));
     xPL_Debug ("STORE:: Allocating new xPL_NameValueList @ %p, now %d lists allocted", theList, ++totalNameValueListAlloc);
@@ -126,51 +152,12 @@ xPL_NameValueList * xPL_AllocNVList (void) {
   return theList;
 }
 
-void xPL_FreeMessage (xPL_Message * theMessage) {
-  CONFIRM_CACHE_OK;
-  xPL_Debug ("STORE:: Relesing xPL_Message @ %p back to cache pool", theMessage);
-  releaseItem (theMessage, MessageCache);
-}
 
-xPL_Message * xPL_AllocMessage (void) {
-  xPL_Message * theMessage;
-
-  CONFIRM_CACHE_OK;
-  if ( (theMessage = (xPL_Message *) allocItem (MessageCache)) == NULL) {
-    theMessage = malloc (sizeof (xPL_Message));
-    bzero (theMessage, sizeof (xPL_Message));
-    xPL_Debug ("STORE:: Allocated new xPL_Message, now %d messages allocated", ++totalMessageAlloc);
-  }
-  else {
-    xPL_Debug ("STORE:: Reused xPL_Message @ %p from cache", theMessage);
-  }
-
-  return theMessage;
-}
-
-void xPL_FreeService (xPL_Service * theService) {
-  CONFIRM_CACHE_OK;
-  xPL_Debug ("STORE:: Releasing xPL_Service @ %p back to cache pool", theService);
-  releaseItem (theService, ServiceCache);
-}
-
-xPL_Service * xPL_AllocService (void) {
-  xPL_Service * theService;
-
-  CONFIRM_CACHE_OK;
-  if ( (theService = (xPL_Service *) allocItem (ServiceCache)) == NULL) {
-    theService = malloc (sizeof (xPL_Service));
-    xPL_Debug ("STORE:: Allocated new xPL_Service, now %d services allocated", ++totalServiceAlloc);
-  }
-  else {
-    xPL_Debug ("STORE:: Reused xPL_Service @ %p from cache", theService);
-  }
-
-  bzero (theService, sizeof (xPL_Service));
-  return theService;
-}
-
-void xPL_FreeStr (char * theString) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+void 
+xPL_FreeStr (char * theString) {
   int theLength;
   itemCache * theCache;
 
@@ -190,16 +177,20 @@ void xPL_FreeStr (char * theString) {
   /* Get the cache and init it if needed */
   if ( (theCache = StringCache[theLength]) == NULL) {
     xPL_Debug ("STORE:: Allocating new cache for strings %d characters long", theLength);
-    theCache = allocItemCache();
+    theCache = xPL_AllocItemCache();
     StringCache[theLength] = theCache;
   }
 
   /* Release the item into the cache */
   xPL_Debug ("STORE:: Releasing string @ %p to cache -- [%s] (LEN=%d, CNT=%d)", theString, theString, theLength, theCache->cacheCount);
-  releaseItem (theString, theCache);
+  xPL_ReleaseItem (theString, theCache);
 }
 
-char * xPL_StrDup (char * theOrigString) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+char * 
+xPL_StrDup (char * theOrigString) {
   char * theString;
 
   /* Handle attempt to copy null */
@@ -214,9 +205,12 @@ char * xPL_StrDup (char * theOrigString) {
   return theString;
 }
 
-/* Copy at MOST the passed number of characters.  If the */
-/* string is shorted, we'll copy less.                   */
-char * xPL_StrNDup (char * theOrigString, int maxChars) {
+/* -----------------------------------------------------------------------------
+ * Private
+ * Copy at MOST the passed number of characters.  If the
+ * string is shorted, we'll copy less.                   */
+char * 
+xPL_StrNDup (char * theOrigString, int maxChars) {
   char * theString;
   int theLength;
 
@@ -239,7 +233,11 @@ char * xPL_StrNDup (char * theOrigString, int maxChars) {
   return theString;
 }
 
-char * xPL_StrAlloc (int theLength) {
+/* -----------------------------------------------------------------------------
+ * Private
+ */
+char * 
+xPL_StrAlloc (int theLength) {
   char * theString;
   itemCache * theCache;
 
@@ -267,7 +265,7 @@ char * xPL_StrAlloc (int theLength) {
   }
 
   /* Get an item from the cache.  If none is found/available, malloc() a new one */
-  if ( (theString = allocItem (theCache)) == NULL) {
+  if ( (theString = xPL_AllocItem (theCache)) == NULL) {
     theString = (char *) malloc (theLength + 1);
     theString[0] = '\0';
     xPL_Debug ("STORE:: No Cache Entry found, Allocating entirely new string @ %p (LEN=%d)", theString, theLength);
@@ -278,3 +276,5 @@ char * xPL_StrAlloc (int theLength) {
   theString[0] = '\0';
   return theString;
 }
+
+/* ========================================================================== */

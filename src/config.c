@@ -7,14 +7,18 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "xPL-private.h"
 
+#include "service_p.h"
+#include "message_p.h"
+
+/* constants ================================================================ */
 #define GROW_CONFIG_LIST_BY 4
+
+/* private variables ======================================================== */
 
 /* Flag set when reading in a configuration to bypass some normal */
 /* safety checks (like no changes to the config after the service */
@@ -24,9 +28,12 @@ static bool configurationBeingInstalled = FALSE;
 /* Forward declaration */
 static bool xPL_saveServiceConfig (xPL_Service * theService);
 
+/* static functions ========================================================= */
 
-/* Send list of configurables */
-static void sendServiceConfigList (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Send list of configurables */
+static void
+sendServiceConfigList (xPL_Service * theService) {
   int configIndex;
   int allocSize;
   char * configType;
@@ -104,9 +111,11 @@ static void sendServiceConfigList (xPL_Service * theService) {
   xPL_releaseMessage (theMessage);
 }
 
-/* Convert passed filter into a string.  char * is dynamic */
-/* and must be freed when no longer needed                 */
-static char * formatFilter (xPL_ServiceFilter * theFilter) {
+/* -----------------------------------------------------------------------------
+ * Convert passed filter into a string.  char * is dynamic
+ * and must be freed when no longer needed */
+static char *
+formatFilter (xPL_ServiceFilter * theFilter) {
   int allocSize = 5;
   char * formattedFilter;
 
@@ -153,8 +162,10 @@ static char * formatFilter (xPL_ServiceFilter * theFilter) {
   return formattedFilter;
 }
 
-/* Parse a string into a filter */
-static bool parseFilter (char * theText, xPL_ServiceFilter * theFilter) {
+/* -----------------------------------------------------------------------------
+ * Parse a string into a filter */
+static bool 
+parseFilter (char * theText, xPL_ServiceFilter * theFilter) {
   char * msgType;
   char * vendor;
   char * device;
@@ -220,8 +231,10 @@ static bool parseFilter (char * theText, xPL_ServiceFilter * theFilter) {
   return TRUE;
 }
 
-/* Send list of configurables */
-static void sendServiceCurrentConfig (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Send list of configurables */
+static void
+sendServiceCurrentConfig (xPL_Service * theService) {
   int groupIndex, filterIndex;
   int configIndex;
   int valueIndex, valueCount;
@@ -294,8 +307,10 @@ static void sendServiceCurrentConfig (xPL_Service * theService) {
   xPL_releaseMessage (theMessage);
 }
 
-/* Parse a configurable definition from the passed string */
-static bool parseConfigDefinition (xPL_Service * theService, char * parseValue, int configType) {
+/* -----------------------------------------------------------------------------
+ * Parse a configurable definition from the passed string */
+static bool
+parseConfigDefinition (xPL_Service * theService, char * parseValue, int configType) {
   int valueCount, nameLength = strlen (parseValue);
   char * startChar = NULL;
   char * endChar;
@@ -346,8 +361,10 @@ static bool parseConfigDefinition (xPL_Service * theService, char * parseValue, 
   return TRUE;
 }
 
-/* Handle new configuration data */
-static void installNewConfig (xPL_Service * theService, xPL_NameValueList * namedValues, bool allowDefinitions) {
+/* -----------------------------------------------------------------------------
+ * Handle new configuration data */
+static void 
+installNewConfig (xPL_Service * theService, xPL_NameValueList * namedValues, bool allowDefinitions) {
   bool foundFilter = FALSE;
   bool foundGroup = FALSE;
 
@@ -540,9 +557,10 @@ static void installNewConfig (xPL_Service * theService, xPL_NameValueList * name
   }
 }
 
-
-/* Handle configuration messages */
-static void configHandler (xPL_Service * theService, xPL_Message * theMessage, xPL_Object * userValue) {
+/* -----------------------------------------------------------------------------
+ * Handle configuration messages */
+static void
+configHandler (xPL_Service * theService, xPL_Message * theMessage, xPL_Object * userValue) {
   char * theSchemaType = xPL_getSchemaType (theMessage);
   char * theCommand = xPL_getMessageNamedValue (theMessage, "command");
 
@@ -567,8 +585,28 @@ static void configHandler (xPL_Service * theService, xPL_Message * theMessage, x
   }
 }
 
-/* Install a new configuration file */
-static void xPL_setServiceConfigFile (xPL_Service * theService, char * localConfigFile) {
+/* -----------------------------------------------------------------------------
+ * Releases all resources for a passed item (values, names, etc) */
+static void 
+releaseConfigurable (xPL_ServiceConfigurable * theItem) {
+  int valueIndex;
+
+  /* Release item values */
+  for (valueIndex = 0; valueIndex < theItem->valueCount; valueIndex++) {
+    STR_FREE (theItem->valueList[valueIndex]);
+  }
+
+  /* Release item definitions */
+  theItem->valueCount = 0;
+  theItem->valueAllocCount = 0;
+  SAFE_FREE (theItem->valueList);
+  STR_FREE (theItem->itemName);
+}
+
+/* -----------------------------------------------------------------------------
+ * Install a new configuration file */
+static void
+xPL_setServiceConfigFile (xPL_Service * theService, char * localConfigFile) {
   /* Skip unless there is a real change or service is disabled */
   if (theService->serviceEnabled
       || ( (theService->configFileName != NULL) && (localConfigFile != NULL)
@@ -585,17 +623,15 @@ static void xPL_setServiceConfigFile (xPL_Service * theService, char * localConf
   }
 }
 
-/* Return the installed config file, if any */
-char * xPL_getServiceConfigFile (xPL_Service * theService) {
-  return theService->configFileName;
-}
-
-/* Clear out existing configuration data and attempt to load it from */
-/* the currently installed config file.  If there is no installed    */
-/* config file, nothing happens.  If there is a file specified but   */
-/* it does not exist, any previous config data is lost, but no error */
-/* is thrown (it may be this is the first use of this file).         */
-static bool xPL_loadServiceConfig (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Clear out existing configuration data and attempt to load it from
+ * the currently installed config file.  If there is no installed
+ * config file, nothing happens.  If there is a file specified but
+ * it does not exist, any previous config data is lost, but no error
+ * is thrown (it may be this is the first use of this file).
+ */
+static bool
+xPL_loadServiceConfig (xPL_Service * theService) {
   FILE *configFile;
   char lineBuffer[2048];
   char * readVendor;
@@ -700,8 +736,10 @@ static bool xPL_loadServiceConfig (xPL_Service * theService) {
   return TRUE;
 }
 
-/* Save out the current configuration */
-static bool xPL_saveServiceConfig (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Save out the current configuration */
+static bool
+xPL_saveServiceConfig (xPL_Service * theService) {
   int configIndex, configCount = theService->configCount;
   int valueIndex;
   char lineBuff[100];
@@ -807,14 +845,21 @@ static bool xPL_saveServiceConfig (xPL_Service * theService) {
   return TRUE;
 }
 
-/* Create a new service and prepare it for configuration.  Like other */
-/* services, this will still require being enabled to start.  Before  */
-/* it's started, you need to define and attach the configurable items */
-/* for the service.   When the service is enabled, if there is a      */
-/* non-null configFile, it's values are read.  The services instance  */
-/* value will be created in a fairly unique method for services that  */
-/* have not yet been configured                                       */
-xPL_Service * xPL_createConfigurableService (char * vendorName, char * deviceID, char * localConfigFile) {
+/* public functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * 
+ * Create a new service and prepare it for configuration.  Like other
+ * services, this will still require being enabled to start.  Before
+ * it's started, you need to define and attach the configurable items
+ * for the service.   When the service is enabled, if there is a
+ * non-null configFile, it's values are read.  The services instance
+ * value will be created in a fairly unique method for services that
+ * have not yet been configured */
+xPL_Service * 
+xPL_createConfigurableService (char * vendorName, char * deviceID,
+    char * localConfigFile) {
   xPL_Service * theService = NULL;
 
   /* Create the service */
@@ -839,35 +884,25 @@ xPL_Service * xPL_createConfigurableService (char * vendorName, char * deviceID,
   return theService;
 }
 
-/* Return TRUE if this is a configured service */
-bool xPL_isConfigurableService (xPL_Service * theService) {
-  return theService->configurableService;
-}
-
-/* Return TRUE if this is a configured service and */
-/* a configuration has been received               */
-bool xPL_isServiceConfigured (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return TRUE if this is a configured service and a configuration has
+ * been received
+ */
+bool 
+xPL_isServiceConfigured (xPL_Service * theService) {
   return theService->serviceConfigured;
 }
 
-/* Search for a configurable and return it (or NULL) */
-xPL_ServiceConfigurable * xPL_findServiceConfigurable (xPL_Service * theService, char * itemName) {
-  int configIndex;
-  xPL_ServiceConfigurable * theItem;
-
-  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
-    theItem = & (theService->configList[configIndex]);
-    if (xPL_strcmpIgnoreCase (theItem->itemName, itemName) == 0) {
-      return theItem;
-    }
-  }
-
-  return NULL;
-}
-
-/* Add a new configurable.  If the item is added, TRUE is returned.  If the item */
-/* already exists, FALSE is returned and it's not added or altered              */
-bool xPL_addServiceConfigurable (xPL_Service * theService, char * itemName, xPL_ConfigurableType itemType, int maxValues) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a new configurable.  If the item is added, TRUE is returned.  If the item
+ * already exists, FALSE is returned and it's not added or altered
+ */
+bool
+xPL_addServiceConfigurable (xPL_Service * theService,
+                            char * itemName, xPL_ConfigurableType itemType,
+                            int maxValues) {
   /* Try to find it */
   xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
   if (theItem != NULL) {
@@ -899,121 +934,12 @@ bool xPL_addServiceConfigurable (xPL_Service * theService, char * itemName, xPL_
   return TRUE;
 }
 
-/* Releases all resources for a passed item (values, names, etc) */
-static void releaseConfigurable (xPL_ServiceConfigurable * theItem) {
-  int valueIndex;
-
-  /* Release item values */
-  for (valueIndex = 0; valueIndex < theItem->valueCount; valueIndex++) {
-    STR_FREE (theItem->valueList[valueIndex]);
-  }
-
-  /* Release item definitions */
-  theItem->valueCount = 0;
-  theItem->valueAllocCount = 0;
-  SAFE_FREE (theItem->valueList);
-  STR_FREE (theItem->itemName);
-}
-
-/* Remove a configurable.  Return TRUE if item found and removed, FALSE if */
-/* not found                                                              */
-bool xPL_removeServiceConfigurable (xPL_Service * theService, char * itemName) {
-  int configIndex;
-  xPL_ServiceConfigurable * theItem;
-
-  /* No changes to list of configurables while the service is enabled */
-  if (theService->serviceEnabled) {
-    return FALSE;
-  }
-
-  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
-    theItem = & (theService->configList[configIndex]);
-    if (xPL_strcmpIgnoreCase (theItem->itemName, itemName) != 0) {
-      continue;
-    }
-
-    /* Release the items resources */
-    releaseConfigurable (theItem);
-
-    /* Shift things around */
-    theService->configCount--;
-    if (configIndex < theService->configCount) {
-      memcpy (& (theService->configList[configIndex]), & (theService->configList[configIndex + 1]),
-              sizeof (xPL_ServiceConfigurable) * (theService->configCount - configIndex));
-    }
-
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-/* Remove all configurables */
-void xPL_removeAllServiceConfigurables (xPL_Service * theService) {
-  int configIndex;
-  xPL_ServiceConfigurable * theItem;
-
-  /* No changes to list of configurables while the service is enabled */
-  if (theService->serviceEnabled) {
-    return;
-  }
-
-  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
-    theItem = & (theService->configList[configIndex]);
-
-    /* Release the items resources */
-    releaseConfigurable (theItem);
-  }
-  theService->configCount = 0;
-}
-
-/* Release all configuration related resources */
-void xPL_releaseServiceConfigurables (xPL_Service * theService) {
-  /* No changes to list of configurables while the service is enabled */
-  if (theService->serviceEnabled) {
-    return;
-  }
-
-  /* Release configurables */
-  xPL_removeAllServiceConfigurables (theService);
-
-  /* Release service level allocation */
-  SAFE_FREE (theService->configList);
-  theService->configCount = 0;
-  theService->configAllocCount = 0;
-
-  STR_FREE (theService->configFileName);
-
-  theService->configChangedCount = 0;
-  theService->configChangedAllocCount = 0;
-  SAFE_FREE (theService->changedListenerList);
-}
-
-
-/* Clear values for a given configurable */
-void xPL_clearServiceConfigValues (xPL_Service * theService, char * itemName) {
-  int valueIndex;
-
-  /* Get item and if not found, bail */
-  xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
-  if (theItem == NULL) {
-    return;
-  }
-
-  /* No changes to list of configurables while the service is enabled */
-  if (theService->serviceEnabled && !configurationBeingInstalled) {
-    return;
-  }
-
-  for (valueIndex = 0; valueIndex < theItem->valueCount; valueIndex++) {
-    STR_FREE (theItem->valueList[valueIndex]);
-  }
-  theItem->valueCount = 0;
-}
-
-/* Clear all configurable values out.  The configurable definitions */
-/* remain in tact                                                 */
-void xPL_clearAllServiceConfigValues (xPL_Service * theService) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Clear all configurable values out.  The configurable definitions
+ * remain in tact */
+void 
+xPL_clearAllServiceConfigValues (xPL_Service * theService) {
   int configIndex, valueIndex;
   xPL_ServiceConfigurable * theItem;
 
@@ -1032,12 +958,14 @@ void xPL_clearAllServiceConfigValues (xPL_Service * theService) {
   }
 }
 
-
-/* Add a service item value.  If there are already values */
-/* this is added to it, up to the limit defined for the   */
-/* configurable.  If the item is "full", then the value is */
-/* discarded                                              */
-bool xPL_addServiceConfigValue (xPL_Service * theService, char * itemName, char * itemValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a service item value.  If there are already values
+ * this is added to it, up to the limit defined for the
+ * configurable.  If the item is "full", then the value is
+ * discarded */
+bool
+xPL_addServiceConfigValue (xPL_Service * theService, char * itemName, char * itemValue) {
   int growValueListBy;
 
   /* Get item and if not found, bail */
@@ -1076,10 +1004,76 @@ bool xPL_addServiceConfigValue (xPL_Service * theService, char * itemName, char 
   return TRUE;
 }
 
-/* Set a item value at a given index.  If that index is above    */
-/* the actual number of values, the value is appeneded (i.e. may */
-/* not be the same index as passed                               */
-void xPL_setServiceConfigValueAt (xPL_Service * theService, char * itemName, int valueIndex, char * itemValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Simple form to set first/only value in an item
+ */
+void 
+xPL_setServiceConfigValue (xPL_Service * theService, char * itemName, char * itemValue) {
+  xPL_setServiceConfigValueAt (theService, itemName, 0, itemValue);
+}
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return the number of values for a given configurable
+ */
+int 
+xPL_getServiceConfigValueCount (xPL_Service * theService, char * itemName) {
+  /* Get item and if not found, bail */
+  xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
+  if (theItem == NULL) {
+    return 0;
+  }
+  return theItem->valueCount;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return the value of the first/only index for an item
+ */
+char * 
+xPL_getServiceConfigValue (xPL_Service * theService, char * itemName) {
+  return xPL_getServiceConfigValueAt (theService, itemName, 0);
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Return TRUE if this is a configured service
+ */
+bool 
+xPL_isConfigurableService (xPL_Service * theService) {
+  return theService->configurableService;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Return the value at the given index.  If the value is NULL of the
+ * index is out of range, NULL is returned
+ */
+char * 
+xPL_getServiceConfigValueAt (xPL_Service * theService, char * itemName, int valueIndex) {
+  /* Locate the item */
+  xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
+  if (theItem == NULL) {
+    return NULL;
+  }
+
+  /* Make sure it's in range */
+  if (valueIndex >= theItem->valueCount) {
+    return NULL;
+  }
+
+  /* Out of range */
+  return theItem->valueList[valueIndex];
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Set a item value at a given index.  If that index is above
+ * the actual number of values, the value is appeneded (i.e. may
+ * not be the same index as passed */
+void 
+xPL_setServiceConfigValueAt (xPL_Service * theService, char * itemName, int valueIndex, char * itemValue) {
   /* Locate the item */
   xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
   if (theItem == NULL) {
@@ -1102,40 +1096,143 @@ void xPL_setServiceConfigValueAt (xPL_Service * theService, char * itemName, int
   xPL_addServiceConfigValue (theService, itemName, itemValue);
 }
 
-/* Simple form to set first/only value in an item */
-void xPL_setServiceConfigValue (xPL_Service * theService, char * itemName, char * itemValue) {
-  xPL_setServiceConfigValueAt (theService, itemName, 0, itemValue);
-}
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Clear values for a given configurable
+ */
+void 
+xPL_clearServiceConfigValues (xPL_Service * theService, char * itemName) {
+  int valueIndex;
 
-/* Return the number of values for a given configurable */
-int xPL_getServiceConfigValueCount (xPL_Service * theService, char * itemName) {
   /* Get item and if not found, bail */
   xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
   if (theItem == NULL) {
-    return 0;
-  }
-  return theItem->valueCount;
-}
-
-/* Return the value at the given index.  If the value is NULL of the */
-/* index is out of range, NULL is returned                           */
-char * xPL_getServiceConfigValueAt (xPL_Service * theService, char * itemName, int valueIndex) {
-  /* Locate the item */
-  xPL_ServiceConfigurable * theItem = xPL_findServiceConfigurable (theService, itemName);
-  if (theItem == NULL) {
-    return NULL;
+    return;
   }
 
-  /* Make sure it's in range */
-  if (valueIndex >= theItem->valueCount) {
-    return NULL;
+  /* No changes to list of configurables while the service is enabled */
+  if (theService->serviceEnabled && !configurationBeingInstalled) {
+    return;
   }
 
-  /* Out of range */
-  return theItem->valueList[valueIndex];
+  for (valueIndex = 0; valueIndex < theItem->valueCount; valueIndex++) {
+    STR_FREE (theItem->valueList[valueIndex]);
+  }
+  theItem->valueCount = 0;
 }
 
-/* Return the value of the first/only index for an item */
-char * xPL_getServiceConfigValue (xPL_Service * theService, char * itemName) {
-  return xPL_getServiceConfigValueAt (theService, itemName, 0);
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Remove all configurables
+ */
+void 
+xPL_removeAllServiceConfigurables (xPL_Service * theService) {
+  int configIndex;
+  xPL_ServiceConfigurable * theItem;
+
+  /* No changes to list of configurables while the service is enabled */
+  if (theService->serviceEnabled) {
+    return;
+  }
+
+  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
+    theItem = & (theService->configList[configIndex]);
+
+    /* Release the items resources */
+    releaseConfigurable (theItem);
+  }
+  theService->configCount = 0;
 }
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Remove a configurable.  Return TRUE if item found and removed, FALSE if
+ * not found
+ */
+bool xPL_removeServiceConfigurable (xPL_Service * theService, char * itemName) {
+  int configIndex;
+  xPL_ServiceConfigurable * theItem;
+
+  /* No changes to list of configurables while the service is enabled */
+  if (theService->serviceEnabled) {
+    return FALSE;
+  }
+
+  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
+    theItem = & (theService->configList[configIndex]);
+    if (xPL_strcmpIgnoreCase (theItem->itemName, itemName) != 0) {
+      continue;
+    }
+
+    /* Release the items resources */
+    releaseConfigurable (theItem);
+
+    /* Shift things around */
+    theService->configCount--;
+    if (configIndex < theService->configCount) {
+      memcpy (& (theService->configList[configIndex]), & (theService->configList[configIndex + 1]),
+              sizeof (xPL_ServiceConfigurable) * (theService->configCount - configIndex));
+    }
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Search for a configurable and return it (or NULL)
+ */
+xPL_ServiceConfigurable *
+xPL_findServiceConfigurable (xPL_Service * theService, char * itemName) {
+  int configIndex;
+  xPL_ServiceConfigurable * theItem;
+
+  for (configIndex = 0; configIndex < theService->configCount; configIndex++) {
+    theItem = & (theService->configList[configIndex]);
+    if (xPL_strcmpIgnoreCase (theItem->itemName, itemName) == 0) {
+      return theItem;
+    }
+  }
+
+  return NULL;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: Not used
+ * Return the installed config file, if any
+ */
+char *
+xPL_getServiceConfigFile (xPL_Service * theService) {
+  return theService->configFileName;
+}
+
+/* private functions ======================================================== */
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Release all configuration related resources
+ */
+void xPL_releaseServiceConfigurables (xPL_Service * theService) {
+  /* No changes to list of configurables while the service is enabled */
+  if (theService->serviceEnabled) {
+    return;
+  }
+
+  /* Release configurables */
+  xPL_removeAllServiceConfigurables (theService);
+
+  /* Release service level allocation */
+  SAFE_FREE (theService->configList);
+  theService->configCount = 0;
+  theService->configAllocCount = 0;
+
+  STR_FREE (theService->configFileName);
+
+  theService->configChangedCount = 0;
+  theService->configChangedAllocCount = 0;
+  SAFE_FREE (theService->changedListenerList);
+}
+
+/* ========================================================================== */

@@ -25,7 +25,7 @@ GIT_VERSION = ON
 
 # Optimization level, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-OPT = s
+OPT = 2
 
 # Debugging information format
 DEBUG_FORMAT = dwarf-2
@@ -46,8 +46,8 @@ VIEW_GCC_LINE = OFF
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = xPL-config.c xPL-hub.c xPL-listeners.c xPL-message.c xPL-service.c 
-SRC += xPL-store.c xPL-utils.c
+SRC  = config.c hub.c io.c listeners.c message.c 
+SRC += service.c alloc.c utils.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
@@ -309,8 +309,10 @@ endif
 	@ln -f -s $(INSTALL_LIBDIR)/$(TARGET_LIB).so.$(VERSION) $(INSTALL_LIBDIR)/$(TARGET_LIB).so
 
 # header files
-	@-install -d -m 0755 $(INSTALL_INCDIR)
+	@-install -d -m 0755 $(INSTALL_INCDIR)/
+	@-install -d -m 0755 $(INSTALL_INCDIR)/xPL
 	@-install -m 0644 $(PROJECT_TOPDIR)/include/xPL.h $(INSTALL_INCDIR)
+	@-install -m 0644 $(PROJECT_TOPDIR)/include/xPL/*.h $(INSTALL_INCDIR)/xPL
 
 	@-ldconfig
 
@@ -319,7 +321,8 @@ uninstall:
 	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).so
 	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).so.*
 	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).a
-	@-rm -fr $(INSTALL_INCDIR)/xPL.h
+	@-rm -f $(INSTALL_INCDIR)/xPL.h
+	@-rm -fr $(INSTALL_INCDIR)/xPL
 
 version.h:
 	@$(PROJECT_TOPDIR)/util/bin/git-version $@

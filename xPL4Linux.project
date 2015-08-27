@@ -52,6 +52,7 @@
     <File Name="INSTALL.txt"/>
     <File Name="NOTICE"/>
     <File Name="README.md"/>
+    <File Name="config.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -145,23 +146,32 @@
   <VirtualDirectory Name="doc">
     <File Name="doc/Doxyfile"/>
     <File Name="doc/DoxygenLayout.xml"/>
+    <File Name="doc/main_page.dox"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="include/xPL.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="lib">
-    <File Name="lib/Makefile"/>
+    <VirtualDirectory Name="xPL">
+      <File Name="include/xPL/service.h"/>
+      <File Name="include/xPL/defs.h"/>
+      <File Name="include/xPL/message.h"/>
+      <File Name="include/xPL/hub.h"/>
+      <File Name="include/xPL/io.h"/>
+      <File Name="include/xPL/utils.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="src">
-    <File Name="src/xPL-message.c"/>
-    <File Name="src/xPL-store.c"/>
-    <File Name="src/xPL-config.c"/>
-    <File Name="src/xPL-hub.c"/>
-    <File Name="src/xPL-utils.c"/>
-    <File Name="src/xPL-service.c"/>
-    <File Name="src/xPL-private.h"/>
-    <File Name="src/xPL-listeners.c"/>
-    <File Name="src/xPL-io.c"/>
-    <File Name="src/config.h"/>
+    <File Name="src/xpl_p.h"/>
+    <File Name="src/io_p.h"/>
+    <File Name="src/message_p.h"/>
+    <File Name="src/service_p.h"/>
+    <File Name="src/config.c"/>
+    <File Name="src/hub.c"/>
+    <File Name="src/io.c"/>
+    <File Name="src/listeners.c"/>
+    <File Name="src/message.c"/>
+    <File Name="src/service.c"/>
+    <File Name="src/utils.c"/>
+    <File Name="src/utils_p.h"/>
+    <File Name="src/alloc.c"/>
   </VirtualDirectory>
 </CodeLite_Project>

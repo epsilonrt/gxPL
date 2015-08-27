@@ -26,8 +26,14 @@
 #include <netdb.h>
 #include <termios.h>
 
-#include "xPL-private.h"
+#include "message_p.h"
+#include "io_p.h"
 
+/* constants ================================================================ */
+#define GROW_CLIENT_LIST_BY 8
+#define MAX_LOCAL_ADDR 128
+
+/* structures =============================================================== */
 typedef struct _hubClient {
   int clientPort;
   int heartbeatInterval;
@@ -37,19 +43,22 @@ typedef struct _hubClient {
   struct sockaddr_in clientAddr;
 } hubClient;
 
+/* private variables ======================================================== */
 /* Hub status */
 static bool hubRunning = FALSE;
 
 /* Hub client list */
-#define GROW_CLIENT_LIST_BY 8
 static int clientCount = 0;
 static int clientAllocCount = 0;
 static hubClient * clientList = NULL;
 
-#define MAX_LOCAL_ADDR 128
 static int localIPAddrCount = 0;
 static char * *localIPAddrs = NULL;
 
+/* static functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ */
 static void buildLocalIPList (void) {
   int ifIndex, localIndex;
   struct ifconf interfaceList;
@@ -100,8 +109,11 @@ static void buildLocalIPList (void) {
   }
 }
 
-/* Return TRUE if the received heartbeat message is on our local host */
-static bool isLocalClient (xPL_Message * theMessage) {
+/* -----------------------------------------------------------------------------
+ * Return TRUE if the received heartbeat message is on our local host
+ */
+static bool 
+isLocalClient (xPL_Message * theMessage) {
   int ipIndex ;
 
   /* Get clients IP address */
@@ -121,7 +133,9 @@ static bool isLocalClient (xPL_Message * theMessage) {
   return FALSE;
 }
 
-/* Return true if this is a heartbeat message */
+/* -----------------------------------------------------------------------------
+ * Return true if this is a heartbeat message 
+ */
 static bool isHeartbeatMessage (xPL_Message * theMessage) {
   char * schemaClass = xPL_getSchemaClass (theMessage);
   if (schemaClass == NULL) {
@@ -134,7 +148,9 @@ static bool isHeartbeatMessage (xPL_Message * theMessage) {
            || (xPL_strcmpIgnoreCase (schemaClass, "config") == 0));
 }
 
-/* Return true if this is a signoff  message */
+/* -----------------------------------------------------------------------------
+ * Return true if this is a signoff  message
+ */
 static bool isSignoffMessage (xPL_Message * theMessage) {
   char * schemaType = xPL_getSchemaType (theMessage);
   if (schemaType == NULL) {
@@ -145,8 +161,11 @@ static bool isSignoffMessage (xPL_Message * theMessage) {
   return (xPL_strcmpIgnoreCase (schemaType, "end") == 0);
 }
 
-/* Extract the clients port # and return it (or -1) */
-static int getClientPort (xPL_Message * theMessage) {
+/* -----------------------------------------------------------------------------
+ * Extract the clients port # and return it (or -1)
+ */
+static int 
+getClientPort (xPL_Message * theMessage) {
   int clientPort = -1;
 
   /* Ge the port # */
@@ -166,8 +185,11 @@ static int getClientPort (xPL_Message * theMessage) {
   return clientPort;
 }
 
-/* Extract heartbeat interval */
-static int getHeartbeatInterval (xPL_Message * theMessage) {
+/* -----------------------------------------------------------------------------
+ * Extract heartbeat interval
+ */
+static int 
+getHeartbeatInterval (xPL_Message * theMessage) {
   int theInterval = -1;
 
   /* Ge the interval */
@@ -193,7 +215,10 @@ static int getHeartbeatInterval (xPL_Message * theMessage) {
   return theInterval;
 }
 
-static void updateClientIdent (xPL_Message * theMessage, hubClient * theClient) {
+/* -----------------------------------------------------------------------------
+ */
+static void 
+updateClientIdent (xPL_Message * theMessage, hubClient * theClient) {
   char identBuff[64];
 
   /* Build an ident for this message */
@@ -218,8 +243,9 @@ static void updateClientIdent (xPL_Message * theMessage, hubClient * theClient) 
   theClient->clientIdent = xPL_StrDup (identBuff);
 }
 
-/* Search the list of known clients for a matching port */
-/* If not found, return NULL                            */
+/* -----------------------------------------------------------------------------
+ * Search the list of known clients for a matching port If not found, return NULL
+ */
 static hubClient * findClientByPort (int clientPortNum) {
   int clientIndex;
 
@@ -232,7 +258,9 @@ static hubClient * findClientByPort (int clientPortNum) {
   return NULL;
 }
 
-/* Add the passed client to the client list */
+/* -----------------------------------------------------------------------------
+ * Add the passed client to the client list
+ */
 static hubClient * addNewClient (xPL_Message * theMessage, int clientPort, int heartbeatInterval) {
   hubClient * theClient = NULL;
   int flag = 1;
@@ -289,8 +317,10 @@ static hubClient * addNewClient (xPL_Message * theMessage, int clientPort, int h
   return theClient;
 }
 
-/* Given the passed client, remove it from our list and return TRUE.  If */
-/* client is not found, return FALSE                                     */
+/* -----------------------------------------------------------------------------
+ * Given the passed client, remove it from our list and return TRUE.  If
+ * client is not found, return FALSE
+ */
 static bool releaseClient (hubClient * theClient) {
   int clientIndex;
 
@@ -320,8 +350,11 @@ static bool releaseClient (hubClient * theClient) {
   return FALSE;
 }
 
-/* Release all clients */
-static void releaseAllClients (void) {
+/* -----------------------------------------------------------------------------
+ * Release all clients
+ */
+static void 
+releaseAllClients (void) {
   int clientIndex;
 
   for (clientIndex = clientCount - 1; clientIndex >= 0; clientIndex--) {
@@ -329,8 +362,11 @@ static void releaseAllClients (void) {
   }
 }
 
-/* Check the message to see if it's an update to our list of clients */
-static void checkForClientUpdates (xPL_Message * theMessage) {
+/* -----------------------------------------------------------------------------
+ * Check the message to see if it's an update to our list of clients
+ */
+static void 
+checkForClientUpdates (xPL_Message * theMessage) {
   int clientPort = -1;
   int clientHeartbeatInterval = -1;
   bool clientSigningOff = FALSE;
@@ -384,9 +420,12 @@ static void checkForClientUpdates (xPL_Message * theMessage) {
   theClient->lastHeardFromAt = time (NULL);
 }
 
-/* Broadcast the passed message data to the passed client.  If all goes */
-/* well, return TRUE.  If there is an error, return FALSE               */
-static bool rebroadcastMessage (hubClient * theClient, char * theData, int dataLen) {
+/* -----------------------------------------------------------------------------
+ * Broadcast the passed message data to the passed client.  If all goes
+ * well, return TRUE.  If there is an error, return FALSE
+ */
+static bool 
+rebroadcastMessage (hubClient * theClient, char * theData, int dataLen) {
   int bytesSent;
 
   /* Try to send the message */
@@ -401,7 +440,10 @@ static bool rebroadcastMessage (hubClient * theClient, char * theData, int dataL
   return TRUE;
 }
 
-/* Rebroadcast the passed message to all current clients */
+/* -----------------------------------------------------------------------------
+ * Rebroadcast the passed message to all current clients
+ */
+
 static void rebroadcastMessageToClients (xPL_Message * theMessage) {
   char * formattedText;
   int formattedSize, clientIndex;
@@ -426,9 +468,11 @@ static void rebroadcastMessageToClients (xPL_Message * theMessage) {
   }
 }
 
-/* Handle a newly received message.  Update our recorded clients */
-/* and rebroadcast to them                                       */
-static void handleXPLMessage (xPL_Message * theMessage, xPL_Object * userValue) {
+/* -----------------------------------------------------------------------------
+ * Handle a newly received message.  Update our recorded clients
+ * and rebroadcast to them */
+static void 
+handleXPLMessage (xPL_Message * theMessage, xPL_Object * userValue) {
   /* Do client checks */
   checkForClientUpdates (theMessage);
 
@@ -436,10 +480,12 @@ static void handleXPLMessage (xPL_Message * theMessage, xPL_Object * userValue) 
   rebroadcastMessageToClients (theMessage);
 }
 
-/* Check each client to see how long it's been since we        */
-/* last heard from it.  If it's twice as long as the heartbeat */
-/* interval we expect, declare them dead and remove them       */
-static void doClientTimeoutChecks (int actualElapsedTime, xPL_Object * userValue) {
+/* -----------------------------------------------------------------------------
+ * Check each client to see how long it's been since we
+ * last heard from it.  If it's twice as long as the heartbeat
+ * interval we expect, declare them dead and remove them */
+static void 
+doClientTimeoutChecks (int actualElapsedTime, xPL_Object * userValue) {
   int clientIndex, elapsedTime;
   time_t rightNow = time (NULL);
   hubClient * theClient;
@@ -465,11 +511,16 @@ static void doClientTimeoutChecks (int actualElapsedTime, xPL_Object * userValue
   }
 }
 
-/* Once called, this instance of xPLLib will be running a */
-/* hub process.   Note: The xPLLib must be started in     */
-/* standalone mode for this to work (which is NOT the     */
-/* default).                                              */
-bool xPL_startHub() {
+/* public functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Once called, this instance of xPLLib will be running a
+ * hub process.   Note: The xPLLib must be started in
+ * standalone mode for this to work (which is NOT the
+ * default). */
+bool
+xPL_startHub (void) {
   /* If the hub is already running, we're done */
   if (hubRunning) {
     return TRUE;
@@ -489,8 +540,11 @@ bool xPL_startHub() {
   return TRUE;
 }
 
-/* Disable the hub */
-void xPL_stopHub() {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Disable the hub */
+void
+xPL_stopHub (void) {
   /* If we are not running, skip this */
   if (!hubRunning) {
     return;
@@ -507,7 +561,11 @@ void xPL_stopHub() {
   hubRunning = FALSE;
 }
 
-/* Return if hub is running or not */
-bool xPL_isHubRunning (void) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return if hub is running or not */
+bool
+xPL_isHubRunning (void) {
   return hubRunning;
 }
+/* ========================================================================== */

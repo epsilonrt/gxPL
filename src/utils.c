@@ -13,22 +13,72 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "xPL-private.h"
 
-/* static buffer to create log messages */
+#include "utils_p.h"
+#include "io_p.h"
+
+/* macros =================================================================== */
+#define FIX_CHAR(x) (((x >= 97) && (x <= 122)) ? x - 32 : x)
+
+/* constants ================================================================ */
 #define LOG_BUFF_MAX 512
-static char logMessageBuffer[LOG_BUFF_MAX];
-
-static char convertBuffer[32];
-
 #define NAME_VALUE_LIST_GROW_BY 8;
 
+/* structures =============================================================== */
+/* types ==================================================================== */
 
+/* private variables ======================================================== */
+/* static buffer to create log messages */
+static char logMessageBuffer[LOG_BUFF_MAX];
+static char convertBuffer[32];
 /* Debug mode */
 bool xPL_DebugMode = FALSE;
+/* Context defined for parser */
+static xPL_ConnectType xPL_ParsedConnectionType = xcViaHub;
 
-/* Write a debug message out (if we are debugging) */
-void xPL_Debug (char * theFormat, ...) {
+/* public variables ========================================================= */
+
+/* static functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ * For the passed integer with a value of 0-15, return a
+ * hex encoded number from 0-F.                          */
+static char nibbleToHex (int theValue) {
+  /* Handle simple digit */
+  if ( (theValue >= 0) && (theValue <= 9)) {
+    return (char) 48 + theValue;
+  }
+
+  /* Handle alphas */
+  if ( (theValue >= 10) && (theValue <= 15)) {
+    return (char) 55 + theValue;
+  }
+
+  /* Error */
+  return '*';
+}
+
+/* -----------------------------------------------------------------------------
+ * Convert a hex character to a nibble value */
+static int hexToNibble (char theValue) {
+  if ( (theValue >= '0') && (theValue <= '9')) {
+    return theValue - 48;
+  }
+  else if ( (theValue >= 'A') && (theValue <= 'F')) {
+    return theValue - 55;
+  }
+
+  /* Anything else is an error */
+  return -1;
+}
+
+/* public functions ========================================================= */
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Write a debug message out (if we are debugging) */
+void
+xPL_Debug (char * theFormat, ...) {
   va_list theParms;
   time_t rightNow;
 
@@ -56,8 +106,11 @@ void xPL_Debug (char * theFormat, ...) {
   va_end (theParms);
 }
 
-/* Write an error message out */
-void xPL_Error (char * theFormat, ...) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Write an error message out */
+void
+xPL_Error (char * theFormat, ...) {
   va_list theParms;
   time_t rightNow;
 
@@ -80,9 +133,27 @@ void xPL_Error (char * theFormat, ...) {
   va_end (theParms);
 }
 
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return if debug mode in use */
+bool
+xPL_isDebugging (void) {
+  return xPL_DebugMode;
+}
 
-/* Convert a string to upper case */
-void xPL_Upcase (char * target) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Set Debugging Mode */
+void
+xPL_setDebugging (bool isDebugging) {
+  xPL_DebugMode = isDebugging;
+}
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Convert a string to upper case */
+void
+xPL_Upcase (char * target) {
   int charPtr = 0;
 
   /* Convert to upper case */
@@ -95,13 +166,14 @@ void xPL_Upcase (char * target) {
   }
 }
 
-#define FIX_CHAR(x) (((x >= 97) && (x <= 122)) ? x - 32 : x)
-
-/* Do a string comparison ignoring upper/lower case difference */
-/* -1 - TextA < Text B */
-/*  0 - TextA = Text B */
-/* +1 - TextA > Text B */
-int xPL_strcmpIgnoreCase (char * textA, char * textB) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Do a string comparison ignoring upper/lower case difference
+ * -1 - TextA < Text B
+ *  0 - TextA = Text B
+ * +1 - TextA > Text B */
+int
+xPL_strcmpIgnoreCase (char * textA, char * textB) {
   int textALen = strlen (textA);
   int textBLen = strlen (textB);
   char textAChar, textBChar;
@@ -133,11 +205,14 @@ int xPL_strcmpIgnoreCase (char * textA, char * textB) {
   return 0;
 }
 
-/* Do a string comparison ignoring upper/lower case difference */
-/* -1 - TextA < Text B */
-/*  0 - TextA = Text B */
-/* +1 - TextA > Text B */
-int xPL_strncmpIgnoreCase (char * textA, char * textB, int maxChars) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Do a string comparison ignoring upper/lower case difference
+ * -1 - TextA < Text B
+ *  0 - TextA = Text B
+ * +1 - TextA > Text B */
+int
+xPL_strncmpIgnoreCase (char * textA, char * textB, int maxChars) {
   int textALen = strlen (textA);
   int textBLen = strlen (textB);
   char textAChar, textBChar;
@@ -177,8 +252,11 @@ int xPL_strncmpIgnoreCase (char * textA, char * textB, int maxChars) {
   return 0;
 }
 
-/* Add a new entry to a passed name/value pair list */
-xPL_NameValuePair * xPL_newNamedValuePair (xPL_NameValueList * nameValueList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Add a new entry to a passed name/value pair list */
+xPL_NameValuePair *
+xPL_newNamedValuePair (xPL_NameValueList * nameValueList, char * theName) {
   xPL_NameValuePair * theNewNamedValue;
 
   /* See if the current array is big enough and if not, allocate more space */
@@ -198,17 +276,23 @@ xPL_NameValuePair * xPL_newNamedValuePair (xPL_NameValueList * nameValueList, ch
   return theNewNamedValue;
 }
 
-/* Just add a simple entry to the list */
-void xPL_addNamedValue (xPL_NameValueList * theList, char * theName, char * theValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Just add a simple entry to the list */
+void
+xPL_addNamedValue (xPL_NameValueList * theList, char * theName, char * theValue) {
   xPL_NameValuePair * theNamedValue = xPL_newNamedValuePair (theList, theName);
   if (theValue != NULL) {
     theNamedValue->itemValue = xPL_StrDup (theValue);
   }
 }
 
-/* Attempt to update an existing name/value and if it is not */
-/* existing, create and add a new one                        */
-void xPL_setNamedValue (xPL_NameValueList * theList, char * theName, char * theValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Attempt to update an existing name/value and if it is not
+ * existing, create and add a new one                        */
+void
+xPL_setNamedValue (xPL_NameValueList * theList, char * theName, char * theValue) {
   int nvIndex = xPL_getNamedValueIndex (theList, theName);
   if (nvIndex == -1) {
     xPL_addNamedValue (theList, theName, theValue);
@@ -231,8 +315,11 @@ void xPL_setNamedValue (xPL_NameValueList * theList, char * theName, char * theV
   }
 }
 
-/* Set a series of NameValue pairs for a message */
-void xPL_setNamedValues (xPL_NameValueList * theList, ...) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Set a series of NameValue pairs for a message */
+void
+xPL_setNamedValues (xPL_NameValueList * theList, ...) {
   va_list argPtr;
   char * theName;
   char * theValue;
@@ -254,10 +341,12 @@ void xPL_setNamedValues (xPL_NameValueList * theList, ...) {
   va_end (argPtr);
 }
 
-
-/* Search for a name in a list of name values and return the */
-/* index into the list of the value or -1 if not found       */
-int xPL_getNamedValueIndex (xPL_NameValueList * theList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Search for a name in a list of name values and return the
+ * index into the list of the value or -1 if not found       */
+int
+xPL_getNamedValueIndex (xPL_NameValueList * theList, char * theName) {
   int nvIndex;
 
   if (theList == NULL) {
@@ -273,8 +362,11 @@ int xPL_getNamedValueIndex (xPL_NameValueList * theList, char * theName) {
   return -1;
 }
 
-/* Find the specified name in the name/value pair or return NULL */
-xPL_NameValuePair * xPL_getNamedValuePair (xPL_NameValueList * theList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Find the specified name in the name/value pair or return NULL */
+xPL_NameValuePair *
+xPL_getNamedValuePair (xPL_NameValueList * theList, char * theName) {
   int nvIndex = xPL_getNamedValueIndex (theList, theName);
   if (nvIndex == -1) {
     return NULL;
@@ -283,8 +375,11 @@ xPL_NameValuePair * xPL_getNamedValuePair (xPL_NameValueList * theList, char * t
   return theList->namedValues[nvIndex];
 }
 
-/* Find the specified name in the list and return it's value or NULL */
-char * xPL_getNamedValue (xPL_NameValueList * theList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Find the specified name in the list and return it's value or NULL */
+char *
+xPL_getNamedValue (xPL_NameValueList * theList, char * theName) {
   int nvIndex = xPL_getNamedValueIndex (theList, theName);
   if (nvIndex == -1) {
     return NULL;
@@ -296,29 +391,41 @@ char * xPL_getNamedValue (xPL_NameValueList * theList, char * theName) {
   return theList->namedValues[nvIndex]->itemValue;
 }
 
-/* Return true if there is a matching named value */
-bool xPL_doesNamedValueExist (xPL_NameValueList * theList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return true if there is a matching named value */
+bool
+xPL_doesNamedValueExist (xPL_NameValueList * theList, char * theName) {
   return (xPL_getNamedValueIndex (theList, theName) != -1);
 }
 
-/* Return number of name value pairs */
-int xPL_getNamedValueCount (xPL_NameValueList * theList) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return number of name value pairs */
+int
+xPL_getNamedValueCount (xPL_NameValueList * theList) {
   if (theList == NULL) {
     return 0;
   }
   return theList->namedValueCount;
 }
 
-/* Return the value indexed at */
-xPL_NameValuePair * xPL_getNamedValuePairAt (xPL_NameValueList * theList, int listIndex) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Return the value indexed at */
+xPL_NameValuePair *
+xPL_getNamedValuePairAt (xPL_NameValueList * theList, int listIndex) {
   if ( (theList == NULL) || (listIndex < 0) || (listIndex >= theList->namedValueCount)) {
     return NULL;
   }
   return theList->namedValues[listIndex];
 }
 
-/* Remove the name/value pair specified by the passed index */
-void xPL_clearNamedValueAt (xPL_NameValueList * theList, int nameIndex) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove the name/value pair specified by the passed index */
+void
+xPL_clearNamedValueAt (xPL_NameValueList * theList, int nameIndex) {
   /* Skip out if there is any problem */
   if ( (theList == NULL) || (theList->namedValues == NULL) || (nameIndex < 0) || (nameIndex >= theList->namedValueCount)) {
     return;
@@ -337,8 +444,11 @@ void xPL_clearNamedValueAt (xPL_NameValueList * theList, int nameIndex) {
   theList->namedValueCount--;
 }
 
-/* Remove all isntances of the passed name from the passed list */
-void xPL_clearNamedValue (xPL_NameValueList * theList, char * theName) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove all instances of the passed name from the passed list */
+void
+xPL_clearNamedValue (xPL_NameValueList * theList, char * theName) {
   int nvIndex = 0;
   for (;;) {
     /* Fetch next instance of a named value */
@@ -349,8 +459,11 @@ void xPL_clearNamedValue (xPL_NameValueList * theList, char * theName) {
   }
 }
 
-/* Remove All name/value pairs from the passed list */
-void xPL_clearAllNamedValues (xPL_NameValueList * theList) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Remove All name/value pairs from the passed list */
+void
+xPL_clearAllNamedValues (xPL_NameValueList * theList) {
   int nvIndex;
 
   /* Bail if trouble is brewing */
@@ -366,13 +479,19 @@ void xPL_clearAllNamedValues (xPL_NameValueList * theList) {
   theList->namedValueCount = 0;
 }
 
-/* Allocate a new named/value list */
-xPL_NameValueList * xPL_newNamedValueList (void) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Allocate a new named/value list */
+xPL_NameValueList *
+xPL_newNamedValueList (void) {
   return xPL_AllocNVList();
 }
 
-/* Free an entire name/value list */
-void xPL_freeNamedValueList (xPL_NameValueList * theList) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Free an entire name/value list */
+void
+xPL_freeNamedValueList (xPL_NameValueList * theList) {
   /* Skip out quick if things suck */
   if (theList == NULL) {
     return;
@@ -387,8 +506,11 @@ void xPL_freeNamedValueList (xPL_NameValueList * theList) {
   xPL_FreeNVList (theList);
 }
 
-/* Free an Name/Value pair */
-void xPL_freeNamedValuePair (xPL_NameValuePair * thePair) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Free an Name/Value pair */
+void
+xPL_freeNamedValuePair (xPL_NameValuePair * thePair) {
   STR_FREE (thePair->itemName);
   if (!thePair->isBinary) {
     STR_FREE (thePair->itemValue);
@@ -396,48 +518,24 @@ void xPL_freeNamedValuePair (xPL_NameValuePair * thePair) {
   xPL_FreeNVPair (thePair);
 }
 
-/* For the passed integer with a value of 0-15, return a */
-/* hex encoded number from 0-F.                          */
-static char nibbleToHex (int theValue) {
-  /* Handle simple digit */
-  if ( (theValue >= 0) && (theValue <= 9)) {
-    return (char) 48 + theValue;
-  }
-
-  /* Handle alphas */
-  if ( (theValue >= 10) && (theValue <= 15)) {
-    return (char) 55 + theValue;
-  }
-
-  /* Error */
-  return '*';
-}
-
-/* Convert a hex character to a nibble value */
-static int hexToNibble (char theValue) {
-  if ( (theValue >= '0') && (theValue <= '9')) {
-    return theValue - 48;
-  }
-  else if ( (theValue >= 'A') && (theValue <= 'F')) {
-    return theValue - 55;
-  }
-
-  /* Anything else is an error */
-  return -1;
-}
-
-/* Convert a number to hex.  Only the lower 8 bits */
-/* of the passed value are examined and converted  */
-char * xPL_intToHex (int theValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Convert a number to hex.  Only the lower 8 bits
+ * of the passed value are examined and converted  */
+char *
+xPL_intToHex (int theValue) {
   convertBuffer[0] = nibbleToHex ( (theValue / 16) % 16);
   convertBuffer[1] = nibbleToHex (theValue % 16);
   convertBuffer[2] = '\0';
   return convertBuffer;
 }
 
-/* Convert a two digit hex string to an integer value */
-/* If the string is invalid, FALSE is returned        */
-bool xPL_hexToInt (char * theHexValue, int *theValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Convert a two digit hex string to an integer value
+ * If the string is invalid, FALSE is returned        */
+bool
+xPL_hexToInt (char * theHexValue, int *theValue) {
   int lowValue, highValue;
 
   /* Convert high value */
@@ -455,10 +553,13 @@ bool xPL_hexToInt (char * theHexValue, int *theValue) {
   return TRUE;
 }
 
-/* Convert a passed string into a number and store in */
-/* the passed value.  If the number is OK, then TRUE  */
-/* is returned.  If there is an error, FALSE          */
-bool xPL_strToInt (char * theValue, int *theResult) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Convert a passed string into a number and store in
+ * the passed value.  If the number is OK, then TRUE
+ * is returned.  If there is an error, FALSE          */
+bool
+xPL_strToInt (char * theValue, int *theResult) {
   char * endChar;
   int intResult;
 
@@ -473,42 +574,36 @@ bool xPL_strToInt (char * theValue, int *theResult) {
   return TRUE;
 }
 
-/* Convert an integer into a string */
-char * xPL_intToStr (int theValue) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Convert an integer into a string */
+char *
+xPL_intToStr (int theValue) {
   sprintf (convertBuffer, "%d", theValue);
   return convertBuffer;
 }
 
-/* Return if debug mode in use */
-bool xPL_isDebugging (void) {
-  return xPL_DebugMode;
-}
-
-/* Set Debugging Mode */
-void xPL_setDebugging (bool isDebugging) {
-  xPL_DebugMode = isDebugging;
-}
-
-/* Context defined for parser */
-static xPL_ConnectType xPL_ParsedConnectionType = xcViaHub;
-
-/* Accessors for context */
-xPL_ConnectType xPL_getParsedConnectionType (void) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * Accessors for context */
+xPL_ConnectType
+xPL_getParsedConnectionType (void) {
   return xPL_ParsedConnectionType;
 }
 
-/* This will parse the passed command array for options and parameters */
-/* and install them into xPL if found.  It supports the following      */
-/* switches:                                                           */
-/*    -interface x - Change the default interface xPLLib uses          */
-/*    -xpldebug - enable xPLLib debugging                              */
-
-/* This function will remove each recognized switch from the parameter */
-/* list so the returned arg list may be smaller than before.  This     */
-/* generally makes life easier for all involved                        */
-
-/* If there is an error parsing the command line, FALSE is returned    */
-bool xPL_parseCommonArgs (int *argc, char *argv[], bool silentErrors) {
+/* -----------------------------------------------------------------------------
+ * Public
+ * This will parse the passed command array for options and parameters
+ * and install them into xPL if found.  It supports the following
+ * switches:
+ *    -interface x - Change the default interface xPLLib uses
+ *    -xpldebug - enable xPLLib debugging
+ * This function will remove each recognized switch from the parameter
+ * list so the returned arg list may be smaller than before.  This
+ * generally makes life easier for all involved
+ * If there is an error parsing the command line, FALSE is returned */
+bool
+xPL_parseCommonArgs (int *argc, char *argv[], bool silentErrors) {
   int swptr;
   int newcnt = 0;
 
@@ -552,22 +647,48 @@ bool xPL_parseCommonArgs (int *argc, char *argv[], bool silentErrors) {
   return TRUE;
 }
 
-const char * xPL_Version (void) {
+/* -----------------------------------------------------------------------------
+ * Public
+ */
+const char *
+xPL_Version (void) {
   return VERSION_SHORT;
 }
-int xPL_VersionMajor (void) {
-  
+
+/* -----------------------------------------------------------------------------
+ * Public
+ */
+int
+xPL_VersionMajor (void) {
+
   return VERSION_MAJOR;
 }
-int xPL_VersionMinor (void) {
-  
+
+/* -----------------------------------------------------------------------------
+ * Public
+ */
+int
+xPL_VersionMinor (void) {
+
   return VERSION_MINOR;
 }
-int xPL_VersionPatch (void) {
-  
+
+/* -----------------------------------------------------------------------------
+ * Public
+ */
+int
+xPL_VersionPatch (void) {
+
   return VERSION_PATCH;
 }
-int xPL_VersionSha1 (void) {
-  
+
+/* -----------------------------------------------------------------------------
+ * Public
+ */
+int
+xPL_VersionSha1 (void) {
+
   return VERSION_SHA1;
 }
+
+/* ========================================================================== */
