@@ -20,7 +20,7 @@
       http://www.xpl4java.org/xPL4Linux/
     </a>
   @endhtmlonly
-
+  
   This is a C based xPL framework that hides most of the details of 
   dealing with xPL.  It will handle filtering messages, sending 
   heartbeats, formatting and parsing messages, directing messages to 
@@ -38,6 +38,8 @@
 $ git clone http://www.epsilonrt.com/xPL4Linux
 @endcode
 
+  @ref doc01 explains how to install.
+
   @author Copyright (c) 2006, Gerald R Duprey Jr  
   @author Copyright (c) 2015, Pascal Jean aka epsilonRT
 
@@ -51,11 +53,3 @@ $ git clone http://www.epsilonrt.com/xPL4Linux
   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
   CONDITIONS OF ANY KIND, either express or implied. See the License for the
   specific language governing permissions and limitations under the License.
-
-  @example clock/xpl-clock.c Simple xPL clock service that sends a time update periodically
-  @example config-clock/xpl-config-clock.c Simple configurable xPL clock service that sends a time update periodically
-  @example hub/xpl-hub.c Implementation of an xPL Hub using xPLLib
-  @example logger/xpl-logger.c Simple program to monitor for any message and any device changes and print them
-  @example send/xpl-send.c Command Line xPL message sending tool
-
-*/

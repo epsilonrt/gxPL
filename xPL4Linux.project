@@ -46,10 +46,8 @@
   <Dependencies Name="Release"/>
   <VirtualDirectory Name="xPL4Linux">
     <File Name="Makefile"/>
-    <File Name="CONFIG.txt"/>
     <File Name="CHANGELOG.txt"/>
     <File Name="TODO.txt"/>
-    <File Name="INSTALL.txt"/>
     <File Name="NOTICE"/>
     <File Name="README.md"/>
     <File Name="config.h"/>
@@ -145,8 +143,13 @@
   </Settings>
   <VirtualDirectory Name="doc">
     <File Name="doc/DoxygenLayout.xml"/>
-    <File Name="doc/main_page.dox"/>
     <File Name="doc/Doxyfile.in"/>
+    <File Name="doc/Makefile"/>
+    <File Name="doc/build_main_page.sh"/>
+    <File Name="doc/main_page_footer.dox"/>
+    <File Name="doc/main_page_header.dox"/>
+    <File Name="doc/doc02-configurable-services.md"/>
+    <File Name="doc/doc01-install.md"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="include/xPL.h"/>

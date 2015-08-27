@@ -4,6 +4,8 @@ V1.3a -- released October 18, 2006
 
 Original homepage: [http://www.xpl4java.org/xPL4Linux/](http://www.xpl4java.org/xPL4Linux/)
 
+**It would be advisable to look in the doc/ directory for installation and full documentation.**
+
 ## xPLLIB
 This is a C based xPL framework that hides most of the details of 
 dealing with xPL.  It will handle filtering messages, sending 
