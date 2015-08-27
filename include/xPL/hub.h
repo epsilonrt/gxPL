@@ -16,6 +16,7 @@ __BEGIN_C_DECLS
 
 /**
  * @defgroup xPLHub Hub
+ * @{
  */
 
 /* internal public functions ================================================ */

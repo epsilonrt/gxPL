@@ -52,4 +52,10 @@ $ git clone http://www.epsilonrt.com/xPL4Linux
   CONDITIONS OF ANY KIND, either express or implied. See the License for the
   specific language governing permissions and limitations under the License.
 
+  @example clock/xpl-clock.c Simple xPL clock service that sends a time update periodically
+  @example config-clock/xpl-config-clock.c Simple configurable xPL clock service that sends a time update periodically
+  @example hub/xpl-hub.c Implementation of an xPL Hub using xPLLib
+  @example logger/xpl-logger.c Simple program to monitor for any message and any device changes and print them
+  @example send/xpl-send.c Command Line xPL message sending tool
+
 */

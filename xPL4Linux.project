@@ -144,9 +144,9 @@
     </Configuration>
   </Settings>
   <VirtualDirectory Name="doc">
-    <File Name="doc/Doxyfile"/>
     <File Name="doc/DoxygenLayout.xml"/>
     <File Name="doc/main_page.dox"/>
+    <File Name="doc/Doxyfile.in"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="include/xPL.h"/>
