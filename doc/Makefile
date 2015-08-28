@@ -48,6 +48,16 @@ x-browser: html
 browser: html
 	@www-browser html/index.html
 
+clean: 
+	@echo "$(MSG_CLEAN)"
+	@-rm -fr html
+	@-rm -f Doxyfile main_page.dox
+
+distclean: clean
+	@echo "$(MSG_DISTCLEAN)"
+	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
+	@-rm -f version.mk .version
+
 install: tar uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) doc in $(INSTALL_DOCDIR)"
 	@-install -d -m 0755 $(INSTALL_DOCDIR)/$(PROJECT_NAME)
@@ -57,12 +67,4 @@ uninstall:
 	@echo "$(MSG_UNINSTALL) $(TARGET) doc from $(INSTALL_DOCDIR)"
 	@-rm -fr $(INSTALL_DOCDIR)/$(PROJECT_NAME)
 
-clean: 
-	@-rm -fr html
-	@-rm -f Doxyfile main_page.dox
-
-distclean: clean
-	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
-	@-rm -f version.mk
-
-.PHONY: all doc tar rebuild clean distclean install uninstall version
+.PHONY: all doc tar rebuild clean distclean install uninstall version browser x-browser

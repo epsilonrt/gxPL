@@ -10,7 +10,7 @@ GXPL_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
 if [ ! -d ${GXPL_TEMPLATE_DIR} ]; then
 cat << EOF
 <<ERREUR>> Le répertoire racine n'a pas été localisé.
-Vous devez installer correctement xPL4Linux (sudo make install)
+Vous devez installer correctement gxPL (sudo make install)
 EOF
 exit 1
 fi
@@ -20,7 +20,7 @@ usage()
 cat << EOF
 usage: $(basename $0) [Options] [project_name]
 
-Ce script permet de créer un nouveau projet pour xPL4Linux.
+Ce script permet de créer un nouveau projet pour gxPL.
 
   project_name  nom du projet à créer. Si le nom de projet n'est pas fourni,
   c'est le nom du répertoire courant qui est utilisé.
@@ -92,7 +92,7 @@ fi
 if [ "_$CPP" = "_ON" ]; then
   cp ${GXPL_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
 else
-  cp ${GXPL_TEMPLATE_DIR}/template.project ${PROJECT_FILE}
+  cp ${GXPL_TEMPLATE_DIR}/c/template.project ${PROJECT_FILE}
 fi
 sed -i -e "s#template#$PROJECT_NAME#g" ${PROJECT_FILE}
 if [ "_$GIT" = "_ON" ]; then
@@ -105,8 +105,8 @@ if [ "_$SOURCE" = "_ON" ]; then
     cp ${GXPL_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
     cp ${GXPL_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
   else
-    cp ${GXPL_TEMPLATE_DIR}/template.c ${SOURCE_FILE}
-    cp ${GXPL_TEMPLATE_DIR}/Makefile ${MAKE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/c/template.c ${SOURCE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/c/Makefile ${MAKE_FILE}
   fi
   sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
   sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
