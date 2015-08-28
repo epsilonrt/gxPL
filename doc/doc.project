@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="xpl-clock" InternalType="">
+<CodeLite_Project Name="doc" InternalType="">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -28,9 +28,16 @@
   </Plugins>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="xpl-clock">
+  <VirtualDirectory Name="doc">
     <File Name="Makefile"/>
-    <File Name="xpl-clock.c"/>
+    <File Name="build_main_page.sh"/>
+    <File Name="doc01-install.md"/>
+    <File Name="doc02-configurable-services.md"/>
+    <File Name="doc03-hub-install.md"/>
+    <File Name="Doxyfile.in"/>
+    <File Name="DoxygenLayout.xml"/>
+    <File Name="main_page_footer.dox"/>
+    <File Name="main_page_header.dox"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -48,7 +55,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/xpl-clock" IntermediateDirectory="." Command="$(IntermediateDirectory)/xpl-clock" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/doc" IntermediateDirectory="." Command="$(IntermediateDirectory)/doc" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -60,6 +67,7 @@
       <PreBuild/>
       <PostBuild/>
       <CustomBuild Enabled="yes">
+        <Target Name="View in x-www-browser">make x-browser &amp;</Target>
         <Target Name="DistClean">make distclean</Target>
         <RebuildCommand>make rebuild DEBUG=ON</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
@@ -74,7 +82,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -87,7 +95,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="xpl-clock" IntermediateDirectory="." Command="$(IntermediateDirectory)/xpl-clock" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="doc" IntermediateDirectory="." Command="$(IntermediateDirectory)/doc" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -99,6 +107,7 @@
       <PreBuild/>
       <PostBuild/>
       <CustomBuild Enabled="yes">
+        <Target Name="View in x-www-browser">make x-browser &amp;</Target>
         <Target Name="DistClean">make distclean</Target>
         <RebuildCommand>make rebuild</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
@@ -113,7 +122,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>

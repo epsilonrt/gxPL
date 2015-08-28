@@ -290,7 +290,7 @@ clean: clean_list_lib
 distclean: distclean_list clean_list_lib
 
 version:
-	@$(PROJECT_TOPDIR)/util/bin/git-version $@.mk
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@.mk
 
 libstatic: $(TARGET_LIB_PATH).a
 libshared: $(TARGET_LIB_PATH).so
@@ -325,7 +325,7 @@ uninstall:
 	@-rm -fr $(INSTALL_INCDIR)/xPL
 
 version.h:
-	@$(PROJECT_TOPDIR)/util/bin/git-version $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 
 version.mk: version
 
@@ -425,7 +425,7 @@ clean_list :
 distclean_list :
 	@$(REMOVE) *.bak
 	@$(REMOVE) *~
-	@$(REMOVE) version.*
+	@$(REMOVE) version.* .version
 	@$(REMOVEDIR) $(OBJDIR)
 
 # Listing of phony targets.

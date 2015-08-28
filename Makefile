@@ -28,26 +28,13 @@ rebuild: $(SUBDIRS)
 clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
 install: install_utils $(SUBDIRS)
-uninstall: uninstall_utils $(SUBDIRS)
+uninstall: $(SUBDIRS) uninstall_utils
 
-install_utils: uninstall_utils
-	@echo "$(MSG_INSTALL) $(TARGET) utils and templates in $(prefix)"
-	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl
-	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl/template
-	@-install -d -m 0755 $(INSTALL_DATDIR)/xpl/template/cpp
-	@-install -m 0644 $(PROJECT_ROOT)/util/template/Makefile $(INSTALL_DATDIR)/xpl/template
-	@-install -m 0644 $(PROJECT_ROOT)/util/template/template.c $(INSTALL_DATDIR)/xpl/template
-	@-install -m 0644 $(PROJECT_ROOT)/util/template/template.project $(INSTALL_DATDIR)/xpl/template
-	@-install -m 0644 $(PROJECT_ROOT)/util/template/cpp/* $(INSTALL_DATDIR)/xpl/template/cpp
-	@-install -m 0755 $(PROJECT_ROOT)/util/bin/xpl-prj $(INSTALL_BINDIR)
-	@-install -m 0755 $(PROJECT_ROOT)/util/bin/git-version $(INSTALL_BINDIR)
-	@sed -i -e "s#INSTALLED_TEMPLATE_DIR#$(INSTALL_DATDIR)/xpl/template#g" $(INSTALL_BINDIR)/xpl-prj
+install_utils: 
+	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 uninstall_utils:
-	@echo "$(MSG_UNINSTALL) $(TARGET) utils and templates from $(prefix)"
-	@-rm -fr $(INSTALL_DATDIR)/xpl
-	@-rm -fr $(INSTALL_BINDIR)/xpl-prj
-	@-rm -fr $(INSTALL_BINDIR)/git-version
+	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)

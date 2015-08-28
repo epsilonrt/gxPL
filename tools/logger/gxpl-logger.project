@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="xPL4Linux" InternalType="">
+<CodeLite_Project Name="gxpl-logger" InternalType="">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -28,13 +28,9 @@
   </Plugins>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="xPL4Linux">
+  <VirtualDirectory Name="gxpl-logger">
     <File Name="Makefile"/>
-    <File Name="CHANGELOG.txt"/>
-    <File Name="TODO.txt"/>
-    <File Name="NOTICE"/>
-    <File Name="README.md"/>
-    <File Name="config.h"/>
+    <File Name="gxpl-logger.c"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -52,7 +48,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/xPL4Linux" IntermediateDirectory="." Command="$(IntermediateDirectory)/xPL4Linux" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/gxpl-logger" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-logger" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -91,7 +87,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="xPL4Linux" IntermediateDirectory="." Command="$(IntermediateDirectory)/xPL4Linux" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="gxpl-logger" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-logger" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -125,33 +121,6 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="include">
-    <File Name="include/xPL.h"/>
-    <VirtualDirectory Name="xPL">
-      <File Name="include/xPL/service.h"/>
-      <File Name="include/xPL/defs.h"/>
-      <File Name="include/xPL/message.h"/>
-      <File Name="include/xPL/hub.h"/>
-      <File Name="include/xPL/io.h"/>
-      <File Name="include/xPL/utils.h"/>
-      <File Name="include/xPL/compat.h"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
-  <VirtualDirectory Name="src">
-    <File Name="src/xpl_p.h"/>
-    <File Name="src/io_p.h"/>
-    <File Name="src/message_p.h"/>
-    <File Name="src/service_p.h"/>
-    <File Name="src/config.c"/>
-    <File Name="src/hub.c"/>
-    <File Name="src/io.c"/>
-    <File Name="src/listeners.c"/>
-    <File Name="src/message.c"/>
-    <File Name="src/service.c"/>
-    <File Name="src/utils.c"/>
-    <File Name="src/utils_p.h"/>
-    <File Name="src/alloc.c"/>
-  </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
 </CodeLite_Project>

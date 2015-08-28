@@ -3,19 +3,19 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
-SUBDIRS = hub logger sender
+SUBDIRS = git-version gxpl-prj
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
 rebuild: $(SUBDIRS)
+install: $(SUBDIRS)
+uninstall: $(SUBDIRS)
 lib: $(SUBDIRS)
 cleanlib: $(SUBDIRS)
 extcoff: $(SUBDIRS)
 program: $(SUBDIRS)
 debug: $(SUBDIRS)
-install: $(SUBDIRS)
-uninstall: $(SUBDIRS)
 
 elf: $(SUBDIRS)
 hex: $(SUBDIRS)

@@ -1,10 +1,20 @@
 #!/bin/bash
+# git-version 
+# Build a file containing version information from GIT
 # (c) Copyright 2015 Pascal JEAN aka epsilonRT
 # All rights reserved.
 # Licensed under the Apache License, Version 2.0 (the "License")
 
+usage()
+{
+  echo "git-version filename.ext"
+  echo "    extension provided (.ext) must be .h (for build C/C++ Header) or .mk (for Makefile)"
+  echo 
+}
+
 if [ $# -lt 1 ]; then
-  echo "You must provide the name of the file to be created"
+  echo "$0 error: you must provide the name of the file to be created"
+  usage
   exit -1
 fi
 
@@ -20,7 +30,8 @@ if [ -x "$(command -v git 2> /dev/null)" ]; then
     VERSION=${VERSION#v}
     VERSION=${VERSION#V}
   else
-    echo "Error: git failed to find the project version !"
+    echo "$0 error: git failed to find the project version !"
+    usage
   fi
 fi
 
@@ -38,6 +49,9 @@ else
 fi
 
 VERSION_SHORT=${VERSION%%-g*}
+VERSION_SHORT_DOT=${VERSION_SHORT//-/.}
+VERSION_TINY=${VERSION%%-*}
+
 case "$EXT" in
 
   h)  VERSION_CORE=${VERSION_SHORT%%-*}
@@ -48,7 +62,8 @@ case "$EXT" in
       VERSION_PATCH=${VERSION_SHORT##*-}
       VERSION_PATCH=${VERSION_PATCH%%[A-Za-z]*}
       echo "#define VERSION \"$VERSION\"" > ${OUTPUT}
-      echo "#define VERSION_SHORT \"$VERSION_SHORT\"" >> ${OUTPUT}
+      echo "#define VERSION_SHORT \"$VERSION_SHORT_DOT\"" >> ${OUTPUT}
+      echo "#define VERSION_TINY \"$VERSION_TINY\"" >> ${OUTPUT}
       echo "#define VERSION_MAJOR $VERSION_MAJOR" >> ${OUTPUT}
       echo "#define VERSION_MINOR $VERSION_MINOR" >> ${OUTPUT}
       echo "#define VERSION_PATCH $VERSION_PATCH" >> ${OUTPUT}
@@ -59,9 +74,10 @@ case "$EXT" in
       fi
       ;;
   mk) VERSION=${VERSION%%-*}
-      echo "$VERSION_SHORT" > ${OUTPUT}
+      echo "$VERSION_SHORT_DOT" > ${OUTPUT}
       ;;
-  *)  echo "$0: unknown file extension !"
+  *)  echo "$0 error: unknown file extension !"
+      usage
       exit -1
       ;;
 esac

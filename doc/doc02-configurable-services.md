@@ -135,9 +135,9 @@ Now, some details:
     configuration values.  In this case, it might look like this:
 
     <div class="fragment"><pre class="fragment">
-    static void parseServiceConfigValues(xPL_ServicePtr theService) {
+    static void parseServiceConfigValues(xPL_Service * theService) {
      /* Extract the value, if any, for a configurable named "debugMode" */
-     String debugFlag = xPL_getServiceConfigValue(theService, "debugMode");
+     char * debugFlag = xPL_getServiceConfigValue(theService, "debugMode");
      if (debugFlag != NULL) {
        /* Do a case insensitive compare to see if it's true or not */
        debugMode = (xPL_strcmpIgnoreCase(debugFlag, "true") == 0);
@@ -189,7 +189,7 @@ Now, some details:
     For example:
 
     <div class="fragment"><pre class="fragment">
-    static void configChangedHandler(xPL_ServicePtr theService, xPL_ObjectPtr userData) {
+    static void configChangedHandler(xPL_Service * theService, xPL_Object * userData) {
       parseServiceConfigValues(theService);
     }
     </pre></div>

@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = xpl-send
+TARGET = gxpl-sender
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..

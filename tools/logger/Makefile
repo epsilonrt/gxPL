@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = xpl-logger
+TARGET = gxpl-logger
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..

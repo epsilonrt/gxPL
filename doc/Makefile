@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 
-PROJECT_NAME = xpl4linux
+PROJECT_NAME = gxpl
 
 # Chemin relatif du répertoire racine de xPL4Linux
 PROJECT_TOPDIR = ..
@@ -29,7 +29,7 @@ main_page.dox: main_page_header.dox main_page_footer.dox *.md
 	./build_main_page.sh
 
 version.mk: 
-	@$(PROJECT_TOPDIR)/util/bin/git-version $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 
 Doxyfile: Doxyfile.in version.mk 
 	@sed  -e "s#GIT_VERSION#$(shell cat version.mk)#g" $< > $@
@@ -48,6 +48,16 @@ x-browser: html
 browser: html
 	@www-browser html/index.html
 
+clean: 
+	@echo "$(MSG_CLEAN)"
+	@-rm -fr html
+	@-rm -f Doxyfile main_page.dox
+
+distclean: clean
+	@echo "$(MSG_DISTCLEAN)"
+	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
+	@-rm -f version.mk .version
+
 install: tar uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) doc in $(INSTALL_DOCDIR)"
 	@-install -d -m 0755 $(INSTALL_DOCDIR)/$(PROJECT_NAME)
@@ -57,12 +67,4 @@ uninstall:
 	@echo "$(MSG_UNINSTALL) $(TARGET) doc from $(INSTALL_DOCDIR)"
 	@-rm -fr $(INSTALL_DOCDIR)/$(PROJECT_NAME)
 
-clean: 
-	@-rm -fr html
-	@-rm -f Doxyfile main_page.dox
-
-distclean: clean
-	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
-	@-rm -f version.mk
-
-.PHONY: all doc tar rebuild clean distclean install uninstall version
+.PHONY: all doc tar rebuild clean distclean install uninstall version browser x-browser

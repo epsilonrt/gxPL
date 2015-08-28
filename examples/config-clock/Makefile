@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = xpl-config-clock
+TARGET = gxpl-config-clock
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..
