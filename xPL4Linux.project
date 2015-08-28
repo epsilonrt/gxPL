@@ -36,8 +36,9 @@
       <File Name="util/template/template.c"/>
     </VirtualDirectory>
     <VirtualDirectory Name="bin">
-      <File Name="util/bin/xpl-prj"/>
       <File Name="util/bin/git-version"/>
+      <File Name="util/bin/gxpl-prj"/>
+      <File Name="util/bin/Makefile"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <Description/>
@@ -141,16 +142,6 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="doc">
-    <File Name="doc/DoxygenLayout.xml"/>
-    <File Name="doc/Doxyfile.in"/>
-    <File Name="doc/Makefile"/>
-    <File Name="doc/build_main_page.sh"/>
-    <File Name="doc/main_page_footer.dox"/>
-    <File Name="doc/main_page_header.dox"/>
-    <File Name="doc/doc02-configurable-services.md"/>
-    <File Name="doc/doc01-install.md"/>
-  </VirtualDirectory>
   <VirtualDirectory Name="include">
     <File Name="include/xPL.h"/>
     <VirtualDirectory Name="xPL">
@@ -160,6 +151,7 @@
       <File Name="include/xPL/hub.h"/>
       <File Name="include/xPL/io.h"/>
       <File Name="include/xPL/utils.h"/>
+      <File Name="include/xPL/compat.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="src">

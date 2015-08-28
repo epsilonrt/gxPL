@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="xPL4Linux" Database="" SWTLW="No">
-  <Project Name="xpl-clock" Path="examples/clock/xpl-clock.project" Active="No"/>
-  <Project Name="xpl-config-clock" Path="examples/config-clock/xpl-config-clock.project" Active="Yes"/>
   <Project Name="xPLLib" Path="lib/xPLLib.project" Active="No"/>
-  <Project Name="xpl-hub" Path="tools/hub/xpl-hub.project" Active="No"/>
-  <Project Name="xpl-logger" Path="tools/logger/xpl-logger.project" Active="No"/>
-  <Project Name="xpl-send" Path="tools/send/xpl-send.project" Active="No"/>
   <Project Name="xPL4Linux" Path="xPL4Linux.project" Active="No"/>
+  <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
+  <Project Name="gxpl-logger" Path="tools/logger/gxpl-logger.project" Active="No"/>
+  <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
+  <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="Yes"/>
+  <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
+  <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="xPL_Lib" ConfigName="Debug"/>
@@ -20,6 +21,12 @@
       <Project Name="xpl-logger" ConfigName="Debug"/>
       <Project Name="xpl-send" ConfigName="Debug"/>
       <Project Name="xPL4Linux" ConfigName="Debug"/>
+      <Project Name="gxpl-hub" ConfigName="Debug"/>
+      <Project Name="gxpl-logger" ConfigName="Debug"/>
+      <Project Name="gxpl-sender" ConfigName="Debug"/>
+      <Project Name="gxpl-clock" ConfigName="Debug"/>
+      <Project Name="gxpl-config-clock" ConfigName="Debug"/>
+      <Project Name="doc" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="xPL_Lib" ConfigName="Release"/>
@@ -33,6 +40,12 @@
       <Project Name="xpl-logger" ConfigName="Release"/>
       <Project Name="xpl-send" ConfigName="Release"/>
       <Project Name="xPL4Linux" ConfigName="Release"/>
+      <Project Name="gxpl-hub" ConfigName="Release"/>
+      <Project Name="gxpl-logger" ConfigName="Release"/>
+      <Project Name="gxpl-sender" ConfigName="Release"/>
+      <Project Name="gxpl-clock" ConfigName="Release"/>
+      <Project Name="gxpl-config-clock" ConfigName="Release"/>
+      <Project Name="doc" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

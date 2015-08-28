@@ -3,11 +3,11 @@
 # All rights reserved.
 # Licensed under the Apache License, Version 2.0 (the "License")
 
-XPL4LINUX_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
+GXPL_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
 #----------------------------------------------------------------------------
 
 
-if [ ! -d ${XPL4LINUX_TEMPLATE_DIR} ]; then
+if [ ! -d ${GXPL_TEMPLATE_DIR} ]; then
 cat << EOF
 <<ERREUR>> Le répertoire racine n'a pas été localisé.
 Vous devez installer correctement xPL4Linux (sudo make install)
@@ -90,9 +90,9 @@ if [ -f ${PROJECT_FILE} ]; then
 fi
 
 if [ "_$CPP" = "_ON" ]; then
-  cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
+  cp ${GXPL_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
 else
-  cp ${XPL4LINUX_TEMPLATE_DIR}/template.project ${PROJECT_FILE}
+  cp ${GXPL_TEMPLATE_DIR}/template.project ${PROJECT_FILE}
 fi
 sed -i -e "s#template#$PROJECT_NAME#g" ${PROJECT_FILE}
 if [ "_$GIT" = "_ON" ]; then
@@ -102,11 +102,11 @@ fi
 
 if [ "_$SOURCE" = "_ON" ]; then
   if [ "_$CPP" = "_ON" ]; then
-    cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
-    cp ${XPL4LINUX_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
   else
-    cp ${XPL4LINUX_TEMPLATE_DIR}/template.c ${SOURCE_FILE}
-    cp ${XPL4LINUX_TEMPLATE_DIR}/Makefile ${MAKE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/template.c ${SOURCE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/Makefile ${MAKE_FILE}
   fi
   sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
   sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}

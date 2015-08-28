@@ -6,9 +6,10 @@
 #include <time.h>
 #include <signal.h>
 #include <xPL.h>
+#include "version-git.h"
 
 /* constants ================================================================ */
-#define CLOCK_VERSION "1.0"
+#define CLOCK_VERSION VERSION_SHORT
 
 /* private variables ======================================================== */
 static time_t lastTimeSent = 0;
