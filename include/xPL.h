@@ -112,5 +112,6 @@ __END_C_DECLS
 #include <xPL/message.h>
 #include <xPL/io.h>
 #include <xPL/hub.h>
+#include <xPL/compat.h>
 
 #endif /* _XPL4LINUX_HEADER_ defined */
