@@ -31,8 +31,8 @@ You can get the latest development version using git :
 
     $ git clone http://www.epsilonrt.com/gxPL
 
-xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr  
-xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
+> xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr  
+> xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
 
 ---
 gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
