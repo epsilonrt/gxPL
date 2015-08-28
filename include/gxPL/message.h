@@ -1,5 +1,5 @@
 /**
- * @file xPL/message.h
+ * @file gxPL/message.h
  * xPL Messages
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -7,15 +7,15 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_MESSAGE_HEADER_
-#define _XPL4LINUX_MESSAGE_HEADER_
+#ifndef _GXPL_MESSAGE_HEADER_
+#define _GXPL_MESSAGE_HEADER_
 
-#include <xPL/defs.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
 /**
- * @defgroup xPLMessage Messages
+ * @defgroup gxPLMessage Messages
  * @{
  */
 
@@ -107,7 +107,7 @@ bool xPL_sendMessage (xPL_Message * theMessage);
  * @brief Process xPL messages and I/O process any pending messages and then
  * immediatly return. If theTimeout > 0 then we process any pending messages,
  * waiting up to theTimeout milliseconds and then return. If theTimeout is -1,
- * then we process messages and wait and do not return until xPLLib is stopped.
+ * then we process messages and wait and do not return until gxPLib is stopped.
  * In all cases, if at lease one xPL message was processed during the duration
  * of this call, TRUE is returned.  otherwise, FALSE
  * If theTimeout is 0, then we
@@ -410,4 +410,4 @@ bool xPL_removeMessageListener (xPL_messageListener theHandler);
 
 /* ========================================================================== */
 __END_C_DECLS
-#endif /* _XPL4LINUX_MESSAGE_HEADER_ defined */
+#endif /* _GXPL_MESSAGE_HEADER_ defined */

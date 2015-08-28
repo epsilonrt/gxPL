@@ -1,5 +1,5 @@
 /**
- * @file xPL-message.c
+ * @file message.c
  * xPL Message support functions
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

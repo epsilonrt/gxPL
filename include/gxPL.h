@@ -1,21 +1,21 @@
 /**
- * @file xPL.h
- * xPLLib API
+ * @file gxPL.h
+ * gxPL API
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_HEADER_
-#define _XPL4LINUX_HEADER_
+#ifndef _GXPL_HEADER_
+#define _GXPL_HEADER_
 
-#include <xPL/defs.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
 /**
- * @defgroup xPLLib Library Context
+ * @defgroup gxPLib Library Context
  * @{
  */
 
@@ -25,8 +25,8 @@ __BEGIN_C_DECLS
  * @brief Parse options and parameters and sets xPL if found
  * This will parse the passed command array for options and parameters
  * and install them into xPL if found.  It supports the following switches:
- * - -interface x - Change the default interface xPLLib uses
- * - -xpldebug - enable xPLLib debugging
+ * - -interface x - Change the default interface gxPLib uses
+ * - -xpldebug - enable gxPLib debugging
  * .
  *
  * This function will remove each recognized switch from the parameter
@@ -63,7 +63,7 @@ bool xPL_initialize (xPL_ConnectType theConnectType);
 bool xPL_shutdown (void);
 
 /**-
- * @defgroup xPLLibVersion Version
+ * @defgroup gxPLibVersion Version
  * @{
  */
 
@@ -107,11 +107,11 @@ int xPL_VersionSha1 (void);
 /* ========================================================================== */
 __END_C_DECLS
 
-#include <xPL/utils.h>
-#include <xPL/service.h>
-#include <xPL/message.h>
-#include <xPL/io.h>
-#include <xPL/hub.h>
-#include <xPL/compat.h>
+#include <gxPL/utils.h>
+#include <gxPL/service.h>
+#include <gxPL/message.h>
+#include <gxPL/io.h>
+#include <gxPL/hub.h>
+#include <gxPL/compat.h>
 
-#endif /* _XPL4LINUX_HEADER_ defined */
+#endif /* _GXPL_HEADER_ defined */

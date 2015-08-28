@@ -1,12 +1,11 @@
 /**
-
 @file main_page.dox
-@brief Page de garde de la documentation
+@brief documentation front page
   Copyright 2015 (c), Pascal JEAN aka epsilonRT
   All rights reserved.
   Licensed under the Apache License, Version 2.0 (the "License")
 
-@mainpage xPL4Linux Tools, Application and Framework for xPL on Linux
+@mainpage Tools, Application and Framework for xPL
 
   @htmlonly
     <a href="http://opensource.org/licenses/Apache-2.0">
@@ -14,36 +13,38 @@
     </a>
   @endhtmlonly
 
-  Original homepage:
-  @htmlonly
-    <a href="http://www.xpl4java.org/xPL4Linux/">
-      http://www.xpl4java.org/xPL4Linux/
-    </a>
-  @endhtmlonly
-  
-  This is a C based xPL framework that hides most of the details of 
+  gxPL is a fork of xPL4Linux whose development seems to have stopped 
+  since 2006. The development was resumed starting from version V1.3a 
+  released October 18, 2006.\n
+  gxPL aims to provide a cross-platform framework xPL in C, C ++ and 
+  Python using only open source software. The letter 'g' in gxPL means 
+  "generic".\n
+  xPL is an application protocol that is often above the Ethernet 
+  protocol, however, it was decided to make a real separation between 
+  the application layer and the network layer to evolve easily.
+   
+  gxPL is a xPL framework that hides most of the details of 
   dealing with xPL.  It will handle filtering messages, sending 
   heartbeats, formatting and parsing messages, directing messages to 
   handlers based on where they were bound from, etc.  
   You can use it as the simplest level to format/send/receive/parse xPL 
   messages or add various layers of additional management to simplify more 
-  complex xPL idioms.  
+  complex xPL idioms.\n
   It's designed to be easy to design a new program around or to 
-  integrate into an existing program.  
+  integrate into an existing program.\n
   It includes some example applications showing how to use various 
-  features of the framework, including the source to the xPLHub.
+  features of the framework, including the source to the gxpl-hub.
 
   You can get the latest development version using git :\n
 @code
-$ git clone http://www.epsilonrt.com/xPL4Linux
+$ git clone http://www.epsilonrt.com/gxPL
 @endcode
 
   @ref doc01 explains how to install.
 
-  @author Copyright (c) 2006, Gerald R Duprey Jr  
   @author Copyright (c) 2015, Pascal Jean aka epsilonRT
 
-  xPL4Linux is licensed under the Apache License, Version 2.0 (the "License"); 
+  gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
   you may not use this file except in compliance with the License.  
   You may obtain a copy of the License at:
 
@@ -53,3 +54,12 @@ $ git clone http://www.epsilonrt.com/xPL4Linux
   under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
   CONDITIONS OF ANY KIND, either express or implied. See the License for the
   specific language governing permissions and limitations under the License.
+  <hr>
+  
+  @htmlonly
+  <blockquote cite="http://www.xpl4java.org/xPL4Linux/">
+  <p>xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr<br>
+  xPL4Linux homepage: <a href="http://www.xpl4java.org/xPL4Linux/">http://www.xpl4java.org/xPL4Linux/</a></p>
+  </blockquote>
+  @endhtmlonly
+

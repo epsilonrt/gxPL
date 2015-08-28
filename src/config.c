@@ -1,5 +1,5 @@
 /**
- * @file xPL-config.c
+ * @file config.c
  * Configuration support for xPL services
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

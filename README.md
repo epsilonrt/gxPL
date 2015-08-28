@@ -1,13 +1,21 @@
-# xPL4Linux Tools, Application and Framework for xPL on Linux
-Copyright 2006, Gerald R Duprey Jr  
-V1.3a -- released October 18, 2006
+# gxPL Tools, Application and Framework for xPL  
+> Copyright 2015 (c), Pascal JEAN aka epsilonRT  
+> All rights reserved.
 
-Original homepage: [http://www.xpl4java.org/xPL4Linux/](http://www.xpl4java.org/xPL4Linux/)
+**It would be advisable to look in the doc/ directory for installation 
+and full documentation.**
 
-**It would be advisable to look in the doc/ directory for installation and full documentation.**
-
-## xPLLIB
-This is a C based xPL framework that hides most of the details of 
+gxPL is a fork of xPL4Linux whose development seems to have stopped 
+since 2006. The development was resumed starting from version V1.3a 
+released October 18, 2006.  
+gxPL aims to provide a cross-platform framework xPL in C, C ++ and 
+Python using only open source software. The letter 'g' in gxPL means 
+"generic".  
+xPL is an application protocol that is often above the Ethernet 
+protocol, however, it was decided to make a real separation between 
+the application layer and the network layer to evolve easily.  
+ 
+gxPL is a xPL framework that hides most of the details of 
 dealing with xPL.  It will handle filtering messages, sending 
 heartbeats, formatting and parsing messages, directing messages to 
 handlers based on where they were bound from, etc.  
@@ -17,10 +25,17 @@ complex xPL idioms.
 It's designed to be easy to design a new program around or to 
 integrate into an existing program.  
 It includes some example applications showing how to use various 
-features of the framework, including the source to the xPLHub.
+features of the framework, including the source to the gxpl-hub.
+
+You can get the latest development version using git :
+
+    $ git clone http://www.epsilonrt.com/gxPL
+
+xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr  
+xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
 
 ---
-xPL4Linux is licensed under the Apache License, Version 2.0 (the "License"); 
+gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
 you may not use this file except in compliance with the License.  
 You may obtain a copy of the License at:
 

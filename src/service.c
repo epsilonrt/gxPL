@@ -1,5 +1,5 @@
 /**
- * @file xPL-service.c
+ * @file service.c
  * xPL Lib Service Management
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

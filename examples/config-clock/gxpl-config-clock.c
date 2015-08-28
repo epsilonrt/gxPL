@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include <signal.h>
-#include <xPL.h>
+#include <gxPL.h>
 
 /* constants ================================================================ */
 #define CLOCK_VERSION "1.3"

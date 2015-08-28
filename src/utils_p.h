@@ -1,16 +1,16 @@
 /**
  * @file utils_p.h
- * xPLLib internal include
+ * gxPLib internal include
  * 
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License") 
  */
-#ifndef _XPL4LINUX_UTILS_PRIVATE_HEADER_
-#define _XPL4LINUX_UTILS_PRIVATE_HEADER_
+#ifndef _GXPL_UTILS_PRIVATE_HEADER_
+#define _GXPL_UTILS_PRIVATE_HEADER_
 
-#include <xPL/utils.h>
+#include <gxPL/utils.h>
 #include "xpl_p.h"
 
 /* types ==================================================================== */
@@ -53,4 +53,4 @@ char * xPL_StrDup(char *);
 char * xPL_StrNDup(char *, int);
 
 /* ========================================================================== */
-#endif /* _XPL4LINUX_UTILS_PRIVATE_HEADER_ defined */
+#endif /* _GXPL_UTILS_PRIVATE_HEADER_ defined */

@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="gxpl-prj" InternalType="">
-  <VirtualDirectory Name="template">
-    <VirtualDirectory Name="cpp">
-      <File Name="template/cpp/template.cpp"/>
-      <File Name="template/cpp/Makefile"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="c">
-      <File Name="template/c/Makefile"/>
-      <File Name="template/c/template.c"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -36,10 +26,18 @@
  }]]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="template">
+    <VirtualDirectory Name="cpp">
+      <File Name="template/cpp/template.cpp"/>
+      <File Name="template/cpp/Makefile"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="c">
+      <File Name="template/c/Makefile"/>
+      <File Name="template/c/template.c"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
   <VirtualDirectory Name="gxpl-prj">
     <File Name="Makefile"/>
     <File Name="gxpl-prj"/>
@@ -133,4 +131,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

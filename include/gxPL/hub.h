@@ -1,5 +1,5 @@
 /**
- * @file xPL/hub.h
+ * @file gxPL/hub.h
  * xPL Hub
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -7,15 +7,15 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_HUB_HEADER_
-#define _XPL4LINUX_HUB_HEADER_
+#ifndef _GXPL_HUB_HEADER_
+#define _GXPL_HUB_HEADER_
 
-#include <xPL/defs.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
 /**
- * @defgroup xPLHub Hub
+ * @defgroup gxpl-hub Hub
  * @{
  */
 
@@ -24,8 +24,8 @@ __BEGIN_C_DECLS
 /**
  * @brief running a hub process
  *
- * Once called, this instance of xPLLib will be running a hub process.
- * @note The xPLLib must be started in standalone mode for this to work
+ * Once called, this instance of gxPLib will be running a hub process.
+ * @note The gxPLib must be started in standalone mode for this to work
  * (which is NOT the default)
  *
  * @return
@@ -49,4 +49,4 @@ bool xPL_isHubRunning (void);
 
 /* ========================================================================== */
 __END_C_DECLS
-#endif /* _XPL4LINUX_HUB_HEADER_ defined */
+#endif /* _GXPL_HUB_HEADER_ defined */

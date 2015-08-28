@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <unistd.h>
-#include <xPL.h>
+#include <gxPL.h>
 
 /* constants ================================================================ */
 /* macros =================================================================== */

@@ -1,5 +1,5 @@
 /**
- * @file xPL-io.c
+ * @file io.c
  * xPL I/O handling
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -1324,7 +1324,7 @@ xPL_shutdown (void) {
  * If theTimeout > 0 then we process any pending messages,   
  * waiting up to theTimeout milliseconds and then return.  If
  * theTimeout is -1, then we process messages and wait and do
- * not return until xPLLib is stopped.  In all cases, if at  
+ * not return until gxPLib is stopped.  In all cases, if at  
  * lease one xPL message was processed during the duration of
  * this call, TRUE is returned.  otherwise, FALSE. */          
 bool 
@@ -1399,7 +1399,7 @@ xPL_processMessages (int theTimeout) {
       /* Dispatch to IO handler */
       pollUserInfo[deviceIndex].ioHandler (pollInfo[deviceIndex].fd, pollInfo[deviceIndex].revents, pollUserInfo[deviceIndex].userValue);
 
-      /* See if the xPLLib is stopped */
+      /* See if the gxPLib is stopped */
       if (xPLFD == -1) {
         break;
       }

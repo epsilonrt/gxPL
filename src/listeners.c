@@ -1,5 +1,5 @@
 /**
- * @file xPL-listeners.c
+ * @file listeners.c
  * Handle class/type listeners
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

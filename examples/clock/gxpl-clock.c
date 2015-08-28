@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <signal.h>
-#include <xPL.h>
+#include <gxPL.h>
 #include "version-git.h"
 
 /* constants ================================================================ */

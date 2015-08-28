@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="xPL4Linux" InternalType="">
+<CodeLite_Project Name="gxPL" InternalType="">
+  <VirtualDirectory Name="include">
+    <VirtualDirectory Name="gxPL">
+      <File Name="include/gxPL/service.h"/>
+      <File Name="include/gxPL/defs.h"/>
+      <File Name="include/gxPL/hub.h"/>
+      <File Name="include/gxPL/io.h"/>
+      <File Name="include/gxPL/utils.h"/>
+      <File Name="include/gxPL/message.h"/>
+      <File Name="include/gxPL/compat.h"/>
+    </VirtualDirectory>
+    <File Name="include/gxPL.h"/>
+  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -28,10 +40,8 @@
   </Plugins>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="xPL4Linux">
+  <VirtualDirectory Name="gxPL">
     <File Name="Makefile"/>
-    <File Name="CHANGELOG.txt"/>
-    <File Name="TODO.txt"/>
     <File Name="NOTICE"/>
     <File Name="README.md"/>
     <File Name="config.h"/>
@@ -52,7 +62,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/xPL4Linux" IntermediateDirectory="." Command="$(IntermediateDirectory)/xPL4Linux" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -91,7 +101,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="xPL4Linux" IntermediateDirectory="." Command="$(IntermediateDirectory)/xPL4Linux" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -125,18 +135,6 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="include">
-    <File Name="include/xPL.h"/>
-    <VirtualDirectory Name="xPL">
-      <File Name="include/xPL/service.h"/>
-      <File Name="include/xPL/defs.h"/>
-      <File Name="include/xPL/message.h"/>
-      <File Name="include/xPL/hub.h"/>
-      <File Name="include/xPL/io.h"/>
-      <File Name="include/xPL/utils.h"/>
-      <File Name="include/xPL/compat.h"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <VirtualDirectory Name="src">
     <File Name="src/xpl_p.h"/>
     <File Name="src/io_p.h"/>

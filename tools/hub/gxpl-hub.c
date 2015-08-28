@@ -1,4 +1,4 @@
-/* xPL_Hub.c -- Implementation of an xPL Hub using xPLLib */
+/* xPL_Hub.c -- Implementation of an xPL Hub using gxPLib */
 /* Copyright (c) 2004, Gerald R Duprey Jr. */
 
 #include <stdio.h>
@@ -14,7 +14,7 @@
 #include <sys/wait.h>
 #include <syslog.h>
 
-#include <xPL.h>
+#include <gxPL.h>
 
 #define MAX_HUB_RESTARTS 10000
 
@@ -160,7 +160,7 @@ void printUsage (char * ourName) {
   fprintf (stderr, "Copyright (c) 2005, Gerald Duprey\n\n");
   fprintf (stderr, "Usage: %s [-debug] [-xpldebug] [-nodaemon] [-ip x] [-interface x]\n", ourName);
   fprintf (stderr, "  -debug -- enable hub debug messages\n");
-  fprintf (stderr, "  -xpldebug -- enable hub and xPLLib debugging messagaes\n");
+  fprintf (stderr, "  -xpldebug -- enable hub and gxPLib debugging messagaes\n");
   fprintf (stderr, "  -nodaemon -- don't detach -- run from the console\n");
   fprintf (stderr, "  -interface x -- Use interface named x (i.e. eth0) as network interface\n");
   fprintf (stderr, "  -ip x -- Bind to specified IP address for xPL\n");
@@ -176,12 +176,12 @@ static void hubShutdownHandler (int onSignal) {
 
 /* This is the hub code itself.  */
 static void runHub (void) {
-  /* Start xPLLib */
+  /* Start gxPLib */
   if (!xPL_initialize (xcStandAlone)) {
-    writeError ("Unable to start xPLLib -- an xPL hub appears to already be running");
+    writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
     exit (1);
   }
-  xPL_Debug ("xPLLib started");
+  xPL_Debug ("gxPLib started");
 
   /* Start xPL Hub */
   xPL_startHub();
@@ -190,7 +190,7 @@ static void runHub (void) {
   signal (SIGTERM, hubShutdownHandler);
   signal (SIGINT, hubShutdownHandler);
 
-  /* Hand control over to xPLLib */
+  /* Hand control over to gxPLib */
   writeInfo ("xPL Hub now running");
   xPL_processMessages (-1);
   exit (0);
@@ -228,7 +228,7 @@ static void superviseHub (void) {
   for (;;) {
     /* See if we can still do this */
     if (hubRestartCount == MAX_HUB_RESTARTS) {
-      writeError ("xPLHub has died %d times -- something may be wrong -- terminating supervisor", MAX_HUB_RESTARTS);
+      writeError ("gxpl-hub has died %d times -- something may be wrong -- terminating supervisor", MAX_HUB_RESTARTS);
       exit (1);
     }
 
@@ -252,10 +252,10 @@ static void superviseHub (void) {
 
         break;
       default:           /* parent */
-        writeDebug ("Spawned xPLHub process, PID=%d, Spawn count=%d", hubPid, hubRestartCount);
+        writeDebug ("Spawned gxpl-hub process, PID=%d, Spawn count=%d", hubPid, hubRestartCount);
         break;
       case -1:           /* error */
-        writeError ("Unable to spawn xPLHub supervisor, %s (%d)", strerror (errno), errno);
+        writeError ("Unable to spawn gxpl-hub supervisor, %s (%d)", strerror (errno), errno);
         exit (1);
     }
 
@@ -263,14 +263,14 @@ static void superviseHub (void) {
     /* Now we just wait for something bad to happen to our hub */
     waitpid (hubPid, &childStatus, 0);
     if (WIFEXITED (childStatus)) {
-      writeInfo ("xPLHub exited normally with status %d -- restarting...", WEXITSTATUS (childStatus));
+      writeInfo ("gxpl-hub exited normally with status %d -- restarting...", WEXITSTATUS (childStatus));
       continue;
     }
     if (WIFSIGNALED (childStatus)) {
-      writeInfo ("xPLHub died from by receiving unexpected signal %d -- restarting...", WTERMSIG (childStatus));
+      writeInfo ("gxpl-hub died from by receiving unexpected signal %d -- restarting...", WTERMSIG (childStatus));
       continue;
     }
-    writeInfo ("xPLHub died from unknown causes -- restarting...");
+    writeInfo ("gxpl-hub died from unknown causes -- restarting...");
     continue;
   }
 }
@@ -305,7 +305,7 @@ int main (int argc, char * argv[]) {
         exit (0);
         break;
       case -1:           /* error */
-        writeError ("Unable to spawn xPLHub supervisor, %s (%d)", strerror (errno), errno);
+        writeError ("Unable to spawn gxpl-hub supervisor, %s (%d)", strerror (errno), errno);
         exit (1);
     }
   }

@@ -1,5 +1,5 @@
 /**
- * @file xPL/service.h
+ * @file gxPL/service.h
  * xPL Services
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -7,10 +7,10 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_SERVICE_HEADER_
-#define _XPL4LINUX_SERVICE_HEADER_
+#ifndef _GXPL_SERVICE_HEADER_
+#define _GXPL_SERVICE_HEADER_
 
-#include <xPL/defs.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
@@ -527,4 +527,4 @@ bool xPL_isServiceConfigured (xPL_Service * theService);
 
 /* ========================================================================== */
 __END_C_DECLS
-#endif /* _XPL4LINUX_SERVICE_HEADER_ defined */
+#endif /* _GXPL_SERVICE_HEADER_ defined */

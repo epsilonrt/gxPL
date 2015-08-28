@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <xPL.h>
+#include <gxPL.h>
 
 #define LOGGER_VERSION "1.1"
 
@@ -140,9 +140,9 @@ int main(int argc, char * argv[]) {
   /* Parse the command line */
   if (!xPL_parseCommonArgs(&argc, argv, FALSE)) exit(1);
 
-  /* Start xPLLib */
+  /* Start gxPLib */
   if (!xPL_initialize(xPL_getParsedConnectionType())) {
-    fprintf(stderr, "Unable to start xPLLib\n");
+    fprintf(stderr, "Unable to start gxPLib\n");
     exit(1);
   }
 
@@ -180,7 +180,7 @@ int main(int argc, char * argv[]) {
   signal(SIGTERM, shutdownHandler);
   signal(SIGINT, shutdownHandler);
 
-  /* Hand control over to xPLLib */
+  /* Hand control over to gxPLib */
   xPL_processMessages(-1);
   exit(0);
 }

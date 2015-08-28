@@ -1,7 +1,7 @@
 
   @example clock/gxpl-clock.c Simple xPL clock service that sends a time update periodically
   @example config-clock/gxpl-config-clock.c Simple configurable xPL clock service that sends a time update periodically
-  @example hub/gxpl-hub.c Implementation of an xPL Hub using xPLLib
+  @example hub/gxpl-hub.c Implementation of an xPL Hub using gxPLib
   @example logger/gxpl-logger.c Simple program to monitor for any message and any device changes and print them
   @example sender/gxpl-sender.c Command Line xPL message sending tool
 */

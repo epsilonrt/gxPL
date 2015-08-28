@@ -1,26 +1,42 @@
-Installing xPL4Linux
+Basic Installation
 
-* Untar the xPL4Linux.tar file into an empty directory or clone from 
-  git repos.  
-* Go into the xPL4Linux directory and type make. This will compile the 
-  components of xPL4Linux library (xPLLib).  
-* If there are no errors (*), you can install it into your systems by 
-  becoming root and typing "make install".  
+These are installation instructions.
+
+Clone sources from epsilonrt.com git repos (or untar archive file):
 
 <div class="fragment"><pre class="fragment">
-git clone http://git.epsilonrt.com/xPL4Linux
-cd xPL4Linux
+git clone http://git.epsilonrt.com/gxPL
+</pre></div>
+
+Build and install the library:
+
+<div class="fragment"><pre class="fragment">
+cd gxPL
 make
-sudo make install_utils
 sudo make install
+</pre></div>
+
+Build and install the tools (hub, logger ...):
+
+<div class="fragment"><pre class="fragment">
 cd tools
 make
-xpl-hub
 sudo make install
+</pre></div>
+
+Run hub tool as daemon:
+
+<div class="fragment"><pre class="fragment">
+gxpl-hub
+</pre></div>
+
+Build and run clock example:
+
+<div class="fragment"><pre class="fragment">
 cd ../examples
 make
 cd clock
-./xpl-clock -xlpdebug
+./gxpl-clock -xlpdebug
 </pre></div>
 
 The shared and static libraries are installed into /usr/local/lib and 

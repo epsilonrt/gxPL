@@ -1,16 +1,16 @@
 /**
- * @file xPL/utils.h
- * xPL4Linux Utilities functions
+ * @file gxPL/utils.h
+ * xPL Utilities functions
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_UTILS_HEADER_
-#define _XPL4LINUX_UTILS_HEADER_
+#ifndef _GXPL_UTILS_HEADER_
+#define _GXPL_UTILS_HEADER_
 
-#include <xPL/defs.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
@@ -281,4 +281,4 @@ void xPL_Error (char * theFormat, ...);
 
 /* ========================================================================== */
 __END_C_DECLS
-#endif /* _XPL4LINUX_UTILS_HEADER_ defined */
+#endif /* _GXPL_UTILS_HEADER_ defined */

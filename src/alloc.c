@@ -1,6 +1,6 @@
 /**
- * @file xPL-alloc.c
- * Memory management for xPLLib
+ * @file alloc.c
+ * Memory management for gxPLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

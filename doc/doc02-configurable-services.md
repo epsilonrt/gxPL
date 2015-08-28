@@ -1,24 +1,25 @@
-Using Configurable services
-> Copyright (c) 2005, Gerald R Duprey Jr.
+Using Configurable services  
+> Copyright (c) 2005, Gerald R Duprey Jr.  
+> Copyright (c) 2015, Pascal JEAN aka epsilonRT  
 
 ## Introduction 
 
-Starting with V1.3, xPL4Linux now fully supports the xPL device configuration
+gxPL fully supports the xPL device configuration
 protocol.  The protocol allows your xPL program to be configured remotely by
 applications like DCM or xPLHAL and preserve those settings locally,
 automatically reloading the settings/configuration the next time your
 application starts.
 
 Ideally, you would want to expose all configurable elements of your
-application to xPL4Linux.  Doing so grants you customization and persistance
+application to gxPL.  Doing so grants you customization and persistance
 with no additional effort on your behalf and provides a means for users to
 configure your program without having to have a seperate configuration program
 or confusing command startup options.
 
 
-## Integrating configuration into xPL4Linux applications
+## Integrating configuration into gxPL applications
 
-If you have an existing xPL4Linux application, you can get automatic support
+If you have an existing gxPL application, you can get automatic support
 for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
@@ -255,7 +256,7 @@ frustrated that what they expect doesn't work.
 ## Overview of the xPL device configuration process
 
 This is an overview of how configuration works in xPL.  For the most part,
-xPL4Linux does this all for you, so this is mostly to understand what is going
+gxPL does this all for you, so this is mostly to understand what is going
 on under the hood.  
 
 The general xPL configuration process goes like this:

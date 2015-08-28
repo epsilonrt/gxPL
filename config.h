@@ -1,6 +1,6 @@
 /**
  * @file config.h
- * xPLLib Configuration file
+ * gxPLib Configuration file
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

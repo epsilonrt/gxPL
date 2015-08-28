@@ -1,6 +1,6 @@
 /**
- * @file xPL-utils.c
- * Misc support for xPLLib
+ * @file utils.c
+ * Misc support for gxPLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -596,8 +596,8 @@ xPL_getParsedConnectionType (void) {
  * This will parse the passed command array for options and parameters
  * and install them into xPL if found.  It supports the following
  * switches:
- *    -interface x - Change the default interface xPLLib uses
- *    -xpldebug - enable xPLLib debugging
+ *    -interface x - Change the default interface gxPLib uses
+ *    -xpldebug - enable gxPLib debugging
  * This function will remove each recognized switch from the parameter
  * list so the returned arg list may be smaller than before.  This
  * generally makes life easier for all involved
@@ -630,7 +630,7 @@ xPL_parseCommonArgs (int *argc, char *argv[], bool silentErrors) {
       if (!strcmp (argv[swptr], "-xpldebug")) {
         xPL_setDebugging (TRUE);
         if (!silentErrors) {
-          xPL_Debug ("xPLLib debugging enabled");
+          xPL_Debug ("gxPLib debugging enabled");
         }
         continue;
       }

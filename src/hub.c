@@ -1,5 +1,5 @@
 /**
- * @file xPL-hub.c
+ * @file hub.c
  * Built-in xPL hub support
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -515,8 +515,8 @@ doClientTimeoutChecks (int actualElapsedTime, xPL_Object * userValue) {
 
 /* -----------------------------------------------------------------------------
  * Public
- * Once called, this instance of xPLLib will be running a
- * hub process.   Note: The xPLLib must be started in
+ * Once called, this instance of gxPLib will be running a
+ * hub process.   Note: The gxPLib must be started in
  * standalone mode for this to work (which is NOT the
  * default). */
 bool

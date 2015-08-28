@@ -34,7 +34,7 @@ version.mk:
 Doxyfile: Doxyfile.in version.mk 
 	@sed  -e "s#GIT_VERSION#$(shell cat version.mk)#g" $< > $@
 
-html: Doxyfile $(PROJECT_TOPDIR)/include/xPL.h $(PROJECT_TOPDIR)/include/xPL/*.h  main_page.dox DoxygenLayout.xml
+html: Doxyfile $(PROJECT_TOPDIR)/include/gxPL.h $(PROJECT_TOPDIR)/include/gxPL/*.h  main_page.dox DoxygenLayout.xml
 	@echo "$(MSG_DOC) $(@)"
 	@doxygen $<
 
@@ -56,7 +56,7 @@ clean:
 distclean: clean
 	@echo "$(MSG_DISTCLEAN)"
 	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
-	@-rm -f version.mk .version
+	@-rm -f version.mk .version $(PROJECT_NAME).tag
 
 install: tar uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) doc in $(INSTALL_DOCDIR)"

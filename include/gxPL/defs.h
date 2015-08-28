@@ -1,14 +1,14 @@
 /**
- * @file xPL/defs.h
- * xPL4Linux Defs
+ * @file gxPL/defs.h
+ * gxPL Defs
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#ifndef _XPL4LINUX_DEFS_HEADER_
-#define _XPL4LINUX_DEFS_HEADER_
+#ifndef _GXPL_DEFS_HEADER_
+#define _GXPL_DEFS_HEADER_
 
 #ifndef __BEGIN_C_DECLS
 # if defined(__cplusplus)
@@ -94,4 +94,4 @@ typedef void xPL_Object;
 
 /* ========================================================================== */
 __END_C_DECLS
-#endif /* _XPL4LINUX_DEFS_HEADER_ defined */
+#endif /* _GXPL_DEFS_HEADER_ defined */

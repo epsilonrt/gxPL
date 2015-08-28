@@ -1,16 +1,16 @@
 /**
  * @file message_p.h
- * xPLLib internal include
+ * gxPLib internal include
  * 
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License") 
  */
-#ifndef _XPL4LINUX_MESSAGE_PRIVATE_HEADER_
-#define _XPL4LINUX_MESSAGE_PRIVATE_HEADER_
+#ifndef _GXPL_MESSAGE_PRIVATE_HEADER_
+#define _GXPL_MESSAGE_PRIVATE_HEADER_
 
-#include <xPL/message.h>
+#include <gxPL/message.h>
 #include "utils_p.h"
 
 /* constants ================================================================ */
@@ -39,4 +39,4 @@ void xPL_FreeService(xPL_Service *);
 xPL_Service * xPL_AllocService(void);
 
 /* ========================================================================== */
-#endif /* _XPL4LINUX_MESSAGE_PRIVATE_HEADER_ defined */
+#endif /* _GXPL_MESSAGE_PRIVATE_HEADER_ defined */

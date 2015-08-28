@@ -94,7 +94,7 @@ STATIC_LINKER = OFF
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_LIBDIRS = xPL++
+EXTRA_LIBDIRS = gxPL++
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.

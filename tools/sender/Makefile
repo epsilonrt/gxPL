@@ -85,7 +85,7 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = xPL
+EXTRA_LIBS = gxPL
 
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON

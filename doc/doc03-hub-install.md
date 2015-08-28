@@ -1,6 +1,6 @@
-Linux based xPL hub with supervisory functions
-> Copyright (c) 2005 -- Gerry Duprey
-> Based on the xPL4Linux V1.1 framework
+Linux based xPL hub with supervisory functions  
+> Copyright (c) 2005 -- Gerry Duprey  
+> Copyright (c) 2015, Pascal JEAN aka epsilonRT
 
 ## Overview
 
@@ -93,7 +93,7 @@ would be best, but really almost any ignal (TERM, INT, KILL) will work.
 ## Source Code
 
 If you would like the source code for gxpl-hub, go to the same web page you
-downloaded this from and download the xPL4Linux framework.  It has
+downloaded this from and download the gxPL framework.  It has
 installation instructions for building the framework (should be a quick few
 second build on most any system).  There is then an examples/ subdirectory
 that contains the gxpl-hub.c code which uses that framework.
