@@ -10,9 +10,10 @@
 
 #include <signal.h>
 #include <gxPL.h>
+#include "version-git.h"
 
 /* constants ================================================================ */
-#define CLOCK_VERSION "1.3"
+#define CLOCK_VERSION VERSION_SHORT
 
 #define DEFAULT_TICK_RATE 60
 #define TICK_RATE_CFG_NAME "tickrate"

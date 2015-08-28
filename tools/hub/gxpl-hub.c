@@ -15,6 +15,7 @@
 #include <syslog.h>
 
 #include <gxPL.h>
+#include "version-git.h"
 
 #define MAX_HUB_RESTARTS 10000
 

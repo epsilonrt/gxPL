@@ -8,8 +8,9 @@
 #include <time.h>
 
 #include <gxPL.h>
+#include "version-git.h"
 
-#define LOGGER_VERSION "1.1"
+#define LOGGER_VERSION VERSION_SHORT
 
 #define LOG_FILE_CFG_NAME "logFilename"
 #define LOG_APPEND_CFG_NAME "append2Log"

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <gxPL.h>
+#include "version-git.h"
 
 char msgSource[64] = "cdp1802-xplsend.default";
 char * srcVendor = NULL;

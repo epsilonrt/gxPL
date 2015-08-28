@@ -15,7 +15,7 @@ PROJECT_TOPDIR = ../..
 ARCH = ARCH_GENERIC_LINUX
 
 # Generates a file to retrieve information on the GIT Version
-GIT_VERSION = OFF
+GIT_VERSION = ON
 
 # Optimization level, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
