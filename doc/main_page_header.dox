@@ -12,14 +12,7 @@
       <img src="osi.png" alt="osi.png" align="right" valign="top">
     </a>
   @endhtmlonly
-  
-  Project Homepage:
-  @htmlonly
-    <a href="http://www.epsilonrt.com/gxPL">
-      http://www.epsilonrt.com/gxPL
-    </a>
-  @endhtmlonly
-  
+    
   <b>This project is under development and has, for now, only C API</b>
 
   gxPL is a fork of xPL4Linux whose development seems to have stopped 
