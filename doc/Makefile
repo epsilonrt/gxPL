@@ -16,6 +16,7 @@ INSTALL_DOCDIR=$(prefix)/share/doc
 MSG_INSTALL = [INSTALL]
 MSG_UNINSTALL = [UNINSTALL]
 MSG_DOC = [DOC]
+MSG_MAIN = [MAINPAGE]
 MSG_TAR = [TAR]
 MSG_CLEAN = [CLEAN]
 MSG_DISTCLEAN = [DISTCLEAN]
@@ -26,7 +27,8 @@ version: version.mk
 doc: html
 
 main_page.dox: main_page_header.dox main_page_footer.dox *.md
-	./build_main_page.sh
+	@echo "$(MSG_MAIN)"
+	@./build_main_page.sh
 
 version.mk: 
 	@$(PROJECT_TOPDIR)/util/git-version/git-version $@

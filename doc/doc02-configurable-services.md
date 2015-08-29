@@ -23,15 +23,15 @@ If you have an existing gxPL application, you can get automatic support
 for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
-<div class="fragment"><pre class="fragment">
+<pre class="fragment">
 myService = xPL_createService(myVendor, myDevice, myInstance);
-</pre></div>
+</pre>
 
 with
 
-<div class="fragment"><pre class="fragment">
+<pre class="fragment">
 myService = xPL_createConfigurableService(myVendor, myDevice, configFilename);
-</pre></div>
+</pre>
 
 That's it! configFileName is the file configuration data it stored in and
 automatically reloaded when the app restarts.  Often, it's the device name
@@ -59,9 +59,9 @@ you do not have to remember to seek the xPL service version value out and change
 You should insure that every message you send that is supposed to come from
 this service is sent with the
 
-<div class="fragment"><pre class="fragment">
+<pre class="fragment">
 xPL_sendServiceMessage(myService, myMessage);
-</pre></div>
+</pre>
 
 instead of the more generic *xPL_sendMessage()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
@@ -105,13 +105,13 @@ Now, some details:
     If it's already configured, then you do not need to (and should not) add
     your configurables in.  Here's a code sample:
 
-    <div class="fragment"><pre class="fragment">
+    <pre class="fragment">
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
       xPL_addServiceConfigurable(clockService, "debugMode", xPL_CONFIG_RECONF, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
-    </pre></div>
+    </pre>
 
     In this example, after creating the configurable service (which will restore
     it's settings, if possible, from the passed configuration file), you test to
@@ -135,7 +135,7 @@ Now, some details:
     handler that is invoked to alert you when the service has new or changed
     configuration values.  In this case, it might look like this:
 
-    <div class="fragment"><pre class="fragment">
+    <pre class="fragment">
     static void parseServiceConfigValues(xPL_Service * theService) {
      /* Extract the value, if any, for a configurable named "debugMode" */
      char * debugFlag = xPL_getServiceConfigValue(theService, "debugMode");
@@ -144,7 +144,7 @@ Now, some details:
        debugMode = (xPL_strcmpIgnoreCase(debugFlag, "true") == 0);
      }
     }
-    </pre></div>
+    </pre>
 
     It can be that easy.  Or it could be more complex if you need to compare
     the configurables value with a current value and only apply a change if the
@@ -170,7 +170,7 @@ Now, some details:
 
     For example:
 
-    <div class="fragment"><pre class="fragment">
+    <pre class="fragment">
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
@@ -180,7 +180,7 @@ Now, some details:
 
     /* Parse configuration */
     parseServiceConfigValues(myService);
-    </pre></div>
+    </pre>
 
 
 3.  You'll probably want to know when some outside force (a configuration
@@ -189,11 +189,11 @@ Now, some details:
 
     For example:
 
-    <div class="fragment"><pre class="fragment">
+    <pre class="fragment">
     static void configChangedHandler(xPL_Service * theService, xPL_Object * userData) {
       parseServiceConfigValues(theService);
     }
-    </pre></div>
+    </pre>
 
     This handler will just invoke the same parser we used earlier to parse
     things after the service was created.
@@ -201,7 +201,7 @@ Now, some details:
     To register that handler, use xPL_addServiceConfigChangedListener() right after you
     finish the initial parsing of config values.  Like this:
 
-    <div class="fragment"><pre class="fragment">
+    <pre class="fragment">
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
@@ -214,7 +214,7 @@ Now, some details:
 
     /* Add a listener for configuration changes */
     xPL_addServiceConfigChangedListener(myService, configChangedHandler, NULL);
-    </pre></div>
+    </pre>
 
 
 4.  At this point, you are fully configuable ready.  You've created a

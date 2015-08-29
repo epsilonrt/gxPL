@@ -7,7 +7,7 @@ TARGET=main_page.dox
 
 PARSER=cat
 command -v markdown >/dev/null 2>&1 && PARSER=markdown
-echo "PARSER=$PARSER"
+# echo "PARSER=$PARSER"
 if [ "$PARSER" = "markdown" ]; then
   HEAD_TAG="@htmlonly"
   FOOT_TAG="@endhtmlonly"
