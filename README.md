@@ -1,9 +1,13 @@
-# gxPL Tools, Application and Framework for xPL  
-> Copyright 2015 (c), Pascal JEAN aka epsilonRT  
-> All rights reserved.
+# gxPL  
+*Tools, Application and Framework for xPL*
 
-**It would be advisable to look in the doc/ directory for installation 
-and full documentation.**
+---
+Copyright 2015 (c), Pascal JEAN aka epsilonRT  
+
+Full documentation and installation is in the doc/ directory or on 
+Project Homepage: [http://www.epsilonrt.com/gxPL](http://www.epsilonrt.com/gxPL)
+
+**This project is under development and has, for now, only C API**
 
 gxPL is a fork of xPL4Linux whose development seems to have stopped 
 since 2006. The development was resumed starting from version V1.3a 
@@ -29,7 +33,10 @@ features of the framework, including the source to the gxpl-hub.
 
 You can get the latest development version using git :
 
-    $ git clone http://www.epsilonrt.com/gxPL
+    $ git clone http://git.epsilonrt.com/gxPL
+
+You can browse the source code on 
+[http://gitweb.epsilonrt.com/gxPL.git](http://gitweb.epsilonrt.com/gxPL.git)
 
 > xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr  
 > xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
