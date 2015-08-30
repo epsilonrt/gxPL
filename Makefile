@@ -27,14 +27,19 @@ all: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
-install: install_utils $(SUBDIRS)
-uninstall: $(SUBDIRS) uninstall_utils
+install: install_utils $(SUBDIRS) install_scripts
+uninstall: uninstall_scripts $(SUBDIRS) uninstall_utils
 
 install_utils: 
 	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
+install_scripts: 
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 uninstall_utils:
 	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
+	
+uninstall_scripts:
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)

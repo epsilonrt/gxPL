@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="gxPL" InternalType="">
-  <VirtualDirectory Name="include">
-    <VirtualDirectory Name="gxPL">
-      <File Name="include/gxPL/service.h"/>
-      <File Name="include/gxPL/defs.h"/>
-      <File Name="include/gxPL/hub.h"/>
-      <File Name="include/gxPL/io.h"/>
-      <File Name="include/gxPL/utils.h"/>
-      <File Name="include/gxPL/message.h"/>
-      <File Name="include/gxPL/compat.h"/>
-    </VirtualDirectory>
-    <File Name="include/gxPL.h"/>
-  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -38,6 +26,24 @@
  }]]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="script">
+    <VirtualDirectory Name="init.d">
+      <File Name="script/init.d/gxpl-hub"/>
+      <File Name="script/init.d/gxpl-hub.conf"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <VirtualDirectory Name="gxPL">
+      <File Name="include/gxPL/service.h"/>
+      <File Name="include/gxPL/defs.h"/>
+      <File Name="include/gxPL/hub.h"/>
+      <File Name="include/gxPL/io.h"/>
+      <File Name="include/gxPL/utils.h"/>
+      <File Name="include/gxPL/message.h"/>
+      <File Name="include/gxPL/compat.h"/>
+    </VirtualDirectory>
+    <File Name="include/gxPL.h"/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="gxPL">

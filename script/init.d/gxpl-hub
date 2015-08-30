@@ -1,0 +1,98 @@
+#!/bin/bash
+###############################################################################
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# All rights reserved.                                                        #
+# Licensed under the Apache License, Version 2.0 (the "License")              #
+###############################################################################
+### BEGIN INIT INFO
+# Provides:          gxpl-hub
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: xPL Hub sysv init script
+# Description:       xPL Hub
+### END INIT INFO
+# Version: 0.1.0
+
+NAME=gxpl-hub
+CONFIGFILE=/etc/$NAME.conf
+DAEMON=/usr/local/bin/$NAME
+
+XPL_IF=eth0
+XPL_DEBUG=
+XPL_XPLDEBUG=
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+niceness=0
+pgm_args="--quiet"
+
+trim () {
+  local var="$*"
+  var="${var#"${var%%[![:space:]]*}"}"   # remove leading whitespace characters
+  var="${var%"${var##*[![:space:]]}"}"   # remove trailing whitespace characters
+  echo -n "$var"
+}
+
+set_args () {
+  
+  local tmpf=$(tempfile)
+  sed '/^[[:space:]]*\#/d' $CONFIGFILE > $tmpf
+  
+  local var=$(trim "$(grep 'interface' $tmpf | cut -d '=' -f2)")
+  ifconfig $var > /dev/null 2>&1 && XPL_IF=$var
+  
+  var=$(trim "$(grep 'xpldebug' $tmpf | cut -d '=' -f2)")
+  if [ "$var" = "1" -o "$var" = "true" ]; then
+    XPL_XPLDEBUG=-xpldebug
+  fi
+
+  var=$(trim "$(grep -v 'xpldebug' $tmpf | grep 'debug' | cut -d '=' -f2)")
+  if [ "$var" = "1" -o "$var" = "true" ]; then
+    XPL_DEBUG=-debug
+  fi
+  
+  rm -f $tmpf
+}
+
+daemon_start () {
+
+  set_args
+  log_daemon_msg "Starting xPL Hub" "gxpl-hub"
+  start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- -interface $XPL_IF $XPL_DEBUG $XPL_XPLDEBUG
+  log_end_msg $?
+  return $?
+}
+
+daemon_stop () {
+  
+  log_daemon_msg "Stopping xPL Hub" "gxpl-hub"
+  start-stop-daemon --stop  $pgm_args --retry 5 --exec $DAEMON
+  log_end_msg $?
+  return $?
+}
+
+
+case "$1" in
+  start)
+    daemon_start
+    ;;
+  stop)
+    daemon_stop
+    ;;
+  force-reload|restart)
+    daemon_stop
+    daemon_start
+    ;;
+  status)
+    status_of_proc $DAEMON "xPL Hub" && exit 0 || exit $?
+    ;;
+  *)
+     echo "Usage: /etc/init.d/gxpl-hub {start|stop|restart|force-reload|status}"
+     exit 1
+esac
+
+exit 0
