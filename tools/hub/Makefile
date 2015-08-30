@@ -32,7 +32,7 @@ DEBUG_OPT = 0
 #DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
-VIEW_GCC_LINE = OFF
+VIEW_GCC_LINE = ON
 
 # Disable the deletion of variables and functions "unnecessary"
 # The linker checks of a function or variable is called, if it is not the case, 

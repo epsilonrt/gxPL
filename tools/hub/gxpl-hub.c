@@ -1,6 +1,12 @@
-/* xPL_Hub.c -- Implementation of an xPL Hub using gxPLib */
-/* Copyright (c) 2004, Gerald R Duprey Jr. */
-
+/**
+ * @file gxpl-hub.c
+ * Implementation of an gxPL Hub using gxPLib
+ *
+ * Copyright 2004 (c), Gerald R Duprey Jr
+ * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ */
 #include <stdio.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -17,21 +23,24 @@
 #include <gxPL.h>
 #include "version-git.h"
 
+/* constants ================================================================ */
 #define MAX_HUB_RESTARTS 10000
+#define LOG_BUFF_MAX 512
 
+/* private variables ======================================================== */
 static bool daemonMode = TRUE;
 static bool debugMode = FALSE;
-
 /* static buffer to create log messages */
-#define LOG_BUFF_MAX 512
 static char logMessageBuffer[LOG_BUFF_MAX];
-
 /* Used to track hubs */
 static pid_t hubPid = 0;
 
+/* private functions ======================================================== */
 
-/* Private wrapper for messages */
-static void writeMessage (int msgType, char * theFormat, va_list theParms) {
+/* -----------------------------------------------------------------------------
+ * Private wrapper for messages */
+static void 
+writeMessage (int msgType, char * theFormat, va_list theParms) {
   time_t rightNow;
 
   /* Write a time stamp */
@@ -73,23 +82,28 @@ static void writeMessage (int msgType, char * theFormat, va_list theParms) {
   }
 }
 
-/* Write an information message out */
-void writeInfo (char * theFormat, ...) {
+/* -----------------------------------------------------------------------------
+ * Write an information message out */
+static void 
+writeInfo (char * theFormat, ...) {
   va_list theParms;
   va_start (theParms, theFormat);
   writeMessage (LOG_INFO, theFormat, theParms);
   va_end (theParms);
 }
 
-/* Write an error message out */
-static void writeError (char * theFormat, ...) {
+/* -----------------------------------------------------------------------------
+ * Write an error message out */
+static void 
+writeError (char * theFormat, ...) {
   va_list theParms;
   va_start (theParms, theFormat);
   writeMessage (LOG_ERR, theFormat, theParms);
   va_end (theParms);
 }
 
-/* Write a debug message out */
+/* -----------------------------------------------------------------------------
+ * Write a debug message out */
 static void writeDebug (char * theFormat, ...) {
   va_list theParms;
 
@@ -100,12 +114,15 @@ static void writeDebug (char * theFormat, ...) {
   }
 }
 
-/* parseCmdLine will handles command line switches.  Valid switches are: */
-/*  -interface x - set interface to use */
-/*  -debug - set debugging mode */
-/*  -xpldebug - set debugging and enable xPL debugging */
-/*  -nodaemon - Dosn't disconnect from the console */
-static bool parseCmdLine (int *argc, char *argv[]) {
+/* -----------------------------------------------------------------------------
+ * parseCmdLine will handles command line switches.  
+ * Valid switches are: 
+ *  -interface x - set interface to use 
+ *  -debug - set debugging mode 
+ *  -xpldebug - set debugging and enable xPL debugging 
+ *  -nodaemon - Dosn't disconnect from the console */
+static bool 
+parseCmdLine (int *argc, char *argv[]) {
   int swptr;
   int newcnt = 0;
 
@@ -113,6 +130,7 @@ static bool parseCmdLine (int *argc, char *argv[]) {
   /* process it as a switch.  If not, then copy it to a new position in   */
   /* the argv list and up the new parm counter.                           */
   for (swptr = 0; swptr < *argc; swptr++) {
+    
     /* If it doesn't begin with a '-', it's not a switch. */
     if (argv[swptr][0] != '-') {
       if (swptr != newcnt) {
@@ -120,6 +138,7 @@ static bool parseCmdLine (int *argc, char *argv[]) {
       }
     }
     else {
+      
       /* Check for debug mode */
       if (!strcmp (argv[swptr], "-debug")) {
         debugMode = TRUE;
@@ -155,9 +174,11 @@ static bool parseCmdLine (int *argc, char *argv[]) {
   return TRUE;
 }
 
-/* Print command usage info out */
-void printUsage (char * ourName) {
-  fprintf (stderr, "%s - xPL Hub\n", ourName);
+/* -----------------------------------------------------------------------------
+ * Print command usage info out */
+static void 
+printUsage (char * ourName) {
+  fprintf (stderr, "%s - gxPL Hub\n", ourName);
   fprintf (stderr, "Copyright (c) 2005, Gerald Duprey\n\n");
   fprintf (stderr, "Usage: %s [-debug] [-xpldebug] [-nodaemon] [-ip x] [-interface x]\n", ourName);
   fprintf (stderr, "  -debug -- enable hub debug messages\n");
@@ -168,15 +189,19 @@ void printUsage (char * ourName) {
 }
 
 
-/* Shutdown gracefully if user hits ^C or received TERM signal */
-static void hubShutdownHandler (int onSignal) {
+/* -----------------------------------------------------------------------------
+ * Shutdown gracefully if user hits ^C or received TERM signal */
+static void 
+hubShutdownHandler (int onSignal) {
   xPL_stopHub();
   xPL_shutdown();
   exit (0);
 }
 
-/* This is the hub code itself.  */
-static void runHub (void) {
+/* -----------------------------------------------------------------------------
+ * This is the hub code itself.  */
+static void 
+runHub (void) {
   /* Start gxPLib */
   if (!xPL_initialize (xcStandAlone)) {
     writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
@@ -184,7 +209,7 @@ static void runHub (void) {
   }
   xPL_Debug ("gxPLib started");
 
-  /* Start xPL Hub */
+  /* Start gxPL Hub */
   xPL_startHub();
 
   /* Install signal traps for proper shutdown */
@@ -192,13 +217,15 @@ static void runHub (void) {
   signal (SIGINT, hubShutdownHandler);
 
   /* Hand control over to gxPLib */
-  writeInfo ("xPL Hub now running");
+  writeInfo ("gxPL Hub now running");
   xPL_processMessages (-1);
   exit (0);
 }
 
-/* Shutdown gracefully if user hits ^C or received TERM signal */
-static void supervisorShutdownHandler (int onSignal) {
+/* -----------------------------------------------------------------------------
+ * Shutdown gracefully if user hits ^C or received TERM signal */
+static void 
+supervisorShutdownHandler (int onSignal) {
   int childStatus;
 
   writeInfo ("Received termination signal -- starting shutdown");
@@ -212,8 +239,10 @@ static void supervisorShutdownHandler (int onSignal) {
   exit (0);
 }
 
-/* Start the hub and monitor it.  If it stops for any reason, restart it */
-static void superviseHub (void) {
+/* -----------------------------------------------------------------------------
+ * Start the hub and monitor it.  If it stops for any reason, restart it */
+static void 
+superviseHub (void) {
   int hubRestartCount = 0;
   int childStatus;
 
@@ -277,12 +306,16 @@ static void superviseHub (void) {
 }
 
 
-int main (int argc, char * argv[]) {
+/* main ===================================================================== */
+int 
+main (int argc, char * argv[]) {
+  
   /* Check for xPL command parameters */
   xPL_parseCommonArgs (&argc, argv, TRUE);
 
   /* Parse Hub command arguments */
   if (!parseCmdLine (&argc, argv)) {
+    
     printUsage (argv[0]);
     exit (1);
   }
@@ -318,3 +351,4 @@ int main (int argc, char * argv[]) {
 
   return 0;
 }
+/* ========================================================================== */

@@ -39,6 +39,9 @@ cd clock
 ./gxpl-clock -xlpdebug
 </pre>
 
+**Be sure to open the UDP Port 3865 on your firewall, or your xPL 
+network may not work !**
+
 The shared and static libraries are installed into /usr/local/lib and 
 header files is installed in /usr/local/include.  
 You can changed the destinations in the Makefile if you'd like.

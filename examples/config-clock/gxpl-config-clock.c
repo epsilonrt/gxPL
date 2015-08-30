@@ -1,8 +1,12 @@
-/* xPL_ConfigClock.c -- Simple configurable xPL clock service */
-/* that sends a time update periodically                      */
-
-/* Copyright (c) 2005, Gerald R. Duprey Jr. */
-
+/**
+ * @file gxpl-config-clock.c
+ * Simple configurable xPL clock service that sends a time update periodically 
+ *
+ * Copyright 2005 (c), Gerald R Duprey Jr
+ * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ */
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -28,19 +32,20 @@ static char numBuffer[10];
 
 /* private functions ======================================================== */
 
-/* -------------------------------------------------------------------------- */
-/* Quickly to convert an integer to string */
+/* --------------------------------------------------------------------------
+ * Quickly to convert an integer to string */
 static char * intToStr (int theValue) {
+
   sprintf (numBuffer, "%d", theValue);
   return numBuffer;
 }
 
-/* -------------------------------------------------------------------------- */
-/** It's best to put the logic for reading the service configuration */
-/** and parsing it into your code in a seperate function so it can   */
-/** be used by your configChangedHandler and your startup code that  */
-/** will want to parse the same data after a config file is loaded   */
-static void 
+/* --------------------------------------------------------------------------
+ * It's best to put the logic for reading the service configuration
+ * and parsing it into your code in a seperate function so it can
+ * be used by your configChangedHandler and your startup code that
+ * will want to parse the same data after a config file is loaded */
+static void
 parseConfig (xPL_Service * theService) {
   /* Get the tickrate */
   char * newRate = xPL_getServiceConfigValue (theService, TICK_RATE_CFG_NAME);
@@ -65,18 +70,19 @@ parseConfig (xPL_Service * theService) {
   tickRate = newTickRate;
 }
 
-/* -------------------------------------------------------------------------- */
-/** Handle a change to the clock service configuration */
-static void 
+/* --------------------------------------------------------------------------
+ * Handle a change to the clock service configuration */
+static void
 configChangedHandler (xPL_Service * theService, xPL_Object * userData) {
+  
   /* Read config items for service and install */
   parseConfig (theService);
 }
 
-/* -------------------------------------------------------------------------- */
-/* When the user hits ^C, logically shutdown (including telling */
-/* the network the service is ending)                           */
-static void 
+/* ----------------------------------------------------------------------------- 
+ * When the user hits ^C, logically shutdown (including telling 
+ * the network the service is ending) */                         
+static void
 shutdownHandler (int onSignal) {
   xPL_setServiceEnabled (clockService, FALSE);
   xPL_releaseService (clockService);
@@ -84,13 +90,14 @@ shutdownHandler (int onSignal) {
   exit (0);
 }
 
-/* Build up a message with the current time in it and send it along.  An */
-/* important detail is that we use xPL_sendServiceMessage() to send the  */
-/* message (vs xPL_sendMessage) because this is a configurable service   */
-/* and since we created the message early on, it could have the wrong    */
-/* source identifiers after a reconfig.                                  */
-static void 
-sendClockTick(void) {
+/* ----------------------------------------------------------------------------- 
+ * Build up a message with the current time in it and send it along.  An 
+ * important detail is that we use xPL_sendServiceMessage() to send the  
+ * message (vs xPL_sendMessage) because this is a configurable service   
+ * and since we created the message early on, it could have the wrong    
+ * source identifiers after a reconfig. */                                 
+static void
+sendClockTick (void) {
   time_t rightNow = time (NULL);
   struct tm * decodedTime;
   char theDateTime[24];
@@ -115,18 +122,18 @@ sendClockTick(void) {
 }
 
 /* main ===================================================================== */
-int 
+int
 main (int argc, char * argv[]) {
 
   /* Parse command line parms */
   if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
-    
+
     exit (1);
   }
 
   /* Start xPL up */
   if (!xPL_initialize (xPL_getParsedConnectionType())) {
-    
+
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }
@@ -141,7 +148,7 @@ main (int argc, char * argv[]) {
   /* we need to define what the configurables are and what the default values */
   /* should be.                                                               */
   if (!xPL_isServiceConfigured (clockService)) {
-    
+
     /* Define a configurable item and give it a default */
     xPL_addServiceConfigurable (clockService, TICK_RATE_CFG_NAME, xPL_CONFIG_RECONF, 1);
     xPL_setServiceConfigValue (clockService, TICK_RATE_CFG_NAME, intToStr (DEFAULT_TICK_RATE));

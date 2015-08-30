@@ -1,7 +1,12 @@
-/* xPLSend.c - Command Line xPL message sending tool */
-/* Copyright (c) 2005, Gerald R Duprey Jr. */
-
-
+/**
+ * @file gxpl-sender.c
+ * Command Line xPL message sending tool
+ *
+ * Copyright 2004 (c), Gerald R Duprey Jr
+ * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License")
+ */
 #include <stdio.h>
 #include <time.h>
 #include <signal.h>
@@ -10,21 +15,31 @@
 #include <gxPL.h>
 #include "version-git.h"
 
+/* constants ================================================================ */
+/* macros =================================================================== */
+/* structures =============================================================== */
+/* types ==================================================================== */
+/* private variables ======================================================== */
 char msgSource[64] = "cdp1802-xplsend.default";
 char * srcVendor = NULL;
 char * srcDeviceID = NULL;
 char * srcInstanceID = NULL;
-
 char * msgTarget = NULL;
 char * tgtVendor = NULL;
 char * tgtDeviceID = NULL;
 char * tgtInstanceID = NULL;
-
 xPL_MessageType msgType = xPL_MESSAGE_COMMAND;
 char * msgSchemaClass = NULL;
 char * msgSchemaType = NULL;
 
-/* Print usage info */
+/* public variables ========================================================= */
+/* internal public functions ================================================ */
+
+/* private functions ======================================================== */
+// -----------------------------------------------------------------------------
+
+/* -----------------------------------------------------------------------------
+ * Print usage info */
 void printUsage (char * commandName) {
   fprintf (stderr, "%s - xPL Message Sender\n", commandName);
   fprintf (stderr, "Copyright (c) 2005, Gerald R Duprey Jr\n\n");
@@ -36,7 +51,9 @@ void printUsage (char * commandName) {
   fprintf (stderr, "  -c schema class and type formatted as class.type - REQUIRED\n\n");
 }
 
-bool parseSourceIdent(void) {
+// -----------------------------------------------------------------------------
+bool 
+parseSourceIdent (void) {
   char * dashstr, * periodstr;
 
   /* Make sure we have something to work with */
@@ -65,7 +82,9 @@ bool parseSourceIdent(void) {
   return TRUE;
 }
 
-bool parseTargetIdent(void) {
+// -----------------------------------------------------------------------------
+bool 
+parseTargetIdent (void) {
   char * dashstr, * periodstr;
 
   /* Make sure we have something to work with */
@@ -97,12 +116,13 @@ bool parseTargetIdent(void) {
   return TRUE;
 }
 
-/** Parse command line for switches */
-/** -s - source of message ident */
-/** -t - target of message ident */
-/** -b - target is broadcast */
-/** -m - message type */
-/** -c - schema class/type */
+/* -----------------------------------------------------------------------------
+ * Parse command line for switches 
+ * -s - source of message ident 
+ * -t - target of message ident 
+ * -b - target is broadcast 
+ * -m - message type 
+ * -c - schema class / type */
 bool parseCmdLine (int *argc, char *argv[]) {
   int swptr;
   int newcnt = 0;
@@ -183,8 +203,9 @@ bool parseCmdLine (int *argc, char *argv[]) {
   return TRUE;
 }
 
-
-bool sendMessage (int argc, char * argv[]) {
+// -----------------------------------------------------------------------------
+bool 
+sendMessage (int argc, char * argv[]) {
   int argIndex = 0;
   xPL_Service * theService = NULL;
   xPL_Message * theMessage = NULL;
@@ -234,7 +255,10 @@ bool sendMessage (int argc, char * argv[]) {
   return TRUE;
 }
 
-int main (int argc, char * argv[]) {
+/* main ===================================================================== */
+int 
+main (int argc, char * argv[]) {
+
   /* Handle a plea for help */
   if (argc == 1) {
     printUsage (argv[0]);
@@ -277,3 +301,4 @@ int main (int argc, char * argv[]) {
   }
   return 0;
 }
+/* ========================================================================== */
