@@ -58,7 +58,7 @@ clean:
 distclean: clean
 	@echo "$(MSG_DISTCLEAN)"
 	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
-	@-rm -f version.mk .version $(PROJECT_NAME).tag
+	@-rm -f version.mk .version $(PROJECT_NAME).tag *.db
 
 install: tar uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) doc in $(INSTALL_DOCDIR)"

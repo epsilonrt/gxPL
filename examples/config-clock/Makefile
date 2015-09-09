@@ -402,6 +402,7 @@ clean_list :
 	@$(REMOVEDIR) $(OBJDIRS)
 
 distclean_list :
+	@$(REMOVE) clock.xpl
 	@$(REMOVE) *.bak
 	@$(REMOVE) *~
 ifeq ($(GIT_VERSION),ON)
