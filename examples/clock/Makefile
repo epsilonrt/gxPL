@@ -40,7 +40,7 @@ VIEW_GCC_LINE = ON
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = $(TARGET).c gxpl.c io.c io_udp.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
@@ -85,7 +85,7 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = gxPL
+EXTRA_LIBS = sysio
 
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON

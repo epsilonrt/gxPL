@@ -28,7 +28,7 @@ char * msgTarget = NULL;
 char * tgtVendor = NULL;
 char * tgtDeviceID = NULL;
 char * tgtInstanceID = NULL;
-xPL_MessageType msgType = xPL_MESSAGE_COMMAND;
+gxPLMessageType msgType = xPLMessageCommand;
 char * msgSchemaClass = NULL;
 char * msgSchemaType = NULL;
 
@@ -161,13 +161,13 @@ bool parseCmdLine (int *argc, char *argv[]) {
         swptr++;
 
         if (xPL_strcmpIgnoreCase (argv[swptr], "cmnd") == 0) {
-          msgType = xPL_MESSAGE_COMMAND;
+          msgType = xPLMessageCommand;
         }
         else if (xPL_strcmpIgnoreCase (argv[swptr], "trig") == 0) {
-          msgType = xPL_MESSAGE_TRIGGER;
+          msgType = xPLMessageTrigger;
         }
         else if (xPL_strcmpIgnoreCase (argv[swptr], "stat") == 0) {
-          msgType = xPL_MESSAGE_STATUS;
+          msgType = xPLMessageStatus;
         }
         else {
           fprintf (stderr, "Unknown message type of %s for -m", argv[swptr]);
@@ -208,7 +208,7 @@ bool
 sendMessage (int argc, char * argv[]) {
   int argIndex = 0;
   xPL_Service * theService = NULL;
-  xPL_Message * theMessage = NULL;
+  gxPLMessage * theMessage = NULL;
   char * delim;
 
   /* Create service so we can create messages */
@@ -280,7 +280,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!xPL_initialize (xPL_getParsedConnectionType())) {
+  if (!gxPLOpen (gxPLGetConnectionType())) {
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }

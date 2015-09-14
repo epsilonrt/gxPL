@@ -65,7 +65,7 @@ xPL_sendServiceMessage(myService, myMessage);
 
 instead of the more generic *xPL_sendMessage()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
-simpler *xPL_sendMessage()* on *xPL_Message* instances you created earlier, your
+simpler *xPL_sendMessage()* on *gxPLMessage* instances you created earlier, your
 messages source fields may no longer match what the services identifiers are
 now.  *xPL_sendServiceMessage()* makes sure (and corrects, if needed) they
 always match.
@@ -108,7 +108,7 @@ Now, some details:
     <pre class="fragment">
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPL_CONFIG_RECONF, 1);
+      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
     </pre>
@@ -174,7 +174,7 @@ Now, some details:
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPL_CONFIG_RECONF, 1);
+      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
 
@@ -205,7 +205,7 @@ Now, some details:
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPL_CONFIG_RECONF, 1);
+      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
 

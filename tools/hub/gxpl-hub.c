@@ -194,7 +194,7 @@ printUsage (char * ourName) {
 static void 
 hubShutdownHandler (int onSignal) {
   xPL_stopHub();
-  xPL_shutdown();
+  gxPLClose();
   exit (0);
 }
 
@@ -203,7 +203,7 @@ hubShutdownHandler (int onSignal) {
 static void 
 runHub (void) {
   /* Start gxPLib */
-  if (!xPL_initialize (xcStandAlone)) {
+  if (!gxPLOpen (xPLConnectStandAlone)) {
     writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
     exit (1);
   }

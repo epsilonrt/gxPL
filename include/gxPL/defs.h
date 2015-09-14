@@ -10,37 +10,18 @@
 #ifndef _GXPL_DEFS_HEADER_
 #define _GXPL_DEFS_HEADER_
 
-#ifndef __BEGIN_C_DECLS
-# if defined(__cplusplus)
-#   define __BEGIN_C_DECLS  extern "C" {
-#   define __END_C_DECLS    }
-# else
-#   define __BEGIN_C_DECLS
-#   define __END_C_DECLS
-# endif
-#endif
-
+#include <sysio/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
-#include <stdint.h>
 
-#ifndef __DOXYGEN__
-# ifndef __cplusplus
-#   include <stdbool.h>
-# endif
-# ifndef TRUE
-#   define TRUE true
-# endif
-# ifndef FALSE
-#   define FALSE false
-# endif
 /* forward struct defined */
+typedef struct _gxPL gxPL;
+typedef struct _gxPLIo gxPLIo;
 typedef struct _xPL_Service xPL_Service;
-typedef struct _xPL_Message xPL_Message;
+typedef struct _xPL_Message gxPLMessage;
 typedef struct _xPL_NameValueList xPL_NameValueList;
 typedef struct _xPL_ServiceChangedListenerDef xPL_ServiceChangedListenerDef;
 typedef struct _xPL_ServiceConfigurable xPL_ServiceConfigurable;
-#endif
 
 /**
  * @defgroup xPLDefs Definitions
@@ -58,29 +39,38 @@ typedef struct _xPL_ServiceConfigurable xPL_ServiceConfigurable;
  * @brief xPL Connection mode
  */
 typedef enum {
-  xcStandAlone,
-  xcViaHub,
-  xcAuto
-} xPL_ConnectType;
+  xPLConnectStandAlone, /**< listen on xPL port */
+  xPLConnectViaHub,     /**< listen on a client port */ 
+  xPLConnectAuto
+} gxPLConnectType;
 
 /**
  * @brief
  */
 typedef enum {
-  xPL_CONFIG_OPTIONAL,
-  xPL_CONFIG_MANDATORY,
-  xPL_CONFIG_RECONF
-} xPL_ConfigurableType;
+  xPLConfigOptional,
+  xPLConfigMandatory,
+  xPLConfigReconf
+} gxPLConfigurableType;
 
 /**
  * @brief Possible xPL message types
  */
 typedef enum {
-  xPL_MESSAGE_ANY,
-  xPL_MESSAGE_COMMAND,
-  xPL_MESSAGE_STATUS,
-  xPL_MESSAGE_TRIGGER
-} xPL_MessageType;
+  xPLMessageAny,
+  xPLMessageCommand,
+  xPLMessageStatus,
+  xPLMessageTrigger
+} gxPLMessageType;
+
+
+/**
+ * @brief Possible xPL ioctl call
+ */
+typedef enum {
+  xPLIoFuncPoll
+} gxPLIoFunc;
+
 
 /* types ==================================================================== */
 /**

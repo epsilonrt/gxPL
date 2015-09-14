@@ -34,7 +34,7 @@ void
 shutdownHandler (int onSignal) {
   xPL_setServiceEnabled (loggerService, FALSE);
   xPL_releaseService (loggerService);
-  xPL_shutdown();
+  gxPLClose();
   exit (0);
 }
 
@@ -112,18 +112,18 @@ void printTimestamp (void) {
 
 /* --------------------------------------------------------------------------
  * Print info on incoming messages */
-void printXPLMessage (xPL_Message * theMessage, xPL_Object * userValue) {
+void printXPLMessage (gxPLMessage * theMessage, xPL_Object * userValue) {
 
   printTimestamp();
   fprintf (logFile, "[xPL_MSG] TYPE=");
   switch (xPL_getMessageType (theMessage)) {
-    case xPL_MESSAGE_COMMAND:
+    case xPLMessageCommand:
       fprintf (logFile, "xpl-cmnd");
       break;
-    case xPL_MESSAGE_STATUS:
+    case xPLMessageStatus:
       fprintf (logFile, "xpl-stat");
       break;
-    case xPL_MESSAGE_TRIGGER:
+    case xPLMessageTrigger:
       fprintf (logFile, "xpl-trig");
       break;
     default:
@@ -173,7 +173,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start gxPLib */
-  if (!xPL_initialize (xPL_getParsedConnectionType())) {
+  if (!gxPLOpen (gxPLGetConnectionType())) {
     fprintf (stderr, "Unable to start gxPLib\n");
     exit (1);
   }
@@ -192,10 +192,10 @@ main (int argc, char * argv[]) {
   if (!xPL_isServiceConfigured (loggerService)) {
     
     /* Define a configurable item and give it a default */
-    xPL_addServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, xPL_CONFIG_RECONF, 1);
+    xPL_addServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, xPLConfigReconf, 1);
     xPL_setServiceConfigValue (loggerService, LOG_FILE_CFG_NAME, "stderr");
 
-    xPL_addServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, xPL_CONFIG_RECONF, 1);
+    xPL_addServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, xPLConfigReconf, 1);
     xPL_setServiceConfigValue (loggerService, LOG_APPEND_CFG_NAME, "false");
   }
 

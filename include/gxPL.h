@@ -11,107 +11,191 @@
 #define _GXPL_HEADER_
 
 #include <gxPL/defs.h>
+
 __BEGIN_C_DECLS
 /* ========================================================================== */
+#if defined(SYSIO_OS_UNIX)
+#include <limits.h>
+#else
+#define NAME_MAX 255
+#endif
 
 /**
  * @defgroup gxPLib Library Context
  * @{
  */
 
-/* internal public functions ================================================ */
+/* structures =============================================================== */
+/**
+ * @brief
+ */
+typedef struct _gxPLConfig {
+
+  char iface[NAME_MAX];
+  char iolayer[NAME_MAX];
+  gxPLConnectType connecttype;
+  union {
+    unsigned int flag;
+    struct {
+      unsigned int debug: 1;
+      unsigned int malloc: 1;
+    };
+  };
+} gxPLConfig;
 
 /**
- * @brief Parse options and parameters and sets xPL if found
- * This will parse the passed command array for options and parameters
- * and install them into xPL if found.  It supports the following switches:
- * - -interface x - Change the default interface gxPLib uses
- * - -xpldebug - enable gxPLib debugging
- * .
- *
- * This function will remove each recognized switch from the parameter
- * list so the returned arg list may be smaller than before. This generally
- * makes life easier for all involved.
+ * @brief
+ */
+typedef struct _gxPL {
+
+  gxPLConfig * config;
+  gxPLIo * io;
+} gxPL;
+
+/* api functions ============================================================ */
+/**
+ * @brief
+ * @param iface
+ * @param iolayer
+ * @param type
+ * @return
+ */
+gxPL * gxPLOpen (const char * iface, const char * iolayer, gxPLConnectType type);
+
+/**
+ * @brief 
  * @param argc
  * @param argv
- * @param silentErrors
- * @return If there is an error parsing the command line, FALSE is returned
+ * @param type
+ * @return 
  */
-bool xPL_parseCommonArgs (int *argc, char *argv[], bool silentErrors);
+gxPL * gxPLOpenWithArgs (int argc, char * argv[], gxPLConnectType type);
 
 /**
- * @brief Accessors for context
- * @return
+ * @brief 
+ * @param argc
+ * @param argv
+ * @param type
+ * @return 
  */
-xPL_ConnectType xPL_getParsedConnectionType (void);
+gxPL * gxPLOpenWithConfig (gxPLConfig * config);
 
 /**
- * @brief Attempt to start the xPL library
- * If we are already "started" then bail out
- * @param theConnectType
+ * @brief
+ * @param xpl
  * @return
  */
-bool xPL_initialize (xPL_ConnectType theConnectType);
+int gxPLClose (gxPL * xpl);
 
 /**
- * @brief Stop the xPL library
- * 
- * If already stopped, bail.  Otherwise, we close our connection, release
- * any/all resources and reset
+ * @brief 
+ * @param gxpl
+ * @param timeout_ms
+ * @return 
+ */
+int gxPLPoll (gxPL * gxpl, int timeout_ms);
+
+# ifdef __DOXYGEN__
+/*
+ * __DOXYGEN__ defined
+ * =============================================================================
+ */
+
+/**
+ * @brief
+ * @param xpl
  * @return
  */
-bool xPL_shutdown (void);
+static inline gxPLConnectType gxPLGetConnectionType (gxPL * xpl);
 
-/**-
+/**
+ * @brief
+ * @param xpl
+ * @return
+ */
+static inline const char * gxPLGetDeviceName (gxPL * xpl);
+
+/**
+ * @brief
+ * @param xpl
+ * @return
+ */
+static inline const char * gxPLGetIoName (gxPL * xpl);
+
+# else
+/*
+ * __DOXYGEN__ not defined
+ * =============================================================================
+ */
+// -----------------------------------------------------------------------------
+INLINE gxPLConnectType
+gxPLGetConnectionType (gxPL * xpl) {
+  return xpl->config->connecttype;
+}
+
+// -----------------------------------------------------------------------------
+INLINE const char *
+gxPLGetDeviceName (gxPL * xpl) {
+  return xpl->config->iface;
+}
+
+// -----------------------------------------------------------------------------
+INLINE const char *
+gxPLGetIoName (gxPL * xpl) {
+  return xpl->config->iolayer;
+}
+
+# endif /* __DOXYGEN__ not defined */
+
+/**
  * @defgroup gxPLibVersion Version
  * @{
  */
 
 /**
- * @brief 
- * @return 
+ * @brief
+ * @return
  */
-const char * xPL_Version (void);
+const char * gxPLVersion (void);
 
 /**
- * @brief 
- * @return 
+ * @brief
+ * @return
  */
-int xPL_VersionMajor (void);
+int gxPLVersionMajor (void);
 
 /**
- * @brief 
- * @return 
+ * @brief
+ * @return
  */
-int xPL_VersionMinor (void);
+int gxPLVersionMinor (void);
 
 /**
- * @brief 
- * @return 
+ * @brief
+ * @return
  */
-int xPL_VersionPatch (void);
+int gxPLVersionPatch (void);
 
 /**
- * @brief 
- * @return 
+ * @brief
+ * @return
  */
-int xPL_VersionSha1 (void);
+int gxPLVersionSha1 (void);
 /**
- * @}
- */
-
-/**
+ *  @}
  * @}
  */
 
 /* ========================================================================== */
 __END_C_DECLS
 
+#if 0
 #include <gxPL/utils.h>
 #include <gxPL/service.h>
 #include <gxPL/message.h>
 #include <gxPL/io.h>
 #include <gxPL/hub.h>
 #include <gxPL/compat.h>
+#endif
 
 #endif /* _GXPL_HEADER_ defined */

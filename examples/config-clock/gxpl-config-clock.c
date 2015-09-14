@@ -26,7 +26,7 @@
 static time_t lastTimeSent = 0;
 static int tickRate = 0;  /* Second between ticks */
 static xPL_Service * clockService = NULL;
-static xPL_Message * clockTickMessage = NULL;
+static gxPLMessage * clockTickMessage = NULL;
 
 static char numBuffer[10];
 
@@ -86,7 +86,7 @@ static void
 shutdownHandler (int onSignal) {
   xPL_setServiceEnabled (clockService, FALSE);
   xPL_releaseService (clockService);
-  xPL_shutdown();
+  gxPLClose();
   exit (0);
 }
 
@@ -132,7 +132,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!xPL_initialize (xPL_getParsedConnectionType())) {
+  if (!gxPLOpen (gxPLGetConnectionType())) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (1);
@@ -150,7 +150,7 @@ main (int argc, char * argv[]) {
   if (!xPL_isServiceConfigured (clockService)) {
 
     /* Define a configurable item and give it a default */
-    xPL_addServiceConfigurable (clockService, TICK_RATE_CFG_NAME, xPL_CONFIG_RECONF, 1);
+    xPL_addServiceConfigurable (clockService, TICK_RATE_CFG_NAME, xPLConfigReconf, 1);
     xPL_setServiceConfigValue (clockService, TICK_RATE_CFG_NAME, intToStr (DEFAULT_TICK_RATE));
   }
 
@@ -164,7 +164,7 @@ main (int argc, char * argv[]) {
   /* Create a message to send.  We don't have to do it here -- you can */
   /* create a message anytime and release it later.  But since we know */
   /* we're going to use this over and over, create one for our life    */
-  clockTickMessage = xPL_createBroadcastMessage (clockService, xPL_MESSAGE_STATUS);
+  clockTickMessage = xPL_createBroadcastMessage (clockService, xPLMessageStatus);
   xPL_setSchema (clockTickMessage, "clock", "update");
 
   /* Install signal traps for proper shutdown */

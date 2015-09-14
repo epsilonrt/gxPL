@@ -15,9 +15,12 @@ extern "C" {
 /* constants ================================================================ */
 
 /* default values =========================================================== */
+#define DEFAULT_IO_LAYER "udp"
+#define DEFAULT_CONNECT_TYPE xPLConnectViaHub
 #define DEFAULT_HEARTBEAT_INTERVAL 300
 
 /* build options ============================================================ */
+
 #define CONFIG_HEARTBEAT_INTERVAL 60
 #define CONFIG_HUB_DISCOVERY_INTERVAL 3
 #define CONFIG_MSG_BUFF_SIZE 2048
