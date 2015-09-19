@@ -25,7 +25,7 @@
 static FILE * logFile = NULL;
 static char * logFileName = "";
 static bool appendToLog = FALSE;
-static xPL_Service * loggerService = NULL;
+static gxPLService * loggerService = NULL;
 
 /* private functions ======================================================== */
 
@@ -44,26 +44,26 @@ shutdownHandler (int onSignal) {
  * be used by your configChangedHandler and your startup code that
  * will want to parse the same data after a config file is loaded */
 static void
-parseConfig (xPL_Service * theService) {
+parseConfig (gxPLService * service) {
   char * configValue;
   FILE * newLogFile = NULL;
 
   /* Get append status */
-  if ( (configValue = xPL_getServiceConfigValue (theService, LOG_APPEND_CFG_NAME)) != NULL) {
+  if ( (configValue = xPL_getServiceConfigValue (service, LOG_APPEND_CFG_NAME)) != NULL) {
 
-    appendToLog = xPL_strcmpIgnoreCase (configValue, "true") == 0;
+    appendToLog = strcasecmp (configValue, "true") == 0;
   }
 
   /* Get log file name and see if it's changed */
-  if ( (configValue = xPL_getServiceConfigValue (theService, LOG_FILE_CFG_NAME)) != NULL) {
+  if ( (configValue = xPL_getServiceConfigValue (service, LOG_FILE_CFG_NAME)) != NULL) {
 
     /* Log file changed and not blank -- try to open the new one */
     if ( (strlen (configValue) != 0) && (strcmp (logFileName, configValue) != 0)) {
       /* Attempt to open new log file */
-      if (xPL_strcmpIgnoreCase (configValue, "stderr") == 0) {
+      if (strcasecmp (configValue, "stderr") == 0) {
         newLogFile = stderr;
       }
-      else if (xPL_strcmpIgnoreCase (configValue, "stdout") == 0) {
+      else if (strcasecmp (configValue, "stdout") == 0) {
         newLogFile = stdout;
       }
       else {
@@ -93,10 +93,10 @@ parseConfig (xPL_Service * theService) {
 /* --------------------------------------------------------------------------
  * Handle a change to the logger service configuration */
 static void
-configChangedHandler (xPL_Service * theService, xPL_Object * userData) {
+configChangedHandler (gxPLService * service, xPL_Object * userData) {
 
   /* Read config items for service and install */
-  parseConfig (theService);
+  parseConfig (service);
 }
 
 /* --------------------------------------------------------------------------
@@ -112,18 +112,18 @@ void printTimestamp (void) {
 
 /* --------------------------------------------------------------------------
  * Print info on incoming messages */
-void printXPLMessage (gxPLMessage * theMessage, xPL_Object * userValue) {
+void printXPLMessage (gxPLMessage * message, xPL_Object * userValue) {
 
   printTimestamp();
   fprintf (logFile, "[xPL_MSG] TYPE=");
-  switch (xPL_getMessageType (theMessage)) {
-    case xPLMessageCommand:
+  switch (gxPLMessageTypeGet (message)) {
+    case gxPLMessageCommand:
       fprintf (logFile, "xpl-cmnd");
       break;
-    case xPLMessageStatus:
+    case gxPLMessageStatus:
       fprintf (logFile, "xpl-stat");
       break;
-    case xPLMessageTrigger:
+    case gxPLMessageTrigger:
       fprintf (logFile, "xpl-trig");
       break;
     default:
@@ -133,34 +133,34 @@ void printXPLMessage (gxPLMessage * theMessage, xPL_Object * userValue) {
 
 
   /* Print hop count, if interesting */
-  if (xPL_getHopCount (theMessage) != 1) {
-    fprintf (logFile, ", HOPS=%d", xPL_getHopCount (theMessage));
+  if (gxPLMessageHopGet (message) != 1) {
+    fprintf (logFile, ", HOPS=%d", gxPLMessageHopGet (message));
   }
 
   /* Source Info */
   fprintf (logFile, ", SOURCE=%s-%s.%s, TARGET=",
-           xPL_getSourceVendor (theMessage),
-           xPL_getSourceDeviceID (theMessage),
-           xPL_getSourceInstanceID (theMessage));
+           gxPLMessageSourceVendorIdGet (message),
+           gxPLMessageSourceDeviceIdGet (message),
+           gxPLMessageSourceInstanceIdGet (message));
 
   /* Handle various target types */
-  if (xPL_isBroadcastMessage (theMessage)) {
+  if (gxPLMessageBroadcastGet (message)) {
     fprintf (logFile, "*");
   }
   else {
-    if (xPL_isGroupMessage (theMessage)) {
-      fprintf (logFile, "XPL-GROUP.%s", xPL_getTargetGroup (theMessage));
+    if (gxPLMessageIsGroup (message)) {
+      fprintf (logFile, "XPL-GROUP.%s", gxPLMessageTargetGetGroup (message));
     }
     else {
       fprintf (logFile, "%s-%s.%s",
-               xPL_getTargetVendor (theMessage),
-               xPL_getTargetDeviceID (theMessage),
-               xPL_getTargetInstanceID (theMessage));
+               gxPLMessageTargetVendorIdGet (message),
+               gxPLMessageTargetDeviceIdGet (message),
+               gxPLMessageTargetInstanceIdGet (message));
     }
   }
 
   /* Echo Schema Info */
-  fprintf (logFile, ", CLASS=%s, TYPE=%s", xPL_getSchemaClass (theMessage), xPL_getSchemaType (theMessage));
+  fprintf (logFile, ", CLASS=%s, TYPE=%s", gxPLMessageSchemaClassGet (message), gxPLMessageSchemaTypeGet (message));
   fprintf (logFile, "\n");
 }
 
@@ -173,13 +173,13 @@ main (int argc, char * argv[]) {
   }
 
   /* Start gxPLib */
-  if (!gxPLOpen (gxPLGetConnectionType())) {
+  if (!gxPLNewConfig (gxPLGetConnectionType())) {
     fprintf (stderr, "Unable to start gxPLib\n");
     exit (1);
   }
 
   /* And a listener for all xPL messages */
-  xPL_addMessageListener (printXPLMessage, NULL);
+  gxPLMessageAddListener (printXPLMessage, NULL);
 
   /* Create a service so the hubs know to send things to us        */
   /* While we are not relaly using he service, xPL hubs will not   */
@@ -189,13 +189,13 @@ main (int argc, char * argv[]) {
   loggerService = xPL_createConfigurableService ("cdp1802", "logger", "logger.xpl");
   xPL_setServiceVersion (loggerService, LOGGER_VERSION);
 
-  if (!xPL_isServiceConfigured (loggerService)) {
+  if (!gxPLIsServiceConfigured (loggerService)) {
     
     /* Define a configurable item and give it a default */
-    xPL_addServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, xPLConfigReconf, 1);
+    xPL_addServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, gxPLConfigReconf, 1);
     xPL_setServiceConfigValue (loggerService, LOG_FILE_CFG_NAME, "stderr");
 
-    xPL_addServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, xPLConfigReconf, 1);
+    xPL_addServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, gxPLConfigReconf, 1);
     xPL_setServiceConfigValue (loggerService, LOG_APPEND_CFG_NAME, "false");
   }
 

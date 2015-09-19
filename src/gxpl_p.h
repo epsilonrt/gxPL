@@ -12,17 +12,7 @@
 #include <gxPL.h>
 
 /* constants ================================================================ */
-
 /* macros =================================================================== */
-/*
- * man 3 free:
- * ... If ptr is NULL, no operation is performed. 
- */
-#define SAFE_FREE(x) if (x != NULL) { free(x); x = NULL; }
-#define STR_FREE(x)  if (x != NULL) { xPL_FreeStr(x); x = NULL; }
-
-/* internal public functions ================================================ */
-int gxPLParseDatagram (gxPL * gxpl, char * data);
 
 /* ========================================================================== */
 #endif /* _GXPL_PRIVATE_HEADER_ defined */

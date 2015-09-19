@@ -18,10 +18,10 @@
 #include <sysio/dlist.h>
 #include <gxPL.h>
 
+#define GXPL_INTERNALS
+#include <gxPL/io.h>
 #include "config.h"
 #include "gxpl_p.h"
-#include "io_p.h"
-
 #include "version-git.h"
 
 /* macros =================================================================== */
@@ -80,29 +80,31 @@ vParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
   optind = 1; // rewinds to allow the user to analyze again the parameters
 }
 
+
+#warning TODO
 #if 0
 /* -----------------------------------------------------------------------------
  * Check to see if the passed message is a hub echo.  */
 static bool
-isHubEcho (gxPLMessage * theMessage) {
+isHubEcho (gxPLMessage * msg) {
   char * remoteIP;
   char * thePort;
 
-  if (theMessage == NULL) {
+  if (msg == NULL) {
     return false;
   }
 
   /* If this is not a heartbeat, ignore it */
-  if (! (!xPL_strcmpIgnoreCase (theMessage->schemaClass, "hbeat")
-         || !xPL_strcmpIgnoreCase (theMessage->schemaClass, "config"))) {
+  if (! (!strcasecmp (msg->schema.class, "hbeat")
+         || !strcasecmp (msg->schema.class, "config"))) {
     return false;
   }
 
   /* Insure it has an IP address and port */
-  if ( (remoteIP = xPL_getMessageNamedValue (theMessage, "remote-ip")) == NULL) {
+  if ( (remoteIP = gxPLMessagePairValueGet (msg, "remote-ip")) == NULL) {
     return false;
   }
-  if ( (thePort = xPL_getMessageNamedValue (theMessage, "port")) == NULL) {
+  if ( (thePort = gxPLMessagePairValueGet (msg, "port")) == NULL) {
     return false;
   }
 
@@ -110,7 +112,7 @@ isHubEcho (gxPLMessage * theMessage) {
   if (strcmp (remoteIP, xPL_getListenerIPAddr())) {
     return false;
   }
-  if (strcmp (thePort, xPL_intToStr (xPL_getPort()))) {
+  if (strcmp (thePort, gxPLStrFromInt (xPL_getPort()))) {
     return false;
   }
 
@@ -118,152 +120,15 @@ isHubEcho (gxPLMessage * theMessage) {
   return true;
 }
 
-/* -----------------------------------------------------------------------------
- * Convert a text message into a xPL message.
- * Return the message or NULL if there is a parse error
- */
-static gxPLMessage *
-parseMessage (char * theText) {
-  int textLen = strlen (theText);
-  int parsedChars, parsedThisTime;
-  char * blockHeaderKeyword;
-  char * blockDelimStr;
-  char * periodstr = NULL;
-  gxPLMessage * theMessage;
-
-  /* Allocate a message */
-  theMessage = createReceivedMessage (xPLMessageAny);
-
-  /* Parse the header */
-  if ( (parsedThisTime = parseBlock (theText, &blockHeaderKeyword, theMessage->messageBody, false)) <= 0) {
-    xPL_Debug ("Error parsing message header");
-    xPL_releaseMessage (theMessage);
-    return NULL;
-  }
-  parsedChars = parsedThisTime;
-
-  /* Parse the header */
-  if (!xPL_strcmpIgnoreCase (blockHeaderKeyword, "XPL-CMND")) {
-    xPL_setMessageType (theMessage, xPLMessageCommand);
-  }
-  else if (!xPL_strcmpIgnoreCase (blockHeaderKeyword, "XPL-STAT")) {
-    xPL_setMessageType (theMessage, xPLMessageStatus);
-  }
-  else if (!xPL_strcmpIgnoreCase (blockHeaderKeyword, "XPL-TRIG")) {
-    xPL_setMessageType (theMessage, xPLMessageTrigger);
-  }
-  else {
-    xPL_Debug ("Unknown message header of %s - bad message", blockHeaderKeyword);
-    STR_FREE (blockHeaderKeyword);
-    xPL_releaseMessage (theMessage);
-    return NULL;
-  }
-
-  /* We are done with this now - drop it while we are still thinking about it */
-  STR_FREE (blockHeaderKeyword);
-
-  /* Parse the name/values into the message */
-  if (!parseMessageHeader (theMessage, theMessage->messageBody)) {
-    xPL_Debug ("Unable to parse message header");
-    xPL_releaseMessage (theMessage);
-    return NULL;
-  }
-
-  /* Parse multiple blocks until we are done */
-  for (; parsedChars < textLen;) {
-    /* Clear the name/value list for the message */
-    xPL_clearAllNamedValues (theMessage->messageBody);
-    periodstr = NULL;
-
-    /* Parse the next block */
-    if ( (parsedThisTime = parseBlock (& (theText[parsedChars]), &blockHeaderKeyword, theMessage->messageBody, false)) < 0) {
-      xPL_Debug ("Error parsing message block");
-      xPL_releaseMessage (theMessage);
-      STR_FREE (blockHeaderKeyword);
-      return NULL;
-    }
-
-    /* If we ran out of characters, no more blocks */
-    if (parsedThisTime == 0) {
-      break;
-    }
-
-    /* Up Parsed count */
-    parsedChars += parsedThisTime;
-
-    /* Parse the block header */
-    if ( (blockDelimStr = strchr (blockHeaderKeyword, '.')) == NULL) {
-      xPL_Debug ("Malformed message block header - %s", blockHeaderKeyword);
-      xPL_releaseMessage (theMessage);
-      STR_FREE (blockHeaderKeyword);
-      return NULL;
-    }
-    periodstr = blockDelimStr;
-    *blockDelimStr++ = '\0';
-
-    /* Record the message schema class/type */
-    xPL_setSchemaClass (theMessage, blockHeaderKeyword);
-    xPL_setSchemaType (theMessage, blockDelimStr);
-
-    /* Fix mangled string & release string */
-    if (periodstr != NULL) {
-      *periodstr = '.';
-    }
-    STR_FREE (blockHeaderKeyword);
-    break;
-  }
-
-  /* Return the message */
-  return theMessage;
-}
 #endif
 
 /* internal public functions ================================================ */
 
-/* -----------------------------------------------------------------------------
- * Parse and dispatch an xPL message
- */
-int
-gxPLParseDatagram (gxPL * gxpl, char * data) {
-  
-#if 0
-  int bytesRead;
-  gxPLMessage * theMessage = NULL;
-
-  for (;;) {
-
-
-    /* Send the raw message to any raw message listeners */
-    xPL_dispatchRawEvent (messageBuff, bytesRead);
-
-    /* Parse the message */
-    if ( (theMessage = parseMessage (messageBuff)) == NULL) {
-      vLog (LOG_ERR, "Error parsing network message - ignored");
-      continue;
-    }
-
-    /* See if we need to check the message for hub detection */
-    if (!hubConfirmed && isHubEcho (theMessage)) {
-      vLog (LOG_DEBUG, "Hub detected and confirmed existing");
-      hubConfirmed = true;
-    }
-
-    /* Dispatch the message */
-    vLog (LOG_DEBUG, "Now dispatching valid message");
-    xPL_dispatchMessageEvent (theMessage);
-
-    /* Release the message */
-    xPL_releaseMessage (theMessage);
-  }
-#endif
-
-  return 0;
-}
 
 /* api functions ============================================================ */
 // -----------------------------------------------------------------------------
-gxPL *
-gxPLOpen (const char * iface, const char * iolayer, gxPLConnectType type) {
+gxPLConfig *
+gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnectType type) {
   gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
   assert (config);
 
@@ -272,12 +137,12 @@ gxPLOpen (const char * iface, const char * iolayer, gxPLConnectType type) {
   config->connecttype = type;
   config->malloc = 1;
 
-  return gxPLOpenWithConfig (config);
+  return config;
 }
 
 // -----------------------------------------------------------------------------
-gxPL *
-gxPLOpenWithArgs (int argc, char * argv[], gxPLConnectType type) {
+gxPLConfig *
+gxPLNewConfigFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
   assert (config);
 
@@ -285,101 +150,171 @@ gxPLOpenWithArgs (int argc, char * argv[], gxPLConnectType type) {
   config->connecttype = type;
   config->malloc = 1;
 
-  return gxPLOpenWithConfig (config);
+  return config;
 }
 
 // -----------------------------------------------------------------------------
 gxPL *
-gxPLOpenWithConfig (gxPLConfig * config) {
-  gxPLIo * io = calloc (1, sizeof (gxPLIo));
-  assert (io);
+gxPLOpen (gxPLConfig * config) {
+  gxPL * gxpl = gxPLIoOpen (config);
 
-  if (strlen (config->iolayer) == 0) {
-    strcpy (config->iolayer, DEFAULT_IO_LAYER);
-    PDEBUG ("set iolayer to default (%s)", config->iolayer);
-  }
-
-  io->ops = gxPLIoGetOps (config->iolayer);
-  if (io->ops) {
-    gxPL * gxpl = calloc (1, sizeof (gxPL));
-    assert (gxpl);
-
-    gxpl->config = config;
-    gxpl->io = io;
-
-    if (io->ops->open (gxpl) == 0) {
+  if (gxpl) {
+    // There's perhaps something to do ?
+#warning TODO
 #if 0
 
-      // Install a listener for xPL oriented messages
-      if (!xPL_IODeviceInstalled) {
-        if (xPL_addIODevice (xPL_receiveMessage, -1, pconfig->bind_socket, true, false, false)) {
+    // Install a listener for xPL oriented messages
+    if (!xPL_IODeviceInstalled) {
+      if (xPL_addIODevice (xPL_receiveMessage, -1, pconfig->bind_socket, true, false, false)) {
 
-          xPL_IODeviceInstalled = true;
-        }
+        xPL_IODeviceInstalled = true;
       }
-
-      // Add a message listener for services
-      xPL_addMessageListener (xPL_handleServiceMessage, NULL);
-
-      // We are ready to go
-      return 0;
-#endif
-      return gxpl;
     }
-    free (gxpl);
+
+    // Add a message listener for services
+    gxPLMessageAddListener (xPL_handleServiceMessage, NULL);
+#endif
   }
-  free (io);
-  return NULL;
+  return gxpl;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLClose (gxPL * gxpl) {
-  int ret;
 
-  /*
-    // Shutdown all services
-    xPL_disableAllServices();
+  // There's perhaps something to do ?
+#warning TODO
+#if 0
+  // Shutdown all services
+  xPL_disableAllServices();
 
-    // Remove xPL Listener
-    if (xPL_removeIODevice (xPLFD)) {
+  // Remove xPL Listener
+  if (xPL_removeIODevice (xPLFD)) {
 
-      xPL_IODeviceInstalled = false;
-    }
-  */
-
-  ret = gxpl->io->ops->close (gxpl);
-  free (gxpl->io);
-  if (gxpl->config->malloc) {
-    free (gxpl->config);
+    xPL_IODeviceInstalled = false;
   }
-  free (gxpl);
-  return ret;
+#endif
+  return gxPLIoClose (gxpl);
 }
-
 
 // -----------------------------------------------------------------------------
 int
 gxPLPoll (gxPL * gxpl, int timeout_ms) {
-  int ret, size;
+  int ret, size = 0;
 
-  ret = gxpl->io->ops->ctl (gxpl, xPLIoFuncPoll, &size, timeout_ms);
+  ret = gxPLIoCtl (gxpl, gxPLIoFuncPoll, &size, timeout_ms);
 
   if ( (ret == 0) && (size > 0)) {
     char * buffer = malloc (size + 1);
     assert (buffer);
 
-    ret = gxpl->io->ops->read (gxpl, buffer, size);
+    ret = gxPLIoRead (gxpl, buffer, size);
     if (ret == size) {
-      
+
       /* We receive a message, append null character to terminate the string */
       buffer[size] = '\0';
       vLog (LOG_DEBUG, "Just read %d bytes as packet [%s]", size, buffer);
-      ret = gxPLParseDatagram (gxpl, buffer);
+#warning TODO
+#if 0
+      int bytesRead;
+      gxPLMessage * msg = NULL;
+
+      /* Send the raw message to any raw message listeners */
+      xPL_dispatchRawEvent (messageBuff, bytesRead);
+
+      /* Parse the message */
+      if ( (msg = gxPLMessageFromString (gxpl, buffer)) == NULL) {
+        vLog (LOG_ERR, "Error parsing network message - ignored");
+        continue;
+      }
+
+      /* See if we need to check the message for hub detection */
+      if (!hubConfirmed && isHubEcho (msg)) {
+        vLog (LOG_DEBUG, "Hub detected and confirmed existing");
+        hubConfirmed = true;
+      }
+
+      /* Dispatch the message */
+      vLog (LOG_DEBUG, "Now dispatching valid message");
+      xPL_dispatchMessageEvent (msg);
+
+      /* Release the message */
+      gxPLMessageDelete (msg);
+#endif
     }
     free (buffer);
   }
   return ret;
+}
+
+
+/* -----------------------------------------------------------------------------
+ * Public
+ * Send an xPL message.  If the message is valid and is successfully sent,
+ * TRUE is returned.
+ */
+int
+gxPLSendMessage (gxPL * gxpl, gxPLMessage * message) {
+
+#warning TODO
+#if 0
+  /* Write the message to text */
+  if (gxPLMessageToString (message) == NULL) {
+    return -1;
+  }
+
+  /* Attempt to brodcast it */
+  vLog (LOG_ERR, "About to broadcast %d bytes as [%s]", messageBytesWritten, messageBuff);
+  if (!xPL_sendRawMessage (messageBuff, messageBytesWritten)) {
+    return -1;
+  }
+#endif
+  /* And we are done */
+  return 0;
+}
+
+
+// -----------------------------------------------------------------------------
+char *
+gxPLLocalAddressString (gxPL * gxpl) {
+  gxPLAddress addr;
+  static char * str;
+
+  if (gxPLIoCtl (gxpl, gxPLIoFuncGetLocalAddr, &addr) == 0) {
+
+    if (gxPLIoCtl (gxpl, gxPLIoFuncNetAddrToString, &addr, &str) == 0) {
+
+      return str;
+    }
+  }
+  return "";
+}
+
+// -----------------------------------------------------------------------------
+char *
+gxPLBroadcastAddressString (gxPL * gxpl) {
+  gxPLAddress addr;
+  static char * str;
+
+  if (gxPLIoCtl (gxpl, gxPLIoFuncGetBcastAddr, &addr) == 0) {
+
+    if (gxPLIoCtl (gxpl, gxPLIoFuncNetAddrToString, &addr, &str) == 0) {
+
+      return str;
+    }
+  }
+  return "";
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLInetPort (gxPL * gxpl) {
+  int iport;
+  if (gxPLIoCtl (gxpl, gxPLIoFuncGetInetPort, &iport) == 0) {
+
+    return iport;
+  }
+  return -1;
 }
 
 // -----------------------------------------------------------------------------

@@ -13,15 +13,26 @@
 #include <sysio/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
+#include <errno.h>
 
 /* forward struct defined */
 typedef struct _gxPL gxPL;
 typedef struct _gxPLIo gxPLIo;
-typedef struct _xPL_Service xPL_Service;
-typedef struct _xPL_Message gxPLMessage;
-typedef struct _xPL_NameValueList xPL_NameValueList;
-typedef struct _xPL_ServiceChangedListenerDef xPL_ServiceChangedListenerDef;
-typedef struct _xPL_ServiceConfigurable xPL_ServiceConfigurable;
+typedef struct _gxPLService gxPLService;
+typedef struct _gxPLMessage gxPLMessage;
+typedef struct _gxPLNameValueList gxPLNameValueList;
+typedef struct _gxPLServiceChangedListenerDef gxPLServiceChangedListenerDef;
+typedef struct _gxPLServiceConfigurable gxPLServiceConfigurable;
+
+#if defined(SYSIO_OS_UNIX)
+#include <limits.h>
+#else
+#define NAME_MAX 255
+#endif
+
+#ifndef EINVAL
+#define EINVAL          22      /* Invalid argument */
+#endif
 
 /**
  * @defgroup xPLDefs Definitions
@@ -39,28 +50,28 @@ typedef struct _xPL_ServiceConfigurable xPL_ServiceConfigurable;
  * @brief xPL Connection mode
  */
 typedef enum {
-  xPLConnectStandAlone, /**< listen on xPL port */
-  xPLConnectViaHub,     /**< listen on a client port */ 
-  xPLConnectAuto
+  gxPLConnectStandAlone, /**< listen on xPL port */
+  gxPLConnectViaHub,     /**< listen on a client port */ 
+  gxPLConnectAuto
 } gxPLConnectType;
 
 /**
  * @brief
  */
 typedef enum {
-  xPLConfigOptional,
-  xPLConfigMandatory,
-  xPLConfigReconf
+  gxPLConfigOptional,
+  gxPLConfigMandatory,
+  gxPLConfigReconf
 } gxPLConfigurableType;
 
 /**
  * @brief Possible xPL message types
  */
 typedef enum {
-  xPLMessageAny,
-  xPLMessageCommand,
-  xPLMessageStatus,
-  xPLMessageTrigger
+  gxPLMessageAny,
+  gxPLMessageCommand,
+  gxPLMessageStatus,
+  gxPLMessageTrigger
 } gxPLMessageType;
 
 
@@ -68,15 +79,37 @@ typedef enum {
  * @brief Possible xPL ioctl call
  */
 typedef enum {
-  xPLIoFuncPoll
+  gxPLIoFuncPoll,
+  gxPLIoFuncGetIface,
+  gxPLIoFuncGetBcastAddr,
+  gxPLIoFuncGetLocalAddr,
+  gxPLIoFuncNetAddrToString,
+  gxPLIoFuncGetInetPort,
 } gxPLIoFunc;
 
-
+/**
+ * @brief Io families
+ */
+typedef enum {
+  gxPLIoFamilyInet4,
+  gxPLIoFamilyInet6,
+  gxPLIoFamilyZigbee16,
+  gxPLIoFamilyZigbee64,
+} gxPLIoFamily;
+  
 /* types ==================================================================== */
 /**
  * @brief Generic xPL object, void for now, but could change in the future
  */
 typedef void xPL_Object;
+
+/**
+ * @brief Network address
+ */
+typedef struct _gxPLAddress {
+  gxPLIoFamily family;
+  uint8_t n_addr[16]; /**< address in network order */
+} gxPLAddress;
 
 /**
  * @}

@@ -22,13 +22,13 @@
 /* private variables ======================================================== */
 char msgSource[64] = "cdp1802-xplsend.default";
 char * srcVendor = NULL;
-char * srcDeviceID = NULL;
-char * srcInstanceID = NULL;
+char * srcDeviceId = NULL;
+char * srcInstanceId = NULL;
 char * msgTarget = NULL;
 char * tgtVendor = NULL;
-char * tgtDeviceID = NULL;
-char * tgtInstanceID = NULL;
-gxPLMessageType msgType = xPLMessageCommand;
+char * tgtDeviceId = NULL;
+char * tgtInstanceId = NULL;
+gxPLMessageType msgType = gxPLMessageCommand;
 char * msgSchemaClass = NULL;
 char * msgSchemaType = NULL;
 
@@ -76,8 +76,8 @@ parseSourceIdent (void) {
   *dashstr++ = '\0';
   *periodstr++ = '\0';
   srcVendor = msgSource;
-  srcDeviceID = dashstr;
-  srcInstanceID = periodstr;
+  srcDeviceId = dashstr;
+  srcInstanceId = periodstr;
 
   return TRUE;
 }
@@ -110,8 +110,8 @@ parseTargetIdent (void) {
   *dashstr++ = '\0';
   *periodstr++ = '\0';
   tgtVendor = msgTarget;
-  tgtDeviceID = dashstr;
-  tgtInstanceID = periodstr;
+  tgtDeviceId = dashstr;
+  tgtInstanceId = periodstr;
 
   return TRUE;
 }
@@ -160,14 +160,14 @@ bool parseCmdLine (int *argc, char *argv[]) {
       if (!strcmp (argv[swptr], "-m")) {
         swptr++;
 
-        if (xPL_strcmpIgnoreCase (argv[swptr], "cmnd") == 0) {
-          msgType = xPLMessageCommand;
+        if (strcasecmp (argv[swptr], "cmnd") == 0) {
+          msgType = gxPLMessageCommand;
         }
-        else if (xPL_strcmpIgnoreCase (argv[swptr], "trig") == 0) {
-          msgType = xPLMessageTrigger;
+        else if (strcasecmp (argv[swptr], "trig") == 0) {
+          msgType = gxPLMessageTrigger;
         }
-        else if (xPL_strcmpIgnoreCase (argv[swptr], "stat") == 0) {
-          msgType = xPLMessageStatus;
+        else if (strcasecmp (argv[swptr], "stat") == 0) {
+          msgType = gxPLMessageStatus;
         }
         else {
           fprintf (stderr, "Unknown message type of %s for -m", argv[swptr]);
@@ -207,32 +207,32 @@ bool parseCmdLine (int *argc, char *argv[]) {
 bool 
 sendMessage (int argc, char * argv[]) {
   int argIndex = 0;
-  xPL_Service * theService = NULL;
-  gxPLMessage * theMessage = NULL;
+  gxPLService * service = NULL;
+  gxPLMessage * message = NULL;
   char * delim;
 
   /* Create service so we can create messages */
-  if ( (theService = xPL_createService (srcVendor, srcDeviceID, srcInstanceID)) == NULL) {
+  if ( (service = xPL_createService (srcVendor, srcDeviceId, srcInstanceId)) == NULL) {
     fprintf (stderr, "Unable to create xPL service\n");
     return FALSE;
   }
 
   /* Create an appropriate message */
   if (msgTarget == NULL) {
-    if ( (theMessage = xPL_createBroadcastMessage (theService, msgType)) == NULL) {
+    if ( (message = gxPLMessageNewBroadcast (service, msgType)) == NULL) {
       fprintf (stderr, "Unable to create broadcast message\n");
       return FALSE;
     }
   }
   else {
-    if ( (theMessage = xPL_createTargetedMessage (theService, msgType, tgtVendor, tgtDeviceID, tgtInstanceID)) == NULL) {
+    if ( (message = gxPLMessageNewTargeted (service, msgType, tgtVendor, tgtDeviceId, tgtInstanceId)) == NULL) {
       fprintf (stderr, "Unable to create targetted message\n");
       return FALSE;
     }
   }
 
   /* Install the schema */
-  xPL_setSchema (theMessage, msgSchemaClass, msgSchemaType);
+  gxPLMessageSchemaSetAll (message, msgSchemaClass, msgSchemaType);
 
   /* Install named values */
   for (argIndex = 1; argIndex < argc; argIndex++) {
@@ -243,11 +243,11 @@ sendMessage (int argc, char * argv[]) {
 
     /* Break them up  and add it */
     *delim++ = '\0';
-    xPL_addMessageNamedValue (theMessage, argv[argIndex], delim);
+    gxPLMessagePairAdd (message, argv[argIndex], delim);
   }
 
   /* Send the message */
-  if (!xPL_sendMessage (theMessage)) {
+  if (!gxPLSendMessage (message)) {
     fprintf (stderr, "Unable to send xPL message\n");
     return FALSE;
   }
@@ -280,7 +280,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!gxPLOpen (gxPLGetConnectionType())) {
+  if (!gxPLNewConfig (gxPLGetConnectionType())) {
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }

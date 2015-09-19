@@ -63,9 +63,9 @@ this service is sent with the
 xPL_sendServiceMessage(myService, myMessage);
 </pre>
 
-instead of the more generic *xPL_sendMessage()*.  The reason is that if the
+instead of the more generic *gxPLSendMessage()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
-simpler *xPL_sendMessage()* on *gxPLMessage* instances you created earlier, your
+simpler *gxPLSendMessage()* on *gxPLMessage* instances you created earlier, your
 messages source fields may no longer match what the services identifiers are
 now.  *xPL_sendServiceMessage()* makes sure (and corrects, if needed) they
 always match.
@@ -107,8 +107,8 @@ Now, some details:
 
     <pre class="fragment">
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
+    if (!gxPLIsServiceConfigured(myService) {
+      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
     </pre>
@@ -136,12 +136,12 @@ Now, some details:
     configuration values.  In this case, it might look like this:
 
     <pre class="fragment">
-    static void parseServiceConfigValues(xPL_Service * theService) {
+    static void parseServiceConfigValues(gxPLService * service) {
      /* Extract the value, if any, for a configurable named "debugMode" */
-     char * debugFlag = xPL_getServiceConfigValue(theService, "debugMode");
+     char * debugFlag = xPL_getServiceConfigValue(service, "debugMode");
      if (debugFlag != NULL) {
        /* Do a case insensitive compare to see if it's true or not */
-       debugMode = (xPL_strcmpIgnoreCase(debugFlag, "true") == 0);
+       debugMode = (strcasecmp(debugFlag, "true") == 0);
      }
     }
     </pre>
@@ -155,7 +155,7 @@ Now, some details:
 
     Note that the assumption is there is a global variable called debugMode
     that is set to 0 or 1 to indicate if the program should print debugging
-    messages.  Also, the xPL_strcmpIgnoreCase is provided in xPL and does
+    messages.  Also, the strcasecmp is provided in xPL and does
     pretty much what it says.  While xPL identifiers in general should be lower
     case, unless case really matters, you should try to be "generous" when
     looking at configurable values (or received xPL message values, for that
@@ -173,8 +173,8 @@ Now, some details:
     <pre class="fragment">
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
+    if (!gxPLIsServiceConfigured(myService) {
+      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
 
@@ -190,8 +190,8 @@ Now, some details:
     For example:
 
     <pre class="fragment">
-    static void configChangedHandler(xPL_Service * theService, xPL_Object * userData) {
-      parseServiceConfigValues(theService);
+    static void configChangedHandler(gxPLService * service, xPL_Object * userData) {
+      parseServiceConfigValues(service);
     }
     </pre>
 
@@ -204,8 +204,8 @@ Now, some details:
     <pre class="fragment">
     /** Create the service */
     myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!xPL_isServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", xPLConfigReconf, 1);
+    if (!gxPLIsServiceConfigured(myService) {
+      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       xPL_setServiceConfigValue(clockService, "debugMode", "false");
     }
 

@@ -9,6 +9,7 @@
 #ifndef _GXPL_IO_PRIVATE_HEADER_
 #define _GXPL_IO_PRIVATE_HEADER_
 
+#include <stdarg.h>
 #include <gxPL/defs.h>
 
 /* constants ================================================================ */
@@ -31,7 +32,7 @@ typedef struct _gxPLIoOps {
   int (*read)   (gxPL * gxpl, void * buffer, int count);
   int (*write)  (gxPL * gxpl, const void * buffer, int count);
   int (*close)  (gxPL * gxpl);
-  int (*ctl)    (gxPL * gxpl, int c, ...);
+  int (*ctl)    (gxPL * gxpl, int c, va_list ap);
 } gxPLIoOps;
 
 /**
@@ -45,6 +46,9 @@ typedef struct _gxPLIo {
 /* internal public functions ================================================ */
 /**
  * @brief Register an io layer
+ * 
+ * Should be called in the constructor of each io layer ...
+ * 
  * @param iolayer name used to identify this layer
  * @param ops layer's function that performs the operations
  * @return 0, -1 on error
@@ -53,6 +57,9 @@ int gxPLIoRegister (const char * iolayer, gxPLIoOps * ops);
 
 /**
  * @brief Register an io layer
+ * 
+ * Should be called in the destructor of each io layer ...
+ * 
  * @param iolayer name used to identify the layer
  * @return 0, -1 on error
  */

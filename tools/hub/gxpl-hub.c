@@ -152,7 +152,7 @@ parseCmdLine (int *argc, char *argv[]) {
         debugMode = TRUE;
         daemonMode = FALSE;
         xPL_setDebugging (TRUE);
-        xPL_Debug ("xPL Debug mode enabled");
+        vLog (LOG_ERR, "xPL Debug mode enabled");
         continue;
       }
 
@@ -203,11 +203,11 @@ hubShutdownHandler (int onSignal) {
 static void 
 runHub (void) {
   /* Start gxPLib */
-  if (!gxPLOpen (xPLConnectStandAlone)) {
+  if (!gxPLNewConfig (gxPLConnectStandAlone)) {
     writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
     exit (1);
   }
-  xPL_Debug ("gxPLib started");
+  vLog (LOG_ERR, "gxPLib started");
 
   /* Start gxPL Hub */
   xPL_startHub();

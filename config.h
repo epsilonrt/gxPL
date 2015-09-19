@@ -16,7 +16,7 @@ extern "C" {
 
 /* default values =========================================================== */
 #define DEFAULT_IO_LAYER "udp"
-#define DEFAULT_CONNECT_TYPE xPLConnectViaHub
+#define DEFAULT_CONNECT_TYPE gxPLConnectViaHub
 #define DEFAULT_HEARTBEAT_INTERVAL 300
 
 /* build options ============================================================ */

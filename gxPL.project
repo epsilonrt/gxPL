@@ -48,6 +48,8 @@
     <File Name="src/io_template.c"/>
     <File Name="src/io.c"/>
     <File Name="src/gxpl_p.h"/>
+    <File Name="src/message.c"/>
+    <File Name="src/message_p.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">
@@ -62,6 +64,7 @@
       </VirtualDirectory>
       <File Name="include/gxPL/defs.h"/>
       <File Name="include/gxPL/io.h"/>
+      <File Name="include/gxPL/message.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="old">
       <File Name="include/old/gxPL.h"/>

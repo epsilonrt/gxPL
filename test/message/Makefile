@@ -1,57 +1,70 @@
 ###############################################################################
-# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# Copyright © 2015 Pascal JEAN aka epsilonRT <pascal.jean--AT--btssn.net>     #
 # All rights reserved.                                                        #
-# Licensed under the Apache License, Version 2.0 (the "License")              #
+# This software is governed by the CeCILL license <http://www.cecill.info>    #
 ###############################################################################
 
-# Target file name (without extension).
-TARGET = gxpl-clock
+# Nom du fichier cible (sans extension).
+TARGET = gxpl-test-message
 
-# Relative path of the project root directory
+# Chemin relatif du répertoire racine du projet de l'utilisateur
 PROJECT_TOPDIR = ../..
 
-# Target architecture
+# Architecture du système cible
 #ARCH = ARCH_ARM_RASPBERRYPI
 ARCH = ARCH_GENERIC_LINUX
 
-# Generates a file to retrieve information on the GIT Version
-GIT_VERSION = ON
+# Permet de générer un fichier version-git.h permettant de récupérer les informations sur la version
+GIT_VERSION = OFF
 
-# Optimization level, can be [0, 1, 2, 3, s]. 0 turns off optimization.
-# (Note: 3 is not always the best optimization level)
+# Niveau d'optimisation de GCC =  [0, 1, 2, 3, s].
+#     0 = pas d'optimisation (pour debug).
+#     s = optimisation de la taille du code (pour release).
+#     (Note: 3 n'est pas toujours le meilleur niveau. Voir la FAQ avr-libc.)
 OPT = s
 
-# Debugging information format
+# Format informations Debug
+#     Les formats natifs pour AVR-GCC -g sont dwarf-2 [default] ou stabs.
+#     AVR Studio 4.10 nécessite dwarf-2.
 DEBUG_FORMAT = dwarf-2
 
-# Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
-# (Note: 3 is not always the best optimization level)
+# Niveau d'optimisation de GCC =  [0, 1, 2, 3, s] pour le debug
+#     0 = pas d'optimisation (pour debug).
+#     s = optimisation de la taille du code (pour release).
+#     (Note: 3 n'est pas toujours le meilleur niveau. Voir la FAQ avr-libc.)
 DEBUG_OPT = 0
 
-# Enabling Debug information (ON / OFF)
-#DEBUG = ON
+# Activation des informations Debug (ON/OFF)
+# Si défini sur ON, aucune information de debug ne sera générée
+DEBUG = ON
 
-# Displays the GCC compile line or not (ON / OFF)
-VIEW_GCC_LINE = ON
+# Affiche la ligne de compilation GCC ou non (ON/OFF)
+VIEW_GCC_LINE = OFF
 
-# Disable the deletion of variables and functions "unnecessary"
-# The linker checks of a function or variable is called, if it is not the case, 
-# it removes the variable or function. This can be problematic in some cases (bootloarder!)
+# Désactive la suppression des variables et fonctions "inutiles"
+# Le linker vérifie d'une fonction ou une variable est appellée, si ce n'est pas
+# le cas, il supprime la variable ou la fonction
+# Cela peut être problèmatique dans certains cas (bootloarder !)
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
-# List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c gxpl.c io.c io_udp.c util.c message.c
+# Liste des fichiers source C. (Les dépendances sont automatiquement générées.)
+# Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
+# recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
+# d'accès complet du fichier mais seulement le nom du projet
+SRC  = $(TARGET).c util.c message.c
 
-# List C++ source files here. (C++ dependencies are automatically generated.)
+# Liste des fichiers source C++ (Les dépendances sont automatiquement générées.)
+# Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
+# recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
+# d'accès complet du fichier mais seulement le nom du projet (avrio, avrx, ...)
 CPPSRC =
 
-# List Assembler source files here.
-# Make them always end in a capital .S.  Files ending in a lowercase .s
-# will not be considered source files but generated files (assembler
-# output from the compiler), and will be deleted upon "make clean"!
-# Even though the DOS/Win* filesystem matches both .s and .S the same,
-# it will preserve the spelling of the filenames, and gcc itself does
-# care about how the name is spelled on its command-line.
+# Liste des fichiers source assembleur
+#   L'extenson doit toujours être .S (en majuscule). En effet, les fichiers .s
+#   ne sont pas consédérés comme des fichiers sources mais comme des fichiers
+#   générés par le compilateur et seront supprimés lors d'un make clean.
+#   Cela est valable aussi sous DOS/Windows (bien que le système d'exploitation
+#   ne soit pas sensible à la casse).
 ASRC =
 
 # Place -D or -U options here for C sources
@@ -81,7 +94,7 @@ STATIC_LINKER = OFF
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_LIBDIRS =
+EXTRA_LIBDIRS = 
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
@@ -131,7 +144,7 @@ LDFLAGS += -pthread
 ifeq ($(PROJECT_TOPDIR),)
 else
 VPATH+=:$(PROJECT_TOPDIR)/src
-EXTRA_INCDIRS += $(PROJECT_TOPDIR) $(PROJECT_TOPDIR)/include
+EXTRA_INCDIRS += $(PROJECT_TOPDIR)/include
 endif
 
 #-------------------------------------------------------------------------------
@@ -309,12 +322,12 @@ $(DEPDIRS):
 
 version-git.h:
 ifeq ($(GIT_VERSION),ON)
-	@git-version $@
+	@sysio-ver $@
 endif
 
 version-git.mk:
 ifeq ($(GIT_VERSION),ON)
-	@git-version $@
+	@sysio-ver $@
 endif
 
 sizebefore:

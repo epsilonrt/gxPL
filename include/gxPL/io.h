@@ -10,120 +10,67 @@
 #ifndef _GXPL_IO_HEADER_
 #define _GXPL_IO_HEADER_
 
-#include <gxPL/defs.h>
+#include <gxPL.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
-#ifndef __DOXYGEN__
-
+#ifndef GXPL_INTERNALS
+#warning You should not add the header file gxPL/io.h in your source code
+#endif
 
 /**
- * @defgroup xPLIo IO
+ * @defgroup xPLIo Internal Io Layer API
+ * Description of the IO layer to the application layer.
+   @warning The top user should not access this layer directly.
  * @{
  */
 
-
+/* macros =================================================================== */
+/* constants ================================================================ */
+/* structures =============================================================== */
 /* types ==================================================================== */
-
-/**
- * @brief Event management of user timeouts
- */
-typedef void (* xPL_TimeoutHandler) (int, xPL_Object *);
-
-/**
- * @brief Raw Listener Support
- */
-typedef void (* xPL_rawListener) (char *, int, xPL_Object *);
-
-/**
- * @brief Event handler for user-registered I/O management
- */
-typedef void (* xPL_IOHandler) (int, int, int);
-
+/* private variables ======================================================== */
+/* private functions ======================================================== */
+/* public variables ========================================================= */
 /* internal public functions ================================================ */
+/**
+ * @brief 
+ * @param config
+ * @return 
+ */
+gxPL * gxPLIoOpen (gxPLConfig * config);
 
 /**
- * @brief Set the interface
- * @param newInterfaceName
+ * @brief 
+ * @param gxpl
+ * @param buffer
+ * @param count
+ * @return 
  */
-void xPL_setBroadcastInterface (char * newInterfaceName);
+int gxPLIoRead (gxPL * gxpl, void * buffer, int count);
 
 /**
- * @brief Get the xPL Interface
- * @return
+ * @brief 
+ * @param gxpl
+ * @param buffer
+ * @param count
+ * @return 
  */
-char * xPL_getBroadcastInterface (void);
+int gxPLIoWrite (gxPL * gxpl, const void * buffer, int count);
 
 /**
- * @brief Return the xPL FD
- * @return
+ * @brief 
+ * @param gxpl
+ * @return 
  */
-int xPL_getFD (void);
+int gxPLIoClose (gxPL * gxpl);
 
-/**
- * @brief Get the connection port
- * @return
+/* --------------- Defined in gxPL.h
+ * @brief 
+ * @param gxpl
+ * @param c
+ * @return 
+ * int gxPLIoCtl (gxPL * gxpl, int c, ...);
  */
-int xPL_getPort (void);
-
-/**
- * @brief Return listing IP address
- * @return
- */
-char * xPL_getListenerIPAddr (void);
-
-/**
- * @brief Return IP address
- * @return
- */
-char * xPL_getBroadcastIPAddr (void);
-
-/**
- * @brief Hub detected and confirmed existing
- * @return
- */
-bool xPL_isHubConfirmed (void);
-
-/**
- * @brief Allocate a new timeout handler and install it into the list
- * @param timeoutHandler
- * @param timeoutInSeconds
- * @param userValue
- */
-void xPL_addTimeoutHandler (xPL_TimeoutHandler timeoutHandler, int timeoutInSeconds, xPL_Object * userValue);
-
-/**
- * @brief Remove a previously allocated timeout handler
- * @param timeoutHandler
- * @return
- */
-bool xPL_removeTimeoutHandler (xPL_TimeoutHandler timeoutHandler);
-
-/**
- * @brief Add an IO channel to monitor/dispatch to.
- *
- * theFD is the FD that is open and should be monitored.  ioHandler is the
- * routine that is is called when there is activity on the channel.
- * userValue is an integer passed directly to the ioHandler, frequently used to
- * track context information.
- * watchRead, watchWrite, watchError tell what sort of things need to be monitored.
- * @param theIOHandler
- * @param userValue
- * @param theFD
- * @param watchRead
- * @param watchWrite
- * @param watchError
- * @return
- */
-bool xPL_addIODevice (xPL_IOHandler theIOHandler, int userValue, int theFD,
-                      bool watchRead, bool watchWrite, bool watchError);
-
-/**
- * @brief Remove an IO channel based on the passed fd.
- * If the fd exists, it's removed and TRUE is returned.
- * If the fd doesn't exist, FALSE is returned.
- * @param theFD
- */
-bool xPL_removeIODevice (int theFD);
 
 /**
  * @}
