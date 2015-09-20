@@ -13,6 +13,14 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
+/**
+ * @brief Describe a name=value pair
+ */
+typedef struct _gxPLPair {
+  char * name;
+  char * value;
+} gxPLPair;
+
 /* internal public functions ================================================ */
 
 /**
@@ -34,11 +42,21 @@ __BEGIN_C_DECLS
  * (letters, numbers and the hyphen/dash character - ASCII 45). If this is not 
  * the case, the copying is interrupted and -1 is returned.
 
- * @param dst
- * @param src
- * @return 0, -1 if error
+ * @param dst This is the pointer to an array of char elements where the 
+ * resulting C string is stored.
+ * @param src source string
+ * @return If successful, the total number of characters written is returned 
+ * excluding the null-character appended at the end of the string, otherwise a 
+ * negative number is returned in case of failure.
  */
 int gxPLStrCpy (char * dst, const char * src);
+
+/**
+ * @brief 
+ * @param str
+ * @return 
+ */
+gxPLPair * gxPLPairFromString (char *str);
 
 /**
  * @}

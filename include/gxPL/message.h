@@ -55,10 +55,28 @@ __BEGIN_C_DECLS
  */
 #define GXPL_HOP_MAX   9
 
+/**
+ *
+ */
+typedef enum {
+  gxPLMessageStateInit = 0,
+  gxPLMessageStateHeader,
+  gxPLMessageStateHeaderHop,
+  gxPLMessageStateHeaderSource,
+  gxPLMessageStateHeaderTarget,
+  gxPLMessageStateHeaderEnd,
+  gxPLMessageStateSchema,
+  gxPLMessageStateBodyBegin,
+  gxPLMessageStateBody,
+  gxPLMessageStateBodyEnd,
+  gxPLMessageStateEnd,
+  gxPLMessageStateError = -1
+} gxPLMessageState;
+
 /* structures =============================================================== */
 
 /**
- * @brief Describe a source or destination
+ * @brief Describe a source or destination identifier
  */
 typedef struct _gxPLMessageId {
   char vendor[GXPL_VENDORID_MAX + 1];
@@ -67,407 +85,474 @@ typedef struct _gxPLMessageId {
 } gxPLMessageId;
 
 /**
- * @brief Describe a schema
+ * @brief Describe a message schema
  */
 typedef struct _gxPLMessageSchema {
   char class[GXPL_CLASS_MAX + 1];
   char type[GXPL_TYPE_MAX + 1];
 } gxPLMessageSchema;
 
-/**
- * @brief Describe a name=value pair
- */
-typedef struct _gxPLPair {
-  char * name;
-  char * value;
-} gxPLPair;
 
 /* internal public functions ================================================ */
 
 /**
  * @brief Create a new empty message
+ * 
+ * All fields are set to zero except the hop count is set to 1 and the type that
+ * is set with the value passed as parameter.
  *
- * @return  the message, NULL if an error occurs, in which case errno contains
- * the error code.
+ * @return  the message, NULL if an error occurs
  */
 gxPLMessage * gxPLMessageNew (gxPLMessageType type);
 
 /**
  * @brief Release a message and all it's resources
  *
- * @param message
- * @return 0, -1 if an error occurs, in which case errno contains
- * the error code.
+ * @param message pointer to the message
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageDelete (gxPLMessage * message);
 
 /**
  * @brief Returns xPL message as text
  * 
- * @param message
- * @return  xPL message as text, NULL if an error occurs, in which case errno 
- * contains the error code. this character buffer must be released after use.
+ * @param message pointer to the message
+ * @return  xPL message as text, NULL if an error occurs. This character buffer 
+ * must be released after use.
  */
 char * gxPLMessageToString (const gxPLMessage * message);
 
 /**
- * @brief Convert a text message into a xPL message.
- * @param data
- * @return  the message, NULL if an error occurs, in which case errno contains
- * the error code.
+ * @brief Parse a list of lines as text  to extract a message
+ * 
+ * Parse the string, line per line. I do this because the bottom layer can make 
+ * repeated calls with parts of the message. The smallest portion that can be 
+ * passed is a line. Do not pass incomplete line ! \n
+ * This function must be called again with the returned pointer as the message 
+ * is not valid and is not in error.
+ * 
+ * @param message pointer to the message returned by a previous call or 
+ * NULL if the first call.
+ * @param lines the list of lines as text, this string is modified by the 
+ * function and is no longer  valid after apple.
+ * @return  the message, NULL if an error occurs
  */
-gxPLMessage * gxPLMessageFromString (const char * data);
+gxPLMessage * gxPLMessageFromString (gxPLMessage * message, char * line);
 
 /**
  * @brief Gets message type
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return message type, -1 if an error occurs
  */
 gxPLMessageType gxPLMessageTypeGet (const gxPLMessage * message);
 
 /**
  * @brief Sets message type
- * @param message
- * @param type
+ * @param message pointer to the message
+ * @param type message type
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTypeSet (gxPLMessage * message, gxPLMessageType type);
 
 /**
  * @brief Gets hop count
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return hop count, -1 if an error occurs
  */
 int gxPLMessageHopGet (const gxPLMessage * message);
 
 /**
  * @brief Sets hop count
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return hop hop count
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageHopSet (gxPLMessage * message, int hop);
 
 /**
  * @brief Increments hop count
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageHopInc (gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Source identifier
+ * @param message pointer to the message
+ * @return pointer to the id, must not be released.  NULL if an error occurs
  */
 const gxPLMessageId * gxPLMessageSourceIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Source vendor identifier
+ * @param message pointer to the message
+ * @return pointer to the vendor id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageSourceVendorIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Source device identifier
+ * @param message pointer to the message
+ * @return pointer to the device id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageSourceDeviceIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Source instance identifier
+ * @param message pointer to the message
+ * @return pointer to the instance id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageSourceInstanceIdGet (const gxPLMessage * message);
 
 /**
- * @brief 
- * @param message
- * @param id
- * @return 
+ * @brief Sets source identifier
+ * @param message pointer to the message
+ * @param id pointer to the source identifier
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSourceIdSet (gxPLMessage * message, const gxPLMessageId * id);
 
 /**
- * @brief
- * @param message
- * @param vendor_id
- * @param device_id
- * @param instance_id
+ * @brief Sets source identifier
+ * @param message pointer to the message
+ * @param vendor_id pointer to the vendor id
+ * @param device_id pointer to the device id
+ * @param instance_id pointer to the instance id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSourceSet (gxPLMessage * message, const char * vendor_id,
                           const char * device_id, const char * instance_id);
 
 /**
- * @brief
- * @param message
- * @param vendor_id
+ * @brief Sets source vendor identifier
+ * @param message pointer to the message
+ * @param vendor_id pointer to the vendor id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSourceVendorIdSet (gxPLMessage * message, const char * vendor_id);
 
 /**
- * @brief
- * @param message
- * @param device_id
+ * @brief Sets source device identifier
+ * @param message pointer to the message
+ * @param device_id pointer to the device id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSourceDeviceIdSet (gxPLMessage * message, const char * device_id);
 
 /**
- * @brief
- * @param message
- * @param instance_id
+ * @brief Sets source instance identifier
+ * @param message pointer to the message
+ * @param instance_id pointer to the instance id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSourceInstanceIdSet (gxPLMessage * message, const char * instance_id);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Target identifier
+ * @param message pointer to the message
+ * @return pointer to the id, must not be released.  NULL if an error occurs
  */
 const gxPLMessageId * gxPLMessageTargetIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Target vendor identifier
+ * @param message pointer to the message
+ * @return pointer to the vendor id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageTargetVendorIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Target device identifier
+ * @param message pointer to the message
+ * @return pointer to the device id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageTargetDeviceIdGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Target instance identifier
+ * @param message pointer to the message
+ * @return pointer to the instance id, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageTargetInstanceIdGet (const gxPLMessage * message);
 
 /**
- * @brief 
- * @param message
- * @param id
- * @return 
+ * @brief Sets target identifier
+ * @param message pointer to the message
+ * @param id pointer to the target identifier
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTargetIdSet (gxPLMessage * message, const gxPLMessageId * id);
 
 /**
- * @brief
- * @param message
- * @param vendor_id
- * @param device_id
- * @param instance_id
+ * @brief Sets target identifier
+ * @param message pointer to the message
+ * @param vendor_id pointer to the vendor id
+ * @param device_id pointer to the device id
+ * @param instance_id pointer to the instance id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTargetSet (gxPLMessage * message, const char * vendor_id,
                           const char * device_id, const char * instance_id);
 
 /**
- * @brief
- * @param message
- * @param vendor_id
+ * @brief Sets target vendor identifier
+ * @param message pointer to the message
+ * @param vendor_id pointer to the vendor id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTargetVendorIdSet (gxPLMessage * message, const char * vendor_id);
 
 /**
- * @brief
- * @param message
- * @param device_id
+ * @brief Sets target device identifier
+ * @param message pointer to the message
+ * @param device_id pointer to the device id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTargetDeviceIdSet (gxPLMessage * message, const char * device_id);
 
 /**
- * @brief
- * @param message
- * @param instance_id
+ * @brief Sets target instance identifier
+ * @param message pointer to the message
+ * @param instance_id pointer to the instance id
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageTargetInstanceIdSet (gxPLMessage * message, const char * instance_id);
 
 /**
  * @brief Gets the schema 
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return pointer to the schema, must not be released. NULL if an error occurs
  */
 const gxPLMessageSchema * gxPLMessageSchemaGet (const gxPLMessage * message);
 
 /**
- * @brief 
- * @param s1
- * @param s2
- * @return 
+ * @brief Compare two schemes
+ * @param s1 schema 1
+ * @param s2 schema 2
+ * @return It returns an integer less than, equal to, or greater than zero if s1 
+ * is found, respectively, to be less than, to match, or be greater than s2. 
  */
 int gxPLMessageSchemaCmp (const gxPLMessageSchema * s1, const gxPLMessageSchema * s2);
 
 /**
  * @brief Gets the schema class
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return pointer to the schema class, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageSchemaClassGet (const gxPLMessage * message);
 
 /**
  * @brief Gets the schema type
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return pointer to the schema type, must not be released. NULL if an error occurs
  */
 const char * gxPLMessageSchemaTypeGet (const gxPLMessage * message);
 
 /**
- * @brief 
- * @param message
- * @param schema
- * @return 
+ * @brief Sets the schema
+ * @param message pointer to the message
+ * @param schema pointer to the schema
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSchemaSet (gxPLMessage * message, const gxPLMessageSchema * schema);
 
 /**
  * @brief Sets the schema
- * @param message
- * @param schema_class
- * @param schema_type
+ * @param message pointer to the message
+ * @param schema_class pointer to the schema class
+ * @param schema_type pointer to the schema type
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSchemaSetAll (gxPLMessage * message,
                           const char * schema_class, const char * schema_type);
 
 /**
  * @brief Sets the schema class
- * @param message
- * @param schema_class
+ * @param message pointer to the message
+ * @param schema_class pointer to the schema class
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSchemaClassSet (gxPLMessage * message, const char * schema_class);
 
 /**
  * @brief Sets the schema type
- * @param message
- * @param schema_type
+ * @param message pointer to the message
+ * @param schema_type pointer to the schema type
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageSchemaTypeSet (gxPLMessage * message, const char * schema_type);
 
 /**
  * @brief Returns body of message as a const vector of gxPLPair
- * @param message
- * @return
+ * @param message pointer to the message
+ * @return pointer body of message as a const vector of gxPLPair, must not be 
+ * released. NULL if an error occurs
  */
 const xVector * gxPLMessageBodyGetConst (const gxPLMessage * message);
 
 /**
  * @brief Returns body of message as a vector of gxPLPair
- * @param message
- * @return
+ * 
+ * All added pairs will be released during the destruction of the message.
+ * If a pair is changed, it will reallocate the memory of the modified parameter 
+ * if it is longer.
+ * 
+ * @param message pointer to the message
+ * @return pointer body of message as a vector of gxPLPair, must not be 
+ * released. NULL if an error occurs
  */
 xVector * gxPLMessageBodyGet (gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @param name
- * @return
+ * @brief Number of pairs of the body
+ * @param message pointer to the message
+ * @return the value, -1 if an error occurs
  */
 int gxPLMessageBodySize (const gxPLMessage * message);
 
 /**
- * @brief Clear the body
- * @param message
+ * @brief Clear, release a body and all it's resources
+ * @param message pointer to the message
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageBodyClear (gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @param name
- * @return
+ * @brief Gets the value of a name/value pair
+ * @param message pointer to the message
+ * @param name the name
+ * @return pointer to the schema type, must not be released. NULL if an error occurs
  */
-char * gxPLMessagePairValueGet (const gxPLMessage * message, const char * name);
+const char * gxPLMessagePairValueGet (const gxPLMessage * message, const char * name);
 
 /**
- * @brief
- * @param message
- * @param name
- * @return
+ * @brief Check if a pair exist
+ * @param message pointer to the message
+ * @param name the name
+ * @return true if exists, false in the other cases, -1 if an error occurs
  */
 int gxPLMessagePairExist (const gxPLMessage * message, const char * name);
 
-
 /**
- * @brief
- * @param message
- * @param name
- * @param value
+ * @brief Adds a pair to the body
+ * @param message pointer to the message
+ * @param name the name
+ * @param value the value
+ * @return pointer to the schema type, must not be released. NULL if an error occurs
  */
 int gxPLMessagePairAdd (gxPLMessage * message, const char * name, const char * value);
 
 /**
- * @brief
- * @param message
- * @param name
- * @param value
+ * @brief Sets the value of a name/value pair
+ * @param message pointer to the message
+ * @param name the name
+ * @param value the value
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessagePairValueSet (gxPLMessage * message, const char * name, const char * value);
 
 /**
- * @brief
- * @param message
- * @param name
- * @param value
+ * @brief Produce value according to a format 
+ * @param message pointer to the message
+ * @param name the name
+ * @param format format as described in the sprintf() function man page
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessagePairValuePrintf (gxPLMessage * message, const char * name, const char * format, ...);
 
 /**
  * @brief Set a series of NameValue pairs for a message
- * @param message
+ * @param message pointer to the message
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessagePairValuesSet (gxPLMessage * message, ...);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Check if a message is valid
+ * @param message pointer to the message
+ * @return true if valid, false if not, -1 if an error occurs
+ */
+int gxPLMessageIsValid (const gxPLMessage * message);
+
+/**
+ * @brief Check if a message is in error
+ * @param message pointer to the message
+ * @return true if error, false if not, -1 if an error occurs
+ */
+int gxPLMessageIsError (const gxPLMessage * message);
+
+/**
+ * @brief gets the decoding state 
+ * @param message pointer to the message
+ * @return the state, -1 if an error occurs
+ */
+gxPLMessageState gxPLMessageStateGet (const gxPLMessage * message);
+
+/**
+ * @brief Clear all flags
+ * @param message pointer to the message
+ * @return 0, -1 if an error occurs
+ */
+int gxPLMessageFlagClear (gxPLMessage * message);
+
+/**
+ * @brief Check if a message is received
+ * @param message pointer to the message
+ * @return true if received, false if not, -1 if an error occurs
  */
 int gxPLMessageReceivedGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @param isBroadcast
+ * @brief Check if a message is received
+ * @param message pointer to the message
+ * @return true if received, false if not, -1 if an error occurs
+ */
+int gxPLMessageReceivedGet (const gxPLMessage * message);
+
+/**
+ * @brief Sets if a message is received
+ * @param message pointer to the message
+ * @param isReceived the value
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageReceivedSet (gxPLMessage * message, bool isReceived);
 
 /**
- * @brief
- * @param message
- * @return
+ * @brief Check if a message is broadcast
+ * @param message pointer to the message
+ * @return true if broadcast, false if not, -1 if an error occurs
  */
 int gxPLMessageBroadcastGet (const gxPLMessage * message);
 
 /**
- * @brief
- * @param message
- * @param isBroadcast
+ * @brief Sets if a message is broadcast
+ * @param message pointer to the message
+ * @param isBroadcast the value
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessageBroadcastSet (gxPLMessage * message, bool isBroadcast);
 
 /**
- * @brief 
- * @param n1
- * @param n2
- * @return 
+ * @brief Compare two identifiers
+ * @param id1 first id
+ * @param id2 second id
+ * @return It returns an integer less than, equal to, or greater than zero if id1 
+ * is found, respectively, to be less than, to match, or be greater than id2. 
  */
-int gxPLMessageIdCmp (const gxPLMessageId * n1, const gxPLMessageId * n2);
+int gxPLMessageIdCmp (const gxPLMessageId * id1, const gxPLMessageId * id2);
 
+/**
+ * @brief Gets an identifier from a string
+ * @param dest destination
+ * @param src source, this string is modified by the function and is no longer 
+ * valid after apple.
+ * @return 0, -1 if an error occurs
+ */
+int gxPLMessageIdFromString (gxPLMessageId * dest, char * src);
 
 /**
  * @}
  */
-
-#ifndef __DOXYGEN__
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-#endif /* __DOXYGEN__ not defined */
 
 /* ========================================================================== */
 __END_C_DECLS

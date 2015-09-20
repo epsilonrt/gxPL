@@ -10,9 +10,6 @@
 #define _GXPL_MESSAGE_PRIVATE_HEADER_
 
 #include <gxPL/message.h>
-
-/* macros =================================================================== */
-/* constants ================================================================ */
 /* structures =============================================================== */
 
 /*
@@ -32,22 +29,15 @@ typedef struct _gxPLMessage {
     struct {
 
       int isbroadcast: 1;
-      int isreceived: 1; /* TRUE if received, FALSE if being sent */
+      int isreceived: 1;
+      int isvalid: 1;
+      int iserror: 1;
     };
   };
+  gxPLMessageState state;
 
   xVector body;
 } gxPLMessage;
-
-
-/* types ==================================================================== */
-/* private variables ======================================================== */
-/* private functions ======================================================== */
-/* public variables ========================================================= */
-/* internal public functions ================================================ */
-
-// -----------------------------------------------------------------------------
-
 
 /* ========================================================================== */
 #endif /* _GXPL_MESSAGE_PRIVATE_HEADER_ defined */

@@ -2,7 +2,6 @@
  * @file message.c
  * xPL Message support functions
  *
- * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
@@ -18,15 +17,11 @@
 #include <gxPL/util.h>
 #include "message_p.h"
 
-/* macros =================================================================== */
 /* constants ================================================================ */
 #ifndef CONFIG_ALLOC_STR_GROW
 #define CONFIG_ALLOC_STR_GROW  256
 #endif
 
-/* structures =============================================================== */
-/* types ==================================================================== */
-/* private variables ======================================================== */
 /* private functions ======================================================== */
 
 // -----------------------------------------------------------------------------
@@ -66,7 +61,7 @@ prvSetVendorId (gxPLMessageId * id, const char * vendor_id) {
     errno = EINVAL;
     return -1;
   }
-  return gxPLStrCpy (id->vendor, vendor_id);
+  return (gxPLStrCpy (id->vendor, vendor_id) > 0) ? 0 : -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -81,7 +76,7 @@ prvSetDeviceId (gxPLMessageId * id, const char * device_id) {
     errno = EINVAL;
     return -1;
   }
-  return gxPLStrCpy (id->device, device_id);
+  return (gxPLStrCpy (id->device, device_id) > 0) ? 0 : -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -96,14 +91,17 @@ prvSetInstanceId (gxPLMessageId * id, const char * instance_id) {
     errno = EINVAL;
     return -1;
   }
-  return gxPLStrCpy (id->instance, instance_id);
+  return (gxPLStrCpy (id->instance, instance_id) > 0) ? 0 : -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
 prvSetId (gxPLMessageId * dst, const gxPLMessageId * src) {
+
   if (prvSetVendorId (dst, src->vendor) == 0) {
+
     if (prvSetDeviceId (dst, src->device) == 0) {
+
       return prvSetInstanceId (dst, src->instance);
     }
   }
@@ -139,7 +137,358 @@ prvStrPrintf (char ** buf, int * buf_size, int index, const char * format, ...) 
   return size;
 }
 
+// -----------------------------------------------------------------------------
+static gxPLPair *
+prvPairFromLine (char ** line) {
+  char * p = strsep (line, "\n");
+
+  if (*line) {
+    // line found
+    gxPLPair * pair = gxPLPairFromString (p);
+    if (pair) {
+      return pair;
+    }
+    vLog (LOG_INFO, "unable to find a '=' in this line: %s", p);
+  }
+  return NULL;
+}
+
+
 /* internal public functions ================================================ */
+
+// -----------------------------------------------------------------------------
+gxPLMessage *
+gxPLMessageFromString (gxPLMessage * m, char * str) {
+
+  if (str) {
+    char *p, *line;
+    gxPLPair * pair;
+
+    if (strlen (str) == 0) {
+
+      vLog (LOG_INFO, "empty message");
+      return m;
+    }
+
+    if (m == NULL) {
+      // New message
+      m = gxPLMessageNew (gxPLMessageAny);
+      assert (m);
+      m->isreceived = 1;
+    }
+
+    line = str;
+    while ( (m->isreceived) && (m->isvalid == 0) &&
+            (m->iserror == 0) && (line != NULL)) {
+
+      // message received and not yet decoded
+      switch (m->state) {
+
+        case gxPLMessageStateInit:
+          //--------------------------------------------------------------------
+
+          // gets first line
+          p = strsep (&line, "\n");
+
+          if ( (strncmp (p, "xpl-", 4) != 0) ||
+               (line == NULL) || (strlen (p) != 8)) {
+
+            // The string does not contain a xPL Message !
+            vLog (LOG_INFO, "Unknown message header '%s' - bad message", p);
+            m->iserror = 1;
+            break;
+          }
+
+          if (strcmp (&p[4], "cmnd") == 0) {
+
+            m->type = gxPLMessageCommand;
+          }
+          else if (strcmp (&p[4], "stat") == 0) {
+
+            m->type = gxPLMessageStatus;
+          }
+          else if (strcmp (&p[4], "trig") == 0) {
+
+            m->type = gxPLMessageTrigger;
+          }
+          else {
+
+            vLog (LOG_INFO, "Unknown message type '%s' - bad message", p);
+            m->iserror = 1;
+            break;
+          }
+          m->state = gxPLMessageStateHeader;
+          // no break;
+
+        case gxPLMessageStateHeader:
+          //--------------------------------------------------------------------
+          // gets next line
+          p = strsep (&line, "\n");
+          if (line == NULL) {
+            // nothing to read, exit...
+            break;
+          }
+
+          if (strcmp (p, "{") != 0) {
+
+            vLog (LOG_INFO, "incorrectly formatted message", p);
+            m->iserror = 1;
+            break;
+          }
+          m->state = gxPLMessageStateHeaderHop;
+          // no break;
+
+        case gxPLMessageStateHeaderHop:
+          //--------------------------------------------------------------------
+          // gets next pair
+          pair = prvPairFromLine (&line);
+
+          if (line == NULL) {
+            // no line found or ...
+            if (pair == NULL) {
+              // no '=' found
+              m->iserror = 1;
+            }
+            break;
+          }
+
+          if (strcmp (pair->name, "hop") == 0) {
+            int hop;
+            char *endptr;
+
+            hop = strtol (pair->value, &endptr, 10);
+            if (*endptr != '\0') {
+
+              // invalid hop value
+              prvPairDelete (pair);
+              vLog (LOG_INFO, "invalid hop count");
+              m->iserror = 1;
+              break;
+            }
+            prvPairDelete (pair);
+            m->hop = hop;
+            m->state = gxPLMessageStateHeaderSource;
+          }
+          else {
+
+            vLog (LOG_INFO, "unable to find hop count");
+            m->iserror = 1;
+            break;
+          }
+          // no break;
+
+        case gxPLMessageStateHeaderSource:
+          //--------------------------------------------------------------------
+          // gets next pair
+          pair = prvPairFromLine (&line);
+
+          if (line == NULL) {
+            // no line found or ...
+            if (pair == NULL) {
+              // no '=' found
+              m->iserror = 1;
+            }
+            break;
+          }
+
+          if (strcmp (pair->name, "source") == 0) {
+
+            if (gxPLMessageIdFromString (&m->source, pair->value) != 0) {
+
+              // illegal source value
+              prvPairDelete (pair);
+              vLog (LOG_INFO, "invalid source");
+              m->iserror = 1;
+              break;
+            }
+
+            prvPairDelete (pair);
+            m->state = gxPLMessageStateHeaderTarget;
+          }
+          else {
+
+            vLog (LOG_INFO, "unable to find source");
+            m->iserror = 1;
+            break;
+          }
+          // no break;
+
+        case gxPLMessageStateHeaderTarget:
+          //--------------------------------------------------------------------
+          // gets next pair
+          pair = prvPairFromLine (&line);
+
+          if (line == NULL) {
+            // no line found or ...
+            if (pair == NULL) {
+              // no '=' found
+              m->iserror = 1;
+            }
+            break;
+          }
+
+          if (strcmp (pair->name, "target") == 0) {
+
+            if (strcmp (pair->value, "*") == 0) {
+
+              strcpy (m->target.vendor, "*");
+              m->isbroadcast = 1;
+            }
+            else {
+
+              if (gxPLMessageIdFromString (&m->target, pair->value) != 0) {
+
+                // illegal target value
+                vLog (LOG_INFO, "invalid target");
+                prvPairDelete (pair);
+                break;
+              }
+            }
+
+            prvPairDelete (pair);
+            m->state = gxPLMessageStateHeaderEnd;
+          }
+          else {
+
+            vLog (LOG_INFO, "unable to find target");
+            m->iserror = 1;
+            break;
+          }
+          // no break;
+
+        case gxPLMessageStateHeaderEnd:
+          //--------------------------------------------------------------------
+          // gets next line
+          p = strsep (&line, "\n");
+          if (line == NULL) {
+            // nothing to read, exit...
+            break;
+          }
+
+          if (strcmp (p, "}") != 0) {
+
+            vLog (LOG_INFO, "incorrectly formatted message", p);
+            m->iserror = 1;
+            break;
+          }
+          m->state = gxPLMessageStateSchema;
+          // no break;
+
+        case gxPLMessageStateSchema:
+          //--------------------------------------------------------------------
+          // gets next line
+          p = strsep (&line, "\n");
+          if (line) {
+            char * class;
+            char * type = p;
+
+            class = strsep (&type, ".");
+            if (type == NULL) {
+
+              vLog (LOG_INFO, "unable to find a '.' in this line: %s", p);
+              m->iserror = 1;
+              break;
+            }
+            if (gxPLMessageSchemaClassSet (m, class) != 0) {
+
+              vLog (LOG_INFO, "invalid schema class");
+              m->iserror = 1;
+              break;
+            }
+            if (gxPLMessageSchemaTypeSet (m, type) != 0) {
+
+              vLog (LOG_INFO, "invalid schema type");
+              m->iserror = 1;
+              break;
+            }
+            m->state = gxPLMessageStateBodyBegin;
+          }
+          else {
+
+            // nothing to read, exit...
+            break;
+          }
+          // no break;
+
+        case gxPLMessageStateBodyBegin:
+          //--------------------------------------------------------------------
+          // gets next line
+          p = strsep (&line, "\n");
+          if (line == NULL) {
+            // nothing to read, exit...
+            break;
+          }
+
+          if (strcmp (p, "{") != 0) {
+
+            vLog (LOG_INFO, "incorrectly formatted message", p);
+            m->iserror = 1;
+            break;
+          }
+          m->state = gxPLMessageStateBody;
+          // no break;
+
+        case gxPLMessageStateBody:
+          //--------------------------------------------------------------------
+          // gets next pair
+          if (strchr (line, '=')) {
+            pair = prvPairFromLine (&line);
+
+            if (pair) {
+              if (iVectorAppend (&m->body, pair) == 0) {
+
+                break;
+              }
+              prvPairDelete (pair);
+            }
+            m->iserror = 1;
+            vLog (LOG_INFO, "unable to append a pair in the message body");
+            break;
+          }
+          else {
+
+            m->state = gxPLMessageStateBodyEnd;
+          }
+          // no break;
+
+        case gxPLMessageStateBodyEnd:
+          //--------------------------------------------------------------------
+          // gets next line
+          p = strsep (&line, "\n");
+          if (line == NULL) {
+            // nothing to read, exit...
+            break;
+          }
+
+          if (strcmp (p, "}") != 0) {
+
+            vLog (LOG_INFO, "incorrectly formatted message", p);
+            m->iserror = 1;
+            break;
+          }
+          m->state = gxPLMessageStateEnd;
+          m->isvalid = 1;
+          break;
+
+        default:
+          break;
+      } // switch end
+    } // while end
+
+    if (m->iserror) {
+
+      m->state = gxPLMessageStateError;
+    }
+  }
+  else {
+
+    // null ptr
+    errno = EFAULT;
+    vLog (LOG_ERR, "str, %s", strerror (errno));
+  }
+
+  return m;
+}
 
 // -----------------------------------------------------------------------------
 char *
@@ -223,17 +572,6 @@ gxPLMessageToString (const gxPLMessage * message) {
 
 // -----------------------------------------------------------------------------
 gxPLMessage *
-gxPLMessageFromString (const char * str) {
-
-  if (str) {
-  }
-
-  errno = EFAULT;
-  return NULL;
-}
-
-// -----------------------------------------------------------------------------
-gxPLMessage *
 gxPLMessageNew (gxPLMessageType type) {
   gxPLMessage * message = calloc (1, sizeof (gxPLMessage));
 
@@ -245,6 +583,7 @@ gxPLMessageNew (gxPLMessageType type) {
 
         message->hop = 1;
         message->type = type;
+        message->state = gxPLMessageStateInit;
         return message;
       }
     }
@@ -278,7 +617,7 @@ gxPLMessageSchemaClassSet (gxPLMessage * message, const char * schema_class) {
     errno = EINVAL;
     return -1;
   }
-  return gxPLStrCpy (message->schema.class, schema_class);
+  return (gxPLStrCpy (message->schema.class, schema_class) > 0) ? 0 : -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -293,7 +632,7 @@ gxPLMessageSchemaTypeSet (gxPLMessage * message, const char * schema_type) {
     errno = EINVAL;
     return -1;
   }
-  return gxPLStrCpy (message->schema.type, schema_type);
+  return (gxPLStrCpy (message->schema.type, schema_type) > 0) ? 0 : -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -377,7 +716,7 @@ gxPLMessagePairAdd (gxPLMessage * message, const char * name, const char * value
     if (p) {
       p->name = malloc (strlen (name) + 1);
       if (p->name) {
-        if (gxPLStrCpy (p->name, name) == 0) {
+        if (gxPLStrCpy (p->name, name) > 0) {
 
           p->value = malloc (strlen (value) + 1);
           if (p->value) {
@@ -428,7 +767,7 @@ gxPLMessagePairValueSet (gxPLMessage * message, const char * name, const char * 
         }
       }
 
-      if (gxPLStrCpy (p->name, name) != 0) {
+      if (gxPLStrCpy (p->name, name) < 0) {
 
         return -1;
       }
@@ -510,7 +849,7 @@ gxPLMessagePairValuesSet (gxPLMessage * message, ...) {
 }
 
 // -----------------------------------------------------------------------------
-char *
+const char *
 gxPLMessagePairValueGet (const gxPLMessage * message, const char * name) {
 
   if ( (message) && (name)) {
@@ -655,6 +994,50 @@ gxPLMessageSourceInstanceIdGet (const gxPLMessage * message) {
   }
 
   return message->source.instance;
+}
+
+// -----------------------------------------------------------------------------
+int 
+gxPLMessageIsValid (const gxPLMessage * message) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  return message->isvalid;  
+}
+
+// -----------------------------------------------------------------------------
+int 
+gxPLMessageIsError (const gxPLMessage * message) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  return message->iserror;  
+}
+
+// -----------------------------------------------------------------------------
+gxPLMessageState 
+gxPLMessageStateGet (const gxPLMessage * message) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  return message->state;  
+}
+
+// -----------------------------------------------------------------------------
+int 
+gxPLMessageFlagClear (gxPLMessage * message) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  return message->flag = 0;  
 }
 
 // -----------------------------------------------------------------------------
@@ -874,6 +1257,32 @@ gxPLMessageIdCmp (const gxPLMessageId * n1, const gxPLMessageId * n2) {
     }
   }
   return ret;
+}
+
+// -----------------------------------------------------------------------------
+// vendor-device.instance\0
+int
+gxPLMessageIdFromString (gxPLMessageId * id, char * str) {
+  char *p, *n;
+
+  n = str;
+  p = strsep (&n, "-");
+  if (n) {
+    if (prvSetVendorId (id, p) == 0) {
+
+      p = strsep (&n, ".");
+      if (n) {
+
+        if (prvSetDeviceId (id, p) == 0) {
+
+          return prvSetInstanceId (id, n);
+        }
+      }
+    }
+
+  }
+  errno = EINVAL;
+  return -1;
 }
 
 // -----------------------------------------------------------------------------

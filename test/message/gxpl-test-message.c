@@ -27,6 +27,7 @@ main (int argc, char **argv) {
   int ret;
   gxPLMessage * m = NULL;
   char * str = NULL;
+  const char * cstr = NULL;
 
   test_count++;
   m = gxPLMessageNew (gxPLMessageTrigger);
@@ -211,17 +212,17 @@ main (int argc, char **argv) {
   test (ret == false);
   
   test_count++;
-  str = gxPLMessagePairValueGet(m, "command");
-  test (str);
-  ret = strcmp (str, "dim");
+  cstr = gxPLMessagePairValueGet(m, "command");
+  test (cstr);
+  ret = strcmp (cstr, "dim");
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessagePairValueSet(m, "command", "test");
   test (ret == 0);
-  str = gxPLMessagePairValueGet(m, "command");
-  test (str);
-  ret = strcmp (str, "test");
+  cstr = gxPLMessagePairValueGet(m, "command");
+  test (cstr);
+  ret = strcmp (cstr, "test");
   test (ret == 0);
   
   test_count++;
@@ -229,18 +230,18 @@ main (int argc, char **argv) {
   sprintf (buf, "HelloWorld0x%X---%s", 1234, "Ok");
   ret = gxPLMessagePairValuePrintf (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
   test (ret == 0);
-  str = gxPLMessagePairValueGet(m, "command");
-  test (str);
-  printf ("%s -> %s\n", buf, str);
-  ret = strcmp (str, buf);
+  cstr = gxPLMessagePairValueGet(m, "command");
+  test (cstr);
+  printf ("%s -> %s\n", buf, cstr);
+  ret = strcmp (cstr, buf);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessagePairValueSet(m, "command", "dim");
   test (ret == 0);
-  str = gxPLMessagePairValueGet(m, "command");
-  test (str);
-  ret = strcmp (str, "dim");
+  cstr = gxPLMessagePairValueGet(m, "command");
+  test (cstr);
+  ret = strcmp (cstr, "dim");
   test (ret == 0);
   
   test_count++;
@@ -259,13 +260,6 @@ main (int argc, char **argv) {
   ret = gxPLMessageBodySize (m);
   test (ret == 3);
 
-  // Print the message
-  test_count++;
-  str = gxPLMessageToString (m);
-  test (str);
-  printf ("unicast message:\n%s\n", str);
-  free(str);
-  
   // Test Received
   test_count++;
   ret = gxPLMessageReceivedGet(m);
@@ -279,7 +273,38 @@ main (int argc, char **argv) {
   ret = gxPLMessageReceivedGet(m);
   test(ret == false);
 
-  // Test Broadcast
+  // Converts the message to a string and prints it
+  test_count++;
+  str = gxPLMessageToString (m);
+  test (str);
+  printf ("unicast message:\n%s", str);
+  
+  // Decode the message
+  test_count++;
+  char * str1 = malloc (strlen(str) + 1);
+  test(str1);
+  strcpy (str1, str);
+  gxPLMessage * rm = gxPLMessageFromString(NULL, str);
+  test (rm);
+
+  test_count++;
+  char * str2 = gxPLMessageToString (m);
+  test (str2);
+  printf ("received message:\n%s", str2);
+
+  test_count++;
+  ret = strcmp (str1, str2);
+  test(ret == 0);
+  printf("the received message is the same as that which was sent\n\n");
+
+  test_count++;
+  ret = gxPLMessageDelete(rm);
+  test(ret == 0);
+  free(str);
+  free(str1);
+  free(str2);
+  
+  // Converts the message to a string and prints it
   test_count++;
   ret = gxPLMessageBroadcastGet(m);
   test(ret == false);
@@ -287,14 +312,37 @@ main (int argc, char **argv) {
   test(ret == 0);
   ret = gxPLMessageBroadcastGet(m);
   test(ret == true);
-
   
   // Print the message
   test_count++;
   str = gxPLMessageToString (m);
   test (str);
-  printf ("broadcast message:\n%s\n", str);
+  printf ("broadcast message:\n%s", str);
+  
+  // Decode the message
+  test_count++;
+  str1 = malloc (strlen(str) + 1);
+  test(str1);
+  strcpy (str1, str);
+  rm = gxPLMessageFromString(NULL, str);
+  test (rm);
+
+  test_count++;
+  str2 = gxPLMessageToString (m);
+  test (str2);
+  printf ("received message:\n%s", str2);
+
+  test_count++;
+  ret = strcmp (str1, str2);
+  test(ret == 0);
+  printf("the received message is the same as that which was sent\n\n");
+
+  test_count++;
+  ret = gxPLMessageDelete(rm);
+  test(ret == 0);
   free(str);
+  free(str1);
+  free(str2);
 
   // Clear body
   test_count++;
@@ -308,7 +356,7 @@ main (int argc, char **argv) {
   ret = gxPLMessageDelete (m);
   test (ret == 0);
 
-  printf ("%d tests were successful !\n", test_count);
+  printf ("All tests (%d) were successful !\n", test_count);
   return 0;
 }
 /* ========================================================================== */
