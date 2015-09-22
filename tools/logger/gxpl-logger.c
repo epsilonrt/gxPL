@@ -93,7 +93,7 @@ parseConfig (gxPLService * service) {
 /* --------------------------------------------------------------------------
  * Handle a change to the logger service configuration */
 static void
-configChangedHandler (gxPLService * service, xPL_Object * userData) {
+configChangedHandler (gxPLService * service, void * userData) {
 
   /* Read config items for service and install */
   parseConfig (service);
@@ -112,7 +112,7 @@ void printTimestamp (void) {
 
 /* --------------------------------------------------------------------------
  * Print info on incoming messages */
-void printXPLMessage (gxPLMessage * message, xPL_Object * userValue) {
+void printXPLMessage (gxPLMessage * message, void * userValue) {
 
   printTimestamp();
   fprintf (logFile, "[xPL_MSG] TYPE=");
@@ -179,7 +179,7 @@ main (int argc, char * argv[]) {
   }
 
   /* And a listener for all xPL messages */
-  gxPLMessageAddListener (printXPLMessage, NULL);
+  gxPLMessageListenerAdd (printXPLMessage, NULL);
 
   /* Create a service so the hubs know to send things to us        */
   /* While we are not relaly using he service, xPL hubs will not   */

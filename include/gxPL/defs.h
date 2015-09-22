@@ -20,7 +20,6 @@ typedef struct _gxPL gxPL;
 typedef struct _gxPLIo gxPLIo;
 typedef struct _gxPLService gxPLService;
 typedef struct _gxPLMessage gxPLMessage;
-typedef struct _gxPLNameValueList gxPLNameValueList;
 typedef struct _gxPLServiceChangedListenerDef gxPLServiceChangedListenerDef;
 typedef struct _gxPLServiceConfigurable gxPLServiceConfigurable;
 
@@ -79,37 +78,78 @@ typedef enum {
  * @brief Possible xPL ioctl call
  */
 typedef enum {
+  gxPLIoFuncNone = 0,
   gxPLIoFuncPoll,
   gxPLIoFuncGetIface,
   gxPLIoFuncGetBcastAddr,
   gxPLIoFuncGetLocalAddr,
   gxPLIoFuncNetAddrToString,
-  gxPLIoFuncGetInetPort,
+  gxPLIoFuncError = -1
 } gxPLIoFunc;
 
 /**
  * @brief Io families
  */
 typedef enum {
-  gxPLIoFamilyInet4,
-  gxPLIoFamilyInet6,
-  gxPLIoFamilyZigbee16,
-  gxPLIoFamilyZigbee64,
-} gxPLIoFamily;
-  
-/* types ==================================================================== */
-/**
- * @brief Generic xPL object, void for now, but could change in the future
- */
-typedef void xPL_Object;
+  gxPLNetFamilyInet4    = 2,
+  gxPLNetFamilyInet6    = 3, // gxPLNetFamilyInet4 | 1
+  gxPLNetFamilyZigbee16 = 4,
+  gxPLNetFamilyZigbee64 = 5, // gxPLNetFamilyZigbee16 | 1
+} gxPLNetFamily;
 
 /**
- * @brief Network address
+ * @brief Decoding states of a message
  */
-typedef struct _gxPLAddress {
-  gxPLIoFamily family;
+typedef enum {
+  gxPLMessageStateInit = 0,
+  gxPLMessageStateHeader,
+  gxPLMessageStateHeaderHop,
+  gxPLMessageStateHeaderSource,
+  gxPLMessageStateHeaderTarget,
+  gxPLMessageStateHeaderEnd,
+  gxPLMessageStateSchema,
+  gxPLMessageStateBodyBegin,
+  gxPLMessageStateBody,
+  gxPLMessageStateBodyEnd,
+  gxPLMessageStateEnd,
+  gxPLMessageStateError = -1
+} gxPLMessageState;
+  
+/* types ==================================================================== */
+
+/* structures =============================================================== */
+/**
+ * @brief Describe a gxPL configuration
+ */
+typedef struct _gxPLConfig {
+
+  char iface[NAME_MAX];
+  char iolayer[NAME_MAX];
+  gxPLConnectType connecttype;
+  union {
+    unsigned int flag;
+    struct {
+      unsigned int debug: 1;
+      unsigned int malloc: 1;
+    };
+  };
+} gxPLConfig;
+
+/**
+ * @brief Describe a network address
+ */
+typedef struct _gxPLNetAddress {
+  gxPLNetFamily family;
+  uint8_t size;
+  uint16_t port;  /**< port in host order */
+  union {
+    uint16_t flag;
+    struct {
+      uint16_t isbroadcast: 1;
+    };
+  };
   uint8_t n_addr[16]; /**< address in network order */
-} gxPLAddress;
+} gxPLNetAddress;
 
 /**
  * @}

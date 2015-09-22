@@ -13,7 +13,7 @@
 #include <stdarg.h>
 #include <sysio/log.h>
 
-#include <gxPL.h>
+#define GXPL_IO_INTERNALS
 #include "io_p.h"
 
 /* constants ================================================================ */
@@ -25,7 +25,7 @@ typedef struct template_data {
 } template_data;
 
 /* macros =================================================================== */
-#define dp ((template_data *)gxpl->io->pdata)
+#define dp ((template_data *)io->pdata)
 
 /* types ==================================================================== */
 /* private variables ======================================================== */
@@ -34,40 +34,40 @@ typedef struct template_data {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateOpen (gxPL * gxpl) {
+gxPLTemplateOpen (gxPLIo * io) {
 
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateRead (gxPL * gxpl, void * buffer, int count) {
+gxPLTemplateRead (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
 
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateWrite (gxPL * gxpl, const void * buffer, int count) {
+gxPLTemplateWrite (gxPLIo * io, const void * buffer, int count, gxPLNetAddress * target) {
 
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateClose (gxPL * gxpl) {
+gxPLTemplateClose (gxPLIo * io) {
 
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateCtl (gxPL * gxpl, int c, va_list ap) {
+gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
   int ret = 0;
 
   switch (c) {
 
-      // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncPoll, int * available_bytes, int timeout_ms)
+      // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncPoll, int * available_bytes, int timeout_ms)
     case gxPLIoFuncPoll: {
       int * available_bytes = va_arg (ap, int*);
       int timeout_ms = va_arg (ap, int);
@@ -76,7 +76,7 @@ gxPLTemplateCtl (gxPL * gxpl, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetInetPort, int * iport)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetInetPort, int * iport)
     case gxPLIoFuncGetInetPort: {
       int * iport = va_arg (ap, int*);
       // TODO
@@ -84,27 +84,31 @@ gxPLTemplateCtl (gxPL * gxpl, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetBcastAddr, gxPLAddress * bcast_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLNetAddress * bcast_addr)
     case gxPLIoFuncGetBcastAddr: {
-      gxPLAddress * bcast_addr = va_arg (ap, gxPLAddress*);
+      gxPLNetAddress * bcast_addr = va_arg (ap, gxPLNetAddress*);
       // TODO
+      // bcast_addr->size = ? ;
       // bcast_addr->family = ? ;
+      // bcast_addr->flag = ? ;
       ret = -1;
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetLocalAddr, gxPLAddress * local_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLNetAddress * local_addr)
     case gxPLIoFuncGetLocalAddr: {
-      gxPLAddress * local_addr = va_arg (ap, gxPLAddress*);
+      gxPLNetAddress * local_addr = va_arg (ap, gxPLNetAddress*);
       // TODO
+      // local_addr->size = ? ;
       // local_addr->family = ? ;
+      // local_addr->flag = ? ;
       ret = -1;
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncNetAddrToString, gxPLAddress * net_addr, char ** str_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLNetAddress * net_addr, char ** str_addr)
     case gxPLIoFuncNetAddrToString: {
-      gxPLAddress * addr = va_arg (ap, gxPLAddress*);
+      gxPLNetAddress * addr = va_arg (ap, gxPLNetAddress*);
 
       if (addr->family == ??) {
         char ** str_addr = va_arg (ap, char**);
@@ -132,8 +136,8 @@ gxPLTemplateCtl (gxPL * gxpl, int c, va_list ap) {
 static gxPLIoOps
 ops = {
   .open  = gxPLTemplateOpen,
-  .read  = gxPLTemplateRead,
-  .write = gxPLTemplateWrite,
+  .recv  = gxPLTemplateRead,
+  .send = gxPLTemplateWrite,
   .close = gxPLTemplateClose,
   .ctl   = gxPLTemplateCtl
 };

@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = gxpl-test-message
+TARGET = gxpl-test
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..
@@ -145,8 +145,7 @@ $(error GXPL_DEBUG_TEST is On and GXPL_ROOT is not defined, double-check that !)
 else
 VPATH+=:$(GXPL_ROOT)
 EXTRA_INCDIRS += $(GXPL_ROOT)/include
-# SRC += $(addprefix src/, $(notdir $(wildcard $(GXPL_ROOT)/src/*.c)))
-SRC += src/util.c src/message.c
+SRC += $(addprefix src/, $(notdir $(wildcard $(GXPL_ROOT)/src/*.c)))
 endif
 else
 EXTRA_LIBS += gxPL

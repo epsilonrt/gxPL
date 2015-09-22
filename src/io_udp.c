@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <sysio/log.h>
 
-#include <gxPL.h>
+#define GXPL_IO_INTERNALS
 #include "io_p.h"
 
 #include <unistd.h>
@@ -43,7 +43,7 @@ typedef struct udp_data {
 } udp_data;
 
 /* macros =================================================================== */
-#define dp ((udp_data *)gxpl->io->pdata)
+#define dp ((udp_data *)io->pdata)
 
 /* types ==================================================================== */
 /* private variables ======================================================== */
@@ -125,7 +125,7 @@ maximize_rxbuffer_size (int fd) {
  * Otherwise, install the name as the interface and return 0
  */
 static int
-find_default_iface (int fd, gxPL * gxpl) {
+find_default_iface (int fd, gxPLIo * io) {
   struct ifconf iflist;
   struct ifreq * ifr;
   struct ifreq ifinfo;
@@ -179,9 +179,9 @@ find_default_iface (int fd, gxPL * gxpl) {
     }
 
     // If successful, use this interface
-    strcpy (gxpl->config->iface, ifr[i].ifr_name);
+    strcpy (io->config->iface, ifr[i].ifr_name);
     vLog (LOG_DEBUG, "Choose interface %s as default interface",
-          gxpl->config->iface);
+          io->config->iface);
     return 0;
   }
 
@@ -193,7 +193,7 @@ find_default_iface (int fd, gxPL * gxpl) {
  * Create a socket for broadcasting messages
  */
 static int
-make_broadcast_connection (gxPL * gxpl) {
+make_broadcast_connection (gxPLIo * io) {
   int fd;
   int flag = 1;
   struct protoent *ppe;
@@ -226,9 +226,9 @@ make_broadcast_connection (gxPL * gxpl) {
   }
 
   // See if we need to find a default interface
-  if (strlen (gxpl->config->iface) == 0) {
+  if (strlen (io->config->iface) == 0) {
 
-    if (find_default_iface (fd, gxpl)) {
+    if (find_default_iface (fd, io)) {
 
       vLog (LOG_ERR, "Could not find a working, non-loopback network interface");
       close (fd);
@@ -239,12 +239,12 @@ make_broadcast_connection (gxPL * gxpl) {
   // Init the interface info request
   memset (&ifinfo, 0, sizeof (struct ifreq));
   ifinfo.ifr_addr.sa_family = AF_INET;
-  strcpy (ifinfo.ifr_name, gxpl->config->iface);
+  strcpy (ifinfo.ifr_name, io->config->iface);
 
   // Get our interface address
   if (ioctl (fd, SIOCGIFADDR, &ifinfo) != 0) {
 
-    vLog (LOG_ERR, "Unable to get IP addr for interface %s", gxpl->config->iface);
+    vLog (LOG_ERR, "Unable to get IP addr for interface %s", io->config->iface);
     close (fd);
     return -1;
   }
@@ -256,7 +256,7 @@ make_broadcast_connection (gxPL * gxpl) {
   memset (&ifinfo, 0, sizeof (struct ifreq));
   ifinfo.ifr_addr.sa_family = AF_INET;
   ifinfo.ifr_broadaddr.sa_family = AF_INET;
-  strcpy (ifinfo.ifr_name, gxpl->config->iface);
+  strcpy (ifinfo.ifr_name, io->config->iface);
   if (ioctl (fd, SIOCGIFNETMASK, &ifinfo) != 0) {
 
     vLog (LOG_ERR, "Unable to extract the interface net mask");
@@ -284,7 +284,7 @@ make_broadcast_connection (gxPL * gxpl) {
 /* -----------------------------------------------------------------------------
  * make a bind connection */
 static int
-make_connection (gxPL * gxpl) {
+make_connection (gxPLIo * io) {
   int fd;
   int flag = 1;
   struct protoent *ppe;
@@ -296,7 +296,7 @@ make_connection (gxPL * gxpl) {
   memset (&socket_info, 0, sizeof (socket_info));
   socket_info.sin_family = AF_INET;
   socket_info.sin_addr.s_addr = INADDR_ANY;
-  if (gxpl->config->connecttype == gxPLConnectViaHub) {
+  if (io->config->connecttype == gxPLConnectViaHub) {
 
     socket_info.sin_port = htons (0);
   }
@@ -318,7 +318,7 @@ make_connection (gxPL * gxpl) {
     return -1;
   }
 
-  if (gxpl->config->connecttype != gxPLConnectViaHub) {
+  if (io->config->connecttype != gxPLConnectViaHub) {
 
     if (setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &flag,
                     sizeof (flag)) < 0) {
@@ -350,7 +350,7 @@ make_connection (gxPL * gxpl) {
     return -1;
   }
 
-  if (gxpl->config->connecttype == gxPLConnectViaHub) {
+  if (io->config->connecttype == gxPLConnectViaHub) {
 
     /* Fetch the actual socket port # */
     if (getsockname (fd, (struct sockaddr *) &socket_info,
@@ -368,7 +368,7 @@ make_connection (gxPL * gxpl) {
   dp->iport = ntohs (socket_info.sin_port);
   if (dp->iport == XPL_PORT) {
 
-    gxpl->config->connecttype = gxPLConnectStandAlone;
+    io->config->connecttype = gxPLConnectStandAlone;
   }
   set_nonblock (dp->ifd);
   maximize_rxbuffer_size (dp->ifd);
@@ -378,20 +378,20 @@ make_connection (gxPL * gxpl) {
 /* -----------------------------------------------------------------------------
  * Figure out what sort of connection to make and do it */
 static int
-make_bind_connection (gxPL * gxpl) {
+make_bind_connection (gxPLIo * io) {
 
   /* Try an stand along connection */
-  if ( (gxpl->config->connecttype == gxPLConnectStandAlone) ||
-       (gxpl->config->connecttype == gxPLConnectAuto)) {
+  if ( (io->config->connecttype == gxPLConnectStandAlone) ||
+       (io->config->connecttype == gxPLConnectAuto)) {
 
 
     /* Attempt the connection */
     vLog (LOG_DEBUG, "Attemping standalone xPL connection");
-    if (make_connection (gxpl) < 0) {
+    if (make_connection (io) < 0) {
 
       /* If we failed and this what we want, bomb out */
       vLog (LOG_ERR, "Standalone connect failed - %d %d",
-            gxpl->config->connecttype, gxPLConnectStandAlone);
+            io->config->connecttype, gxPLConnectStandAlone);
       return -1;
     }
 
@@ -402,7 +402,7 @@ make_bind_connection (gxPL * gxpl) {
 
   /* Try a hub based connection */
   vLog (LOG_DEBUG, "Attempting via hub xPL connection");
-  if (make_connection (gxpl) < 0) {
+  if (make_connection (io) < 0) {
 
     return -1;
   }
@@ -414,7 +414,7 @@ make_bind_connection (gxPL * gxpl) {
 
 // -----------------------------------------------------------------------------
 static int
-iopoll (gxPL * gxpl, int * available_data, int timeout_ms) {
+iopoll (gxPLIo * io, int * available_data, int timeout_ms) {
   int ret;
   fd_set set;
   struct timeval timeout;
@@ -434,7 +434,7 @@ iopoll (gxPL * gxpl, int * available_data, int timeout_ms) {
 
     vLog (LOG_ERR, "failed to poll listen socket: %s", strerror (errno));
   }
-  else if (ret > 0) {
+  else if ( (ret > 0) && (FD_ISSET (dp->ifd, &set))) {
 
     ret = ioctl (dp->ifd, FIONREAD, available_data);
   }
@@ -444,31 +444,31 @@ iopoll (gxPL * gxpl, int * available_data, int timeout_ms) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpOpen (gxPL * gxpl) {
+gxPLUdpOpen (gxPLIo * io) {
 
-  if (gxpl->io->pdata == NULL) {
+  if (io->pdata == NULL) {
 
-    gxpl->io->pdata = calloc (1, sizeof (udp_data));
-    assert (gxpl->io->pdata);
+    io->pdata = calloc (1, sizeof (udp_data));
+    assert (io->pdata);
     dp->ifd = -1;
     dp->ofd = -1;
 
     // Setup the broadcasting interface
-    if (make_broadcast_connection (gxpl) < 0) {
+    if (make_broadcast_connection (io) < 0) {
 
-      free (gxpl->io->pdata);
+      free (io->pdata);
       return -1;
     }
 
     // Attempt to make bind connection
-    if (make_bind_connection (gxpl) < 0) {
+    if (make_bind_connection (io) < 0) {
       int ret;
 
       ret = close (dp->ofd);
       if (ret != 0) {
         vLog (LOG_ERR, "failed to close broadcast socket: %s", strerror (errno));
       }
-      free (gxpl->io->pdata);
+      free (io->pdata);
       return -1;
     }
 
@@ -480,40 +480,64 @@ gxPLUdpOpen (gxPL * gxpl) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpRead (gxPL * gxpl, void * buffer, int count) {
+gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
   int ret;
+  struct sockaddr_in client;
+  socklen_t addrlen = sizeof (client);
 
-  /* Fetch the next message, if any */
-  if ( (ret = recvfrom (dp->ifd, buffer, count, 0, NULL, NULL)) < 0) {
+  ret = recvfrom (dp->ifd, buffer, count, 0, (struct sockaddr *) &client, &addrlen);
 
-    /* Expected response when queue is empty */
+  if (ret >= 0) {
+    
+    if (source)  {
+      // Send, get and copy the source address
+      source->family = gxPLNetFamilyInet4;
+      source->size = MIN (sizeof (source->n_addr), sizeof (client.sin_addr.s_addr));
+      source->port = ntohs (client.sin_port);
+      source->flag = 0;
+      memcpy (source->n_addr, &client.sin_addr.s_addr, source->size);
+    }
+  }
+  else {
+
+    // Expected response when queue is empty
     if (errno == EAGAIN) {
 
       return 0;
     }
 
-    /* Note the error and bail */
+    // Note the error and bail
     vLog (LOG_ERR, "Error reading xPL message from network - %s (%d)",
           strerror (errno), errno);
     return -1;
   }
+
   return ret;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpWrite (gxPL * gxpl, const void * buffer, int count) {
-  int bytes_sent;
+gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target) {
+  int bytes_sent, addrlen = sizeof (struct sockaddr_in);
+  struct sockaddr_in a;
+  struct sockaddr * addrdst = (struct sockaddr *) &dp->bcast_addr;
+
+  if (target) {
+    if ( (target->isbroadcast == 0) && (target->family == gxPLNetFamilyInet4)) {
+      a.sin_family = AF_INET;
+      memcpy (&a.sin_addr.s_addr, target->n_addr,  sizeof (a.sin_addr.s_addr));
+      a.sin_port = htons (XPL_PORT);
+      addrdst = (struct sockaddr *) &a;
+    }
+  }
 
   /* Try to send the message */
-  if ( (bytes_sent = sendto (dp->ofd, buffer, count, 0,
-                             (struct sockaddr *) &dp->bcast_addr,
-                             sizeof (struct sockaddr_in))) != count) {
+  if ( (bytes_sent = sendto (dp->ofd, buffer, count, 0, addrdst, addrlen)) != count) {
     vLog (LOG_ERR, "Unable to broadcast message, %s (%d)",
           strerror (errno), errno);
     return -1;
   }
-  vLog (LOG_DEBUG, "Broadcasted %d bytes (of %d attempted)", bytes_sent, count);
+  vLog (LOG_DEBUG, "Send broadcast %d bytes (of %d attempted)", bytes_sent, count);
 
   /* Okey dokey then */
   return bytes_sent;
@@ -521,11 +545,11 @@ gxPLUdpWrite (gxPL * gxpl, const void * buffer, int count) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpClose (gxPL * gxpl) {
+gxPLUdpClose (gxPLIo * io) {
   int ret;
 
   // If already stopped, bail
-  if (gxpl->io->pdata == NULL) {
+  if (io->pdata == NULL) {
 
     return -1;
   }
@@ -540,56 +564,55 @@ gxPLUdpClose (gxPL * gxpl) {
     vLog (LOG_ERR, "failed to close bind socket: %s", strerror (errno));
   }
 
-  free (gxpl->io->pdata);
-  gxpl->io->pdata = NULL;
+  free (io->pdata);
+  io->pdata = NULL;
   return ret;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpCtl (gxPL * gxpl, int c, va_list ap) {
+gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
   int ret = 0;
 
   switch (c) {
 
-      // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncPoll, int * available_bytes, int timeout_ms)
+      // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncPoll, int * available_bytes, int timeout_ms)
     case gxPLIoFuncPoll: {
       int * available_bytes = va_arg (ap, int*);
       int timeout_ms = va_arg (ap, int);
-      ret = iopoll (gxpl, available_bytes, timeout_ms);
+      ret = iopoll (io, available_bytes, timeout_ms);
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetInetPort, int * iport)
-    case gxPLIoFuncGetInetPort: {
-      int * iport = va_arg (ap, int*);
-      *iport = dp->iport;
-    }
-    break;
-
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetBcastAddr, gxPLAddress * bcast_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLNetAddress * bcast_addr)
     case gxPLIoFuncGetBcastAddr: {
-      gxPLAddress * bcast_addr = va_arg (ap, gxPLAddress*);
-      bcast_addr->family = gxPLIoFamilyInet4;
+      gxPLNetAddress * bcast_addr = va_arg (ap, gxPLNetAddress*);
+      bcast_addr->family = gxPLNetFamilyInet4;
+      bcast_addr->size = sizeof (dp->bcast_addr.sin_addr.s_addr);
+      bcast_addr->port = XPL_PORT;
+      bcast_addr->flag = 0;
+      bcast_addr->isbroadcast = 1;
       memcpy (bcast_addr->n_addr, &dp->bcast_addr.sin_addr.s_addr,
-              sizeof (dp->bcast_addr.sin_addr.s_addr));
+              bcast_addr->size);
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetLocalAddr, gxPLAddress * local_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLNetAddress * local_addr)
     case gxPLIoFuncGetLocalAddr: {
-      gxPLAddress * local_addr = va_arg (ap, gxPLAddress*);
-      local_addr->family = gxPLIoFamilyInet4;
-      memcpy (local_addr->n_addr, &dp->local_addr.s_addr,
-              sizeof (dp->local_addr.s_addr));
+      gxPLNetAddress * local_addr = va_arg (ap, gxPLNetAddress*);
+      local_addr->family = gxPLNetFamilyInet4;
+      local_addr->size = sizeof (dp->local_addr.s_addr);
+      local_addr->port = dp->iport;
+      local_addr->flag = 0;
+      memcpy (local_addr->n_addr, &dp->local_addr.s_addr, local_addr->size);
     }
     break;
 
-    // int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncNetAddrToString, gxPLAddress * net_addr, char ** str_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLNetAddress * net_addr, char ** str_addr)
     case gxPLIoFuncNetAddrToString: {
-      gxPLAddress * addr = va_arg (ap, gxPLAddress*);
+      gxPLNetAddress * addr = va_arg (ap, gxPLNetAddress*);
 
-      if (addr->family == gxPLIoFamilyInet4) {
+      if (addr->family == gxPLNetFamilyInet4) {
         char ** str_addr = va_arg (ap, char**);
         struct in_addr net_addr;
 
@@ -617,8 +640,8 @@ gxPLUdpCtl (gxPL * gxpl, int c, va_list ap) {
 static gxPLIoOps
 ops = {
   .open  = gxPLUdpOpen,
-  .read  = gxPLUdpRead,
-  .write = gxPLUdpWrite,
+  .recv  = gxPLUdpRecv,
+  .send  = gxPLUdpSend,
   .close = gxPLUdpClose,
   .ctl   = gxPLUdpCtl
 };

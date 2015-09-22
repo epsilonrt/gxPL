@@ -1,8 +1,10 @@
 /*
  * gxpl-test-message.c
- * @brief Description de votre programme
+ * @brief gxPL Message tests
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>

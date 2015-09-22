@@ -5,86 +5,31 @@
 #include <stdlib.h>
 #include <time.h>
 #include <signal.h>
-#include <sysio/log.h>
 #include <gxPL.h>
+#include "version-git.h"
 
-
-/* private variables ======================================================== */
-static gxPL * gxpl;
-
-/* private functions ======================================================== */
-
-// -----------------------------------------------------------------------------
-static void
-vShutdownHandler (int sig) {
-  int ret;
-
-  ret = gxPLClose (gxpl);
-  assert (ret == 0);
-
-  printf ("\neverything was closed.\nHave a nice day !\n");
-  exit (EXIT_SUCCESS);
-}
-
-/* main ===================================================================== */
-int
-main (int argc, char * argv[]) {
-  int ret;
-  gxPLConfig * config;
-
-
-  config = gxPLNewConfigFromCommandArgs (argc, argv, gxPLConnectViaHub);
-  gxpl = gxPLOpen (config);
-  if (!gxpl) {
-    vLog (LOG_ERR, "Unable to open xPL connection !");
-    exit (EXIT_FAILURE);
-  }
-
-  /* Install signal traps for proper shutdown */
-  signal (SIGTERM, vShutdownHandler);
-  signal (SIGINT, vShutdownHandler);
-
-  printf ("Starting simple clock service on %s...\n", gxPLGetInterfaceName (gxpl));
-  printf ("  listen on  %s:%d\n", gxPLLocalAddressString (gxpl),
-          gxPLInetPort (gxpl));
-  printf ("  broadcast on  %s\n", gxPLBroadcastAddressString (gxpl));
-
-
-  for (;;) {
-    // Main loop
-    ret = gxPLPoll (gxpl, 1000);
-    putchar ('.');
-    fflush (stdout);
-  }
-
-  return 0;
-}
-/* ========================================================================== */
-
-
-#if 0
 /* constants ================================================================ */
 #define CLOCK_VERSION VERSION_SHORT
 
 /* private variables ======================================================== */
 static time_t lastTimeSent = 0;
-static gxPLService * clockService = NULL;
-static gxPLMessage * clockTickMessage = NULL;
+static xPL_Service * clockService = NULL;
+static xPL_Message * clockTickMessage = NULL;
 
 /* internal public functions ================================================ */
 
 /* -------------------------------------------------------------------------- */
 void
-clockMessageHandler (gxPLService * service, gxPLMessage * message,
-                     xPL_Object * userValue) {
+clockMessageHandler (xPL_Service * theService, xPL_Message * theMessage,
+                     void * userValue) {
   fprintf (stderr,
            "Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
-           gxPLMessageSourceVendorIdGet (message),
-           gxPLMessageSourceDeviceIdGet (message),
-           gxPLMessageSourceInstanceIdGet (message),
-           gxPLMessageTypeGet (message),
-           gxPLMessageSchemaClassGet (message),
-           gxPLMessageSchemaTypeGet (message));
+           xPL_getSourceVendor (theMessage),
+           xPL_getSourceDeviceID (theMessage),
+           xPL_getSourceInstanceID (theMessage),
+           xPL_getMessageType (theMessage),
+           xPL_getSchemaClass (theMessage),
+           xPL_getSchemaType (theMessage));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -93,7 +38,7 @@ shutdownHandler (int onSignal) {
 
   xPL_setServiceEnabled (clockService, FALSE);
   xPL_releaseService (clockService);
-  gxPLClose();
+  xPL_shutdown();
   exit (0);
 }
 
@@ -101,7 +46,7 @@ shutdownHandler (int onSignal) {
 
 /* -------------------------------------------------------------------------- */
 static void
-sendClockTick (void) {
+sendClockTick(void) {
   time_t rightNow = time (NULL);
   struct tm * decodedTime;
   char theDateTime[24];
@@ -118,41 +63,42 @@ sendClockTick (void) {
   strftime (theDateTime, 24, "%Y%m%d%H%M%S", decodedTime);
 
   /* Install the value and send the message */
-  gxPLMessagePairValueSet (clockTickMessage, "time", theDateTime);
+  xPL_setMessageNamedValue (clockTickMessage, "time", theDateTime);
 
   /* Broadcast the message */
-  gxPLSendMessage (clockTickMessage);
+  xPL_sendMessage (clockTickMessage);
 
   /* And reset when we last sent the clock update */
   lastTimeSent = rightNow;
 }
 
+/* main ===================================================================== */
 int
 main (int argc, char * argv[]) {
-
   /* Parse command line parms */
   if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
     exit (1);
   }
 
   /* Start xPL up */
-  if (!gxPLNewConfig (gxPLGetConnectionType())) {
-
+  if (!xPL_initialize (xPL_getParsedConnectionType())) {
+    
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }
 
   /* Initialze clock service */
+
   /* Create  a service for us */
   clockService = xPL_createService ("cdp1802", "clock", "default");
   xPL_setServiceVersion (clockService, CLOCK_VERSION);
 
   /* Add a responder for time setting */
-  xPL_addServiceListener (clockService, clockMessageHandler, gxPLMessageAny, "clock", NULL, NULL);
+  xPL_addServiceListener (clockService, clockMessageHandler, xPL_MESSAGE_ANY, "clock", NULL, NULL);
 
   /* Create a message to send */
-  clockTickMessage = gxPLMessageNewBroadcast (clockService, gxPLMessageStatus);
-  gxPLMessageSchemaSetAll (clockTickMessage, "clock", "update");
+  clockTickMessage = xPL_createBroadcastMessage (clockService, xPL_MESSAGE_STATUS);
+  xPL_setSchema (clockTickMessage, "clock", "update");
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, shutdownHandler);
@@ -171,8 +117,5 @@ main (int argc, char * argv[]) {
     /* Process clock tick update checking */
     sendClockTick();
   }
-
-  return 0;
 }
-
-#endif
+/* ========================================================================== */

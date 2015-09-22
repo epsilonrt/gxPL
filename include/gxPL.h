@@ -2,7 +2,6 @@
  * @file gxPL.h
  * gxPL API
  *
- * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
@@ -16,87 +15,71 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 /**
- * @defgroup gxPLib Library Context
+ * @defgroup gxPLApi Top Level API
  * @{
  */
 
-/* structures =============================================================== */
-/**
- * @brief
- */
-typedef struct _gxPLConfig {
-
-  char iface[NAME_MAX];
-  char iolayer[NAME_MAX];
-  gxPLConnectType connecttype;
-  union {
-    unsigned int flag;
-    struct {
-      unsigned int debug: 1;
-      unsigned int malloc: 1;
-    };
-  };
-} gxPLConfig;
-
-/**
- * @brief
- */
-typedef struct _gxPL {
-
-  gxPLConfig * config;
-  gxPLIo * io;  /**< abstract structure can not be used by top user. */
-} gxPL;
-
 /* api functions ============================================================ */
 /**
- * @brief
- * @param iface
- * @param iolayer
- * @param type
- * @return
+ * @brief Returns a new gxPL config from parameters
+ * 
+ * @param iface network interface name o, the system
+ * @param iolayer network access layer name
+ * @param type network connection type
+ * @return the config or NULL if error occurs
  */
 gxPLConfig * gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnectType type);
 
 /**
- * @brief
- * @param argc
- * @param argv
- * @param type
- * @return
+ * @brief Returns a new gxPL config from command line parameters
+ * @param argc number of parameters from main
+ * @param argv list of parameters from main
+ * @param type network connection type
+ * @return the config or NULL if error occurs
  */
 gxPLConfig * gxPLNewConfigFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
 
 /**
- * @brief
- * @param argc
- * @param argv
- * @param type
- * @return
+ * @brief Opens a new gxPL object
+ * @param config pointer to a configuration, this configuration can be modified 
+ * by the function to return the actual configuration.
+ * @return the object or NULL if error occurs
  */
 gxPL * gxPLOpen (gxPLConfig * config);
 
 /**
- * @brief
- * @param gxpl pointer to a gxPL structure
- * @return
+ * @brief Close a gxPL object and release all ressources 
+ * @param gxpl pointer to a gxPL object
+ * @return 0, -1 if an error occurs
  */
 int gxPLClose (gxPL * gxpl);
 
 /**
  * @brief
- * @param gxpl pointer to a gxPL structure
+ * @param gxpl pointer to a gxPL object
  * @param timeout_ms
- * @return
+ * @return 0, -1 if an error occurs
  */
 int gxPLPoll (gxPL * gxpl, int timeout_ms);
 
 /**
  * @brief Send an xPL message
- * If the message is valid and is successfully sent, TRUE is returned
- * @param message
- * @return
+ *
+ * @param gxpl pointer to a gxPL object
+ * @param message pointer to the message
+ * @return 0, -1 if error occurs
  */
 int gxPLSendMessage (gxPL * gxpl, gxPLMessage * message);
+
+/**
+ * @brief Check if a message is echo hub
+ * @param gxpl pointer to a gxPL object
+ * @param message pointer to the message
+ * @param my_id identifier of the request source. Necessary if the underlying 
+ * network is not udp, may be NULL otherwise.
+ * @return
+ */
+int gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * message, const gxPLMessageId * my_id);
 
 /**
  * @brief System call for device-specific input/output operations
@@ -107,133 +90,102 @@ int gxPLSendMessage (gxPL * gxpl, gxPLMessage * message);
  * completely on the request code. Request codes are often device-specific.
  *
  * -  \b gxPLIoFuncGetBcastAddr
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetBcastAddr, gxPLAddress * bcast_addr)
+ *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetBcastAddr, gxPLNetAddress * bcast_addr)
  *    Broadcast address on the network.
  * -  \b gxPLIoFuncGetLocalAddr
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetLocalAddr, gxPLAddress * local_addr)
+ *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetLocalAddr, gxPLNetAddress * local_addr)
  *    Local address associated with this machine on the network.
  * -  \b gxPLIoFuncNetAddrToString
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncNetAddrToString, gxPLAddress * net_addr, char ** str_addr)
+ *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncNetAddrToString, gxPLNetAddress * net_addr, char ** str_addr)
  *    Converts a network address to a corresponding character string
- * -  \b gxPLIoFuncGetInetPort
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetInetPort, int * iport)
- *    IP port in host order, only if the interface is in the INET/INET6 family.
  * .
  *
- * @param gxpl pointer to a gxPL structure
- * @param req 
- * @return
+ * @param gxpl pointer to a gxPL object
+ * @param req request code 
+ * @param ... optional parameters
+ * @return 0, -1 if an error occurs
  */
 int gxPLIoCtl (gxPL * gxpl, int req, ...);
 
 /**
  * @brief Local network address as a string
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @return the address as a string, NULL if an error occurs
  */
-char * gxPLLocalAddressString (gxPL * gxpl);
+const char * gxPLLocalAddressString (const gxPL * gxpl);
 
 /**
  * @brief Broadcast network address as a string
- */
-char * gxPLBroadcastAddressString (gxPL * gxpl);
-
-/**
- * @brief IP port in host order
  * 
- * only if the interface is in the INET/INET6 family !
+ * @param gxpl pointer to a gxPL object
+ * @return the address as a string, NULL if an error occurs
  */
-int gxPLInetPort (gxPL * gxpl) ;
+const char * gxPLBroadcastAddressString (const gxPL * gxpl);
 
 /**
- * @brief Set Debugging Mode
- * @param isDebugging
+ * @brief Local Network informations
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @return network infos, NULL if an error occurs
  */
-void xPL_setDebugging (bool isDebugging);
+const gxPLNetAddress * gxPLNetInfo (const gxPL * gxpl);
 
 /**
- * @brief  Return if debug mode in use
- * @return 
+ * @brief Connection type
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @return the type
  */
-bool gxPLIsDebugging (void);
-
-# ifdef __DOXYGEN__
-/*
- * __DOXYGEN__ defined
- * =============================================================================
- */
+gxPLConnectType gxPLGetConnectionType (const gxPL * gxpl);
 
 /**
- * @brief
- * @param gxpl
- * @return
+ * @brief Name of the network interface on the system
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @return the name, NULL if an error occurs
  */
-static inline gxPLConnectType gxPLGetConnectionType (gxPL * gxpl);
+const char * gxPLGetInterfaceName (const gxPL * gxpl);
 
 /**
- * @brief
- * @param gxpl
- * @return
+ * @brief Name of the underlying layer of the network
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @return the name, NULL if an error occurs
  */
-static inline const char * gxPLGetInterfaceName (gxPL * gxpl);
+const char * gxPLGetIoLayerName (const gxPL * gxpl);
 
 /**
- * @brief
- * @param gxpl
- * @return
- */
-static inline const char * gxPLGetIoName (gxPL * gxpl);
-
-# else
-/*
- * __DOXYGEN__ not defined
- * =============================================================================
- */
-// -----------------------------------------------------------------------------
-INLINE gxPLConnectType
-gxPLGetConnectionType (gxPL * gxpl) {
-  return gxpl->config->connecttype;
-}
-
-// -----------------------------------------------------------------------------
-INLINE const char *
-gxPLGetInterfaceName (gxPL * gxpl) {
-  return gxpl->config->iface;
-}
-
-// -----------------------------------------------------------------------------
-INLINE const char *
-gxPLGetIoName (gxPL * gxpl) {
-  return gxpl->config->iolayer;
-}
-# endif /* __DOXYGEN__ not defined */
-
-/**
- * @defgroup xPLMessageListener Listeners
- * Message Listener SupportService Listener Support
+ * @defgroup xPLMessageListener Message Listeners
+ * Message Listeners 
  * @{
  */
 
 /* types ==================================================================== */
 /**
- * @brief
+ * @brief Function that will be called each valid message reception
  */
-typedef void (* xPL_messageListener) (gxPLMessage *, xPL_Object *);
+typedef int (* gxPLMessageListener) (const gxPLMessage *, const gxPLNetAddress *, void *);
 
 /* internal public functions ================================================ */
 
 /**
  * @brief Add a message listener
- * @param theHandler
- * @param userValue
+ * 
+ * @param gxpl pointer to a gxPL object
+ * @param listener function that will be called each message reception.
+ * @param udata pointer to the data passed to the listener
+ * @return 0, -1 if an error occurs
  */
-void gxPLMessageAddListener (xPL_messageListener theHandler, xPL_Object * userValue);
+int gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata);
 
 /**
- * @brief
- * @param theHandler
- * @return
+ * @brief Remove a message listener
+ * @param gxpl pointer to a gxPL object
+ * @param listener the listener to remove
+ * @return 0, -1 if an error occurs
  */
-int gxPLMessageRemoveListener (xPL_messageListener theHandler);
-
+int gxPLMessageListenerRemove (gxPL * gxpl, gxPLMessageListener listener);
 
 /**
  * @}
@@ -278,16 +230,14 @@ int gxPLVersionSha1 (void);
  * @}
  */
 
+
+# ifndef __DOXYGEN__
+/*
+ * __DOXYGEN__ not defined
+ * =============================================================================
+ */
+# endif /* __DOXYGEN__ not defined */
+
 /* ========================================================================== */
 __END_C_DECLS
-
-#if 0
-#include <gxPL/utils.h>
-#include <gxPL/service.h>
-#include <gxPL/message.h>
-#include <gxPL/io.h>
-#include <gxPL/hub.h>
-#include <gxPL/compat.h>
-#endif
-
 #endif /* _GXPL_HEADER_ defined */

@@ -45,12 +45,14 @@
     <File Name="src/io_p.h"/>
     <File Name="src/gxpl.c"/>
     <File Name="src/io_udp.c"/>
-    <File Name="src/io_template.c"/>
     <File Name="src/io.c"/>
     <File Name="src/gxpl_p.h"/>
     <File Name="src/message.c"/>
     <File Name="src/message_p.h"/>
     <File Name="src/util.c"/>
+    <VirtualDirectory Name="template">
+      <File Name="src/template/io_template.c"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">

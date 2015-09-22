@@ -73,7 +73,7 @@ parseConfig (gxPLService * service) {
 /* --------------------------------------------------------------------------
  * Handle a change to the clock service configuration */
 static void
-configChangedHandler (gxPLService * service, xPL_Object * userData) {
+configChangedHandler (gxPLService * service, void * userData) {
   
   /* Read config items for service and install */
   parseConfig (service);

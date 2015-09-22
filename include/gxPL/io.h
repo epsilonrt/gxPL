@@ -10,7 +10,8 @@
 #ifndef _GXPL_IO_HEADER_
 #define _GXPL_IO_HEADER_
 
-#include <gxPL.h>
+#include <stdarg.h>
+#include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
 #ifndef GXPL_INTERNALS
@@ -19,8 +20,12 @@ __BEGIN_C_DECLS
 
 /**
  * @defgroup xPLIo Internal Io Layer API
+ * 
  * Description of the IO layer to the application layer.
-   @warning The top user should not access this layer directly.
+ * The application layer uses functions described here to access the hardware 
+ * layer.
+ * 
+ * @warning The top user should not access this layer directly.
  * @{
  */
 
@@ -37,40 +42,48 @@ __BEGIN_C_DECLS
  * @param config
  * @return 
  */
-gxPL * gxPLIoOpen (gxPLConfig * config);
+gxPLIo * gxPLIoOpen (gxPLConfig * config);
 
 /**
- * @brief 
- * @param gxpl
+ * @brief  Receive a message from the network
+ * 
+ * The call can be blocking, gxPLIoFuncPoll will be used before so you do not block.
+ * 
+ * @param io
  * @param buffer
  * @param count
+ * @param source if not NULL, returns the source address.
  * @return 
  */
-int gxPLIoRead (gxPL * gxpl, void * buffer, int count);
+int gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source);
 
 /**
  * @brief 
- * @param gxpl
+ * 
+ * @param io
  * @param buffer
  * @param count
+ * @param target if target is NULL or if her broadcast flag is set, the 
+ * broadcast address of the network is used.
  * @return 
  */
-int gxPLIoWrite (gxPL * gxpl, const void * buffer, int count);
+int gxPLIoSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target);
 
 /**
  * @brief 
- * @param gxpl
+ * @param io
  * @return 
  */
-int gxPLIoClose (gxPL * gxpl);
+int gxPLIoClose (gxPLIo * io);
 
-/* --------------- Defined in gxPL.h
+/**
  * @brief 
- * @param gxpl
+ * @param io
  * @param c
+ * @param ap
  * @return 
- * int gxPLIoCtl (gxPL * gxpl, int c, ...);
  */
+int gxPLIoIoCtl (gxPLIo * io, int c, va_list ap);
 
 /**
  * @}

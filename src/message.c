@@ -16,6 +16,7 @@
 
 #include <gxPL/util.h>
 #include "message_p.h"
+#include "config.h"
 
 /* constants ================================================================ */
 #ifndef CONFIG_ALLOC_STR_GROW
@@ -166,7 +167,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
     if (strlen (str) == 0) {
 
-      vLog (LOG_INFO, "empty message");
+      vLog (LOG_DEBUG, "empty message");
       return m;
     }
 
@@ -421,7 +422,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
           if (strcmp (p, "{") != 0) {
 
-            vLog (LOG_INFO, "incorrectly formatted message", p);
+            vLog (LOG_INFO, "Message improperly formatted: %s", p);
             m->iserror = 1;
             break;
           }
@@ -462,7 +463,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
           if (strcmp (p, "}") != 0) {
 
-            vLog (LOG_INFO, "incorrectly formatted message", p);
+            vLog (LOG_INFO, "Message improperly formatted: %s", p);
             m->iserror = 1;
             break;
           }

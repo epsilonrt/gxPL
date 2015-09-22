@@ -55,23 +55,6 @@ __BEGIN_C_DECLS
  */
 #define GXPL_HOP_MAX   9
 
-/**
- *
- */
-typedef enum {
-  gxPLMessageStateInit = 0,
-  gxPLMessageStateHeader,
-  gxPLMessageStateHeaderHop,
-  gxPLMessageStateHeaderSource,
-  gxPLMessageStateHeaderTarget,
-  gxPLMessageStateHeaderEnd,
-  gxPLMessageStateSchema,
-  gxPLMessageStateBodyBegin,
-  gxPLMessageStateBody,
-  gxPLMessageStateBodyEnd,
-  gxPLMessageStateEnd,
-  gxPLMessageStateError = -1
-} gxPLMessageState;
 
 /* structures =============================================================== */
 

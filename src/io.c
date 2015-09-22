@@ -16,7 +16,7 @@
 #include <sysio/log.h>
 
 #include "config.h"
-#include <gxPL.h>
+#define GXPL_IO_INTERNALS
 #include "io_p.h"
 
 /* macros =================================================================== */
@@ -33,28 +33,41 @@ static xDList iolist;
 
 /* private functions ======================================================== */
 // -----------------------------------------------------------------------------
-void
-destroy (void *item) {
+static void
+prvIoDestroy (void *item) {
   free ( ( (ioitem *) item)->name);
   free (item);
 }
 
 // -----------------------------------------------------------------------------
-const void *
-key (const xDListElmt * element) {
+static const void *
+prvIoKey (const xDListElmt * element) {
   return pxDListElmtDataPtr (element, ioitem)->name;
 }
 
 // -----------------------------------------------------------------------------
-int
-match (const void *key1, const void *key2) {
+static int
+prvIoMatch (const void *key1, const void *key2) {
   return strcmp ( (const char *) key1, (const char *) key2);
 }
 
-/* internal public functions ================================================ */
 
 // -----------------------------------------------------------------------------
-gxPL *
+static gxPLIoOps *
+prvGetOps (const char * iolayer) {
+  gxPLIoOps * ops = NULL;
+  xDListElmt * element = pxDListFindFirst (&iolist, iolayer);
+
+  if (element) {
+    ops = pxDListElmtDataPtr (element, ioitem)->ops;
+  }
+  return ops;
+}
+
+/* internal api functions =================================================== */
+
+// -----------------------------------------------------------------------------
+gxPLIo *
 gxPLIoOpen (gxPLConfig * config) {
   gxPLIo * io = calloc (1, sizeof (gxPLIo));
   assert (io);
@@ -65,20 +78,15 @@ gxPLIoOpen (gxPLConfig * config) {
     PDEBUG ("set iolayer to default (%s)", config->iolayer);
   }
 
-  io->ops = gxPLIoGetOps (config->iolayer);
+  io->ops = prvGetOps (config->iolayer);
+  io->config = config;
   if (io->ops) {
-    gxPL * gxpl = calloc (1, sizeof (gxPL));
-    assert (gxpl);
 
-    gxpl->config = config;
-    gxpl->io = io;
-
-    if (io->ops->open (gxpl) == 0) {
+    if (io->ops->open (io) == 0) {
       
       // great ! everything was done
-      return gxpl;
+      return io;
     }
-    free (gxpl);
   }
   free (io);
   return NULL;
@@ -86,56 +94,36 @@ gxPLIoOpen (gxPLConfig * config) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoClose (gxPL * gxpl) {
+gxPLIoClose (gxPLIo * io) {
   int ret;
 
-  ret = gxpl->io->ops->close (gxpl);
-  free (gxpl->io);
-  if (gxpl->config->malloc) {
-    
-    free (gxpl->config);
-  }
-  free (gxpl);
+  ret = io->ops->close (io);
+  free (io);
   return ret;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoRead (gxPL * gxpl, void * buffer, int count) {
+gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
 
-  return gxpl->io->ops->read (gxpl, buffer, count);
+  return io->ops->recv (io, buffer, count, source);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoWrite (gxPL * gxpl, const void * buffer, int count) {
+gxPLIoSend (gxPLIo * io, const void * buffer, int count, gxPLNetAddress * target) {
 
-  return gxpl->io->ops->write (gxpl, buffer, count);
+  return io->ops->send (io, buffer, count, target);
 }
 
 // -----------------------------------------------------------------------------
-int
-gxPLIoCtl (gxPL * gxpl, int c, ...) {
-  int ret = 0;
-  va_list ap;
-
-  va_start (ap, c);
-  switch (c) {
-    
-    // put here the requests should not be transmitted to the layer below.
-    // case ...
-    
-    default:
-      ret = gxpl->io->ops->ctl (gxpl, c, ap);
-      if ((ret == -1) && (errno == EINVAL)) {
-        vLog (LOG_ERR, "gxPLIoCtl function not supported: %d", c);
-      }
-      break;
-  }
-
-  va_end (ap);
-  return ret;
+int 
+gxPLIoIoCtl (gxPLIo * io, int c, va_list ap) {
+  
+  return io->ops->ctl (io, c, ap);
 }
+
+/* internal public functions ================================================ */
 
 // -----------------------------------------------------------------------------
 int
@@ -166,22 +154,10 @@ gxPLIoUnregister (const char * iolayer) {
     void * item;
 
     (void) iDListRemove (&iolist, element, &item);
-    destroy (item);
+    prvIoDestroy (item);
     return 0;
   }
   return -1;
-}
-
-// -----------------------------------------------------------------------------
-gxPLIoOps *
-gxPLIoGetOps (const char * iolayer) {
-  gxPLIoOps * ops = NULL;
-  xDListElmt * element = pxDListFindFirst (&iolist, iolayer);
-
-  if (element) {
-    ops = pxDListElmtDataPtr (element, ioitem)->ops;
-  }
-  return ops;
 }
 
 /*constructor/destructor ==================================================== */
@@ -190,9 +166,9 @@ gxPLIoGetOps (const char * iolayer) {
 int __gxpl_init
 gxPLIoInit (void) {
 
-  if (iDListInit (&iolist, destroy) == 0) {
+  if (iDListInit (&iolist, prvIoDestroy) == 0) {
     
-    return iDListInitSearch (&iolist, key, match);
+    return iDListInitSearch (&iolist, prvIoKey, prvIoMatch);
   }
   return -1;
 }

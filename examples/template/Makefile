@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = gxpl-test-message
+TARGET = gxpl-template
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..
@@ -105,7 +105,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-GXPL_DEBUG_TEST = ON
+#GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)
@@ -145,8 +145,7 @@ $(error GXPL_DEBUG_TEST is On and GXPL_ROOT is not defined, double-check that !)
 else
 VPATH+=:$(GXPL_ROOT)
 EXTRA_INCDIRS += $(GXPL_ROOT)/include
-# SRC += $(addprefix src/, $(notdir $(wildcard $(GXPL_ROOT)/src/*.c)))
-SRC += src/util.c src/message.c
+SRC += $(addprefix src/, $(notdir $(wildcard $(GXPL_ROOT)/src/*.c)))
 endif
 else
 EXTRA_LIBS += gxPL

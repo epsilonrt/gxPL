@@ -11,6 +11,9 @@
 
 #include <stdarg.h>
 #include <gxPL/defs.h>
+#ifndef GXPL_IO_INTERNALS
+#warning You should not add the header file gxPL/io.h in your source code
+#endif
 
 /* constants ================================================================ */
 #define GXPL_PRIORITY   101
@@ -24,27 +27,28 @@
 
 /* structures =============================================================== */
 
-/**
+/*
  * @brief xPL Hardware Layer Operations
  */
 typedef struct _gxPLIoOps {
-  int (*open)   (gxPL * gxpl);
-  int (*read)   (gxPL * gxpl, void * buffer, int count);
-  int (*write)  (gxPL * gxpl, const void * buffer, int count);
-  int (*close)  (gxPL * gxpl);
-  int (*ctl)    (gxPL * gxpl, int c, va_list ap);
+  int (*open)   (gxPLIo * io);
+  int (*recv)   (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source);
+  int (*send)   (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target);
+  int (*close)  (gxPLIo * io);
+  int (*ctl)    (gxPLIo * io, int c, va_list ap);
 } gxPLIoOps;
 
-/**
+/*
  * @brief xPL Hardware Abstraction Layer
  */
 typedef struct _gxPLIo {
   void * pdata; /**< Private data used internally by layer io */
   gxPLIoOps * ops;
+  gxPLConfig * config; /**< pointer to the top-level configuration */
 } gxPLIo;
 
-/* internal public functions ================================================ */
-/**
+/* internal private functions (low level service) =========================== */
+/*
  * @brief Register an io layer
  * 
  * Should be called in the constructor of each io layer ...
@@ -55,7 +59,7 @@ typedef struct _gxPLIo {
  */
 int gxPLIoRegister (const char * iolayer, gxPLIoOps * ops);
 
-/**
+/*
  * @brief Register an io layer
  * 
  * Should be called in the destructor of each io layer ...
@@ -64,13 +68,6 @@ int gxPLIoRegister (const char * iolayer, gxPLIoOps * ops);
  * @return 0, -1 on error
  */
 int gxPLIoUnregister (const char * iolayer);
-
-/**
- * @brief Returns io layer's functions
- * @param iolayer name used to identify the layer
- * @return pointer on layer's function that performs the operations
- */
-gxPLIoOps * gxPLIoGetOps (const char * iolayer);
 
 /* ========================================================================== */
 #endif /* _GXPL_IO_PRIVATE_HEADER_ defined */

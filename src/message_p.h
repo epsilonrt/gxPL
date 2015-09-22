@@ -25,13 +25,13 @@ typedef struct _gxPLMessage {
   gxPLMessageSchema schema;
 
   union {
-    int flag;
+    unsigned int flag;
     struct {
 
-      int isbroadcast: 1;
-      int isreceived: 1;
-      int isvalid: 1;
-      int iserror: 1;
+      unsigned int isbroadcast: 1;
+      unsigned int isreceived: 1;
+      unsigned int isvalid: 1;
+      unsigned int iserror: 1;
     };
   };
   gxPLMessageState state;

@@ -20,10 +20,15 @@ extern "C" {
 #define DEFAULT_HEARTBEAT_INTERVAL 300
 
 /* build options ============================================================ */
-
+#define CONFIG_ALLOC_STR_GROW  256
 #define CONFIG_HEARTBEAT_INTERVAL 60
 #define CONFIG_HUB_DISCOVERY_INTERVAL 3
-#define CONFIG_MSG_BUFF_SIZE 2048
+
+#ifndef NDEBUG
+#define GXPL_LOG_DEBUG_LEVEL LOG_DEBUG
+#else
+#define GXPL_LOG_DEBUG_LEVEL LOG_INFO
+#endif
 
 /* ========================================================================== */
 #ifdef __cplusplus
