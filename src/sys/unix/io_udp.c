@@ -7,6 +7,7 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#ifdef  __unix__
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -431,8 +432,12 @@ iopoll (gxPLIo * io, int * available_data, int timeout_ms) {
   /* select returns 0 if timeout, 1 if input available, -1 if error. */
   ret = select (FD_SETSIZE, &set, NULL, NULL, &timeout);
   if (ret == -1) {
-
-    vLog (LOG_ERR, "failed to poll listen socket: %s", strerror (errno));
+    if (errno != EINTR) {
+      vLog (LOG_ERR, "failed to poll listen socket: %s", strerror (errno));
+    }
+    else {
+      ret = 0;
+    }
   }
   else if ( (ret > 0) && (FD_ISSET (dp->ifd, &set))) {
 
@@ -480,7 +485,7 @@ gxPLUdpOpen (gxPLIo * io) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
+gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
   int ret;
   struct sockaddr_in client;
   socklen_t addrlen = sizeof (client);
@@ -488,14 +493,14 @@ gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
   ret = recvfrom (dp->ifd, buffer, count, 0, (struct sockaddr *) &client, &addrlen);
 
   if (ret >= 0) {
-    
+
     if (source)  {
       // Send, get and copy the source address
       source->family = gxPLNetFamilyInet4;
-      source->size = MIN (sizeof (source->n_addr), sizeof (client.sin_addr.s_addr));
+      source->addrlen = MIN (sizeof (source->addr), sizeof (client.sin_addr.s_addr));
       source->port = ntohs (client.sin_port);
       source->flag = 0;
-      memcpy (source->n_addr, &client.sin_addr.s_addr, source->size);
+      memcpy (source->addr, &client.sin_addr.s_addr, source->addrlen);
     }
   }
   else {
@@ -517,7 +522,7 @@ gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target) {
+gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * target) {
   int bytes_sent, addrlen = sizeof (struct sockaddr_in);
   struct sockaddr_in a;
   struct sockaddr * addrdst = (struct sockaddr *) &dp->bcast_addr;
@@ -525,13 +530,13 @@ gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress *
   if (target) {
     if ( (target->isbroadcast == 0) && (target->family == gxPLNetFamilyInet4)) {
       a.sin_family = AF_INET;
-      memcpy (&a.sin_addr.s_addr, target->n_addr,  sizeof (a.sin_addr.s_addr));
+      memcpy (&a.sin_addr.s_addr, target->addr,  sizeof (a.sin_addr.s_addr));
       a.sin_port = htons (XPL_PORT);
       addrdst = (struct sockaddr *) &a;
     }
   }
 
-  /* Try to send the message */
+  // Try to send the message
   if ( (bytes_sent = sendto (dp->ofd, buffer, count, 0, addrdst, addrlen)) != count) {
     vLog (LOG_ERR, "Unable to broadcast message, %s (%d)",
           strerror (errno), errno);
@@ -539,7 +544,6 @@ gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress *
   }
   vLog (LOG_DEBUG, "Send broadcast %d bytes (of %d attempted)", bytes_sent, count);
 
-  /* Okey dokey then */
   return bytes_sent;
 }
 
@@ -584,39 +588,39 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLNetAddress * bcast_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
     case gxPLIoFuncGetBcastAddr: {
-      gxPLNetAddress * bcast_addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * bcast_addr = va_arg (ap, gxPLIoAddr*);
       bcast_addr->family = gxPLNetFamilyInet4;
-      bcast_addr->size = sizeof (dp->bcast_addr.sin_addr.s_addr);
+      bcast_addr->addrlen = sizeof (dp->bcast_addr.sin_addr.s_addr);
       bcast_addr->port = XPL_PORT;
       bcast_addr->flag = 0;
       bcast_addr->isbroadcast = 1;
-      memcpy (bcast_addr->n_addr, &dp->bcast_addr.sin_addr.s_addr,
-              bcast_addr->size);
+      memcpy (bcast_addr->addr, &dp->bcast_addr.sin_addr.s_addr,
+              bcast_addr->addrlen);
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLNetAddress * local_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLIoAddr * local_addr)
     case gxPLIoFuncGetLocalAddr: {
-      gxPLNetAddress * local_addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * local_addr = va_arg (ap, gxPLIoAddr*);
       local_addr->family = gxPLNetFamilyInet4;
-      local_addr->size = sizeof (dp->local_addr.s_addr);
+      local_addr->addrlen = sizeof (dp->local_addr.s_addr);
       local_addr->port = dp->iport;
       local_addr->flag = 0;
-      memcpy (local_addr->n_addr, &dp->local_addr.s_addr, local_addr->size);
+      memcpy (local_addr->addr, &dp->local_addr.s_addr, local_addr->addrlen);
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLNetAddress * net_addr, char ** str_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
     case gxPLIoFuncNetAddrToString: {
-      gxPLNetAddress * addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * addr = va_arg (ap, gxPLIoAddr*);
 
       if (addr->family == gxPLNetFamilyInet4) {
         char ** str_addr = va_arg (ap, char**);
         struct in_addr net_addr;
 
-        memcpy (&net_addr.s_addr, addr->n_addr, sizeof (net_addr.s_addr));
+        memcpy (&net_addr.s_addr, addr->addr, sizeof (net_addr.s_addr));
         *str_addr = inet_ntoa (net_addr);
       }
       else {
@@ -662,4 +666,5 @@ gxPLUdpExit (void) {
   return gxPLIoUnregister (IO_NAME);
 }
 
+#endif /* __unix__ defined */
 /* ========================================================================== */

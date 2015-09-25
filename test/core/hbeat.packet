@@ -1,0 +1,13 @@
+xpl-stat
+{
+hop=1
+source=xpl-xplhal.myhouse
+target=*
+}
+hbeat.app
+{
+interval=5
+port=38829
+remote-ip=192.168.122.202
+version=0.1-9
+}

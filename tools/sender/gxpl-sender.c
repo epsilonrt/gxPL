@@ -207,25 +207,25 @@ bool parseCmdLine (int *argc, char *argv[]) {
 bool 
 sendMessage (int argc, char * argv[]) {
   int argIndex = 0;
-  gxPLService * service = NULL;
+  gxPLDevice * service = NULL;
   gxPLMessage * message = NULL;
   char * delim;
 
   /* Create service so we can create messages */
-  if ( (service = xPL_createService (srcVendor, srcDeviceId, srcInstanceId)) == NULL) {
+  if ( (service = gxPLDeviceNew (srcVendor, srcDeviceId, srcInstanceId)) == NULL) {
     fprintf (stderr, "Unable to create xPL service\n");
     return FALSE;
   }
 
   /* Create an appropriate message */
   if (msgTarget == NULL) {
-    if ( (message = gxPLMessageNewBroadcast (service, msgType)) == NULL) {
+    if ( (message = gxPLDeviceMessageNewBroadcast (service, msgType)) == NULL) {
       fprintf (stderr, "Unable to create broadcast message\n");
       return FALSE;
     }
   }
   else {
-    if ( (message = gxPLMessageNewTargeted (service, msgType, tgtVendor, tgtDeviceId, tgtInstanceId)) == NULL) {
+    if ( (message = gxPLDeviceMessageNewTargeted (service, msgType, tgtVendor, tgtDeviceId, tgtInstanceId)) == NULL) {
       fprintf (stderr, "Unable to create targetted message\n");
       return FALSE;
     }
@@ -266,7 +266,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Parse xPL & program command line parms */
-  if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
     exit (1);
   }
   if (!parseCmdLine (&argc, argv)) {
@@ -280,7 +280,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!gxPLNewConfig (gxPLGetConnectionType())) {
+  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }

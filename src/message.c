@@ -52,65 +52,6 @@ prvPairKey (const void * pair) {
 
 // -----------------------------------------------------------------------------
 static int
-prvSetVendorId (gxPLMessageId * id, const char * vendor_id) {
-  if (vendor_id == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
-
-  if (strlen (vendor_id) > GXPL_VENDORID_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  return (gxPLStrCpy (id->vendor, vendor_id) > 0) ? 0 : -1;
-}
-
-// -----------------------------------------------------------------------------
-static int
-prvSetDeviceId (gxPLMessageId * id, const char * device_id) {
-  if (device_id == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
-
-  if (strlen (device_id) > GXPL_DEVICEID_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  return (gxPLStrCpy (id->device, device_id) > 0) ? 0 : -1;
-}
-
-// -----------------------------------------------------------------------------
-static int
-prvSetInstanceId (gxPLMessageId * id, const char * instance_id) {
-  if (instance_id == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
-
-  if (strlen (instance_id) > GXPL_INSTANCEID_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  return (gxPLStrCpy (id->instance, instance_id) > 0) ? 0 : -1;
-}
-
-// -----------------------------------------------------------------------------
-static int
-prvSetId (gxPLMessageId * dst, const gxPLMessageId * src) {
-
-  if (prvSetVendorId (dst, src->vendor) == 0) {
-
-    if (prvSetDeviceId (dst, src->device) == 0) {
-
-      return prvSetInstanceId (dst, src->instance);
-    }
-  }
-  return -1;
-}
-
-// -----------------------------------------------------------------------------
-static int
 prvStrPrintf (char ** buf, int * buf_size, int index, const char * format, ...) {
   va_list ap;
   int buf_free = *buf_size - index - 1;
@@ -294,7 +235,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
           if (strcmp (pair->name, "source") == 0) {
 
-            if (gxPLMessageIdFromString (&m->source, pair->value) != 0) {
+            if (gxPLIdFromString (&m->source, pair->value) != 0) {
 
               // illegal source value
               prvPairDelete (pair);
@@ -337,7 +278,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
             }
             else {
 
-              if (gxPLMessageIdFromString (&m->target, pair->value) != 0) {
+              if (gxPLIdFromString (&m->target, pair->value) != 0) {
 
                 // illegal target value
                 vLog (LOG_INFO, "invalid target");
@@ -531,7 +472,7 @@ gxPLMessageToString (const gxPLMessage * message) {
     index += prvStrPrintf (&buf, &buf_size, index, "%s\n{\nhop=%d\n",
                            str, message->hop);
     // Writes the source
-    const gxPLMessageId * n = gxPLMessageSourceIdGet (message);
+    const gxPLId * n = gxPLMessageSourceIdGet (message);
     index += prvStrPrintf (&buf, &buf_size, index, "source=%s-%s.%s\n",
                            n->vendor, n->device, n->instance);
     // Writes the target and ends the header
@@ -547,7 +488,7 @@ gxPLMessageToString (const gxPLMessage * message) {
     }
 
     // Writes the schema and begins the body
-    const gxPLMessageSchema * s = gxPLMessageSchemaGet (message);
+    const gxPLSchema * s = gxPLMessageSchemaGet (message);
     index += prvStrPrintf (&buf, &buf_size, index, "%s.%s\n{\n", s->class, s->type);
 
     // Writes the name/value pairs (body)
@@ -578,7 +519,7 @@ gxPLMessageNew (gxPLMessageType type) {
 
   if (message) {
 
-    if (iVectorInit (&message->body, NULL, prvPairDelete) == 0) {
+    if (iVectorInit (&message->body, 3, NULL, prvPairDelete) == 0) {
 
       if (iVectorInitSearch (&message->body, prvPairKey, prvPairMatch) == 0) {
 
@@ -594,17 +535,14 @@ gxPLMessageNew (gxPLMessageType type) {
 }
 
 // -----------------------------------------------------------------------------
-int
+void
 gxPLMessageDelete (gxPLMessage * message) {
 
   if (message) {
 
-    int ret = iVectorDestroy (&message->body);
+    (void) iVectorDestroy (&message->body);
     free (message);
-    return ret;
   }
-  errno = EFAULT;
-  return -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -643,7 +581,7 @@ gxPLMessageSourceVendorIdSet (gxPLMessage * message, const char * vendor_id) {
     errno = EFAULT;
     return -1;
   }
-  return prvSetVendorId (&message->source, vendor_id);
+  return gxPLIdVendorIdSet (&message->source, vendor_id);
 }
 
 // -----------------------------------------------------------------------------
@@ -653,7 +591,7 @@ gxPLMessageSourceDeviceIdSet (gxPLMessage * message, const char * device_id) {
     errno = EFAULT;
     return -1;
   }
-  return prvSetDeviceId (&message->source, device_id);
+  return gxPLIdDeviceIdSet (&message->source, device_id);
 }
 
 // -----------------------------------------------------------------------------
@@ -663,7 +601,7 @@ gxPLMessageSourceInstanceIdSet (gxPLMessage * message, const char * instance_id)
     errno = EFAULT;
     return -1;
   }
-  return prvSetInstanceId (&message->source, instance_id);
+  return gxPLIdInstanceIdSet (&message->source, instance_id);
 }
 
 
@@ -674,7 +612,7 @@ gxPLMessageTargetVendorIdSet (gxPLMessage * message, const char * vendor_id) {
     errno = EFAULT;
     return -1;
   }
-  return prvSetVendorId (&message->target, vendor_id);
+  return gxPLIdVendorIdSet (&message->target, vendor_id);
 }
 
 // -----------------------------------------------------------------------------
@@ -684,7 +622,7 @@ gxPLMessageTargetDeviceIdSet (gxPLMessage * message, const char * device_id) {
     errno = EFAULT;
     return -1;
   }
-  return prvSetDeviceId (&message->target, device_id);
+  return gxPLIdDeviceIdSet (&message->target, device_id);
 }
 
 // -----------------------------------------------------------------------------
@@ -694,7 +632,7 @@ gxPLMessageTargetInstanceIdSet (gxPLMessage * message, const char * instance_id)
     errno = EFAULT;
     return -1;
   }
-  return prvSetInstanceId (&message->target, instance_id);
+  return gxPLIdInstanceIdSet (&message->target, instance_id);
 }
 
 // -----------------------------------------------------------------------------
@@ -879,7 +817,7 @@ gxPLMessagePairExist (const gxPLMessage * message, const char * name) {
 int
 gxPLMessageSourceSet (gxPLMessage * message, const char * vendor_id,
                       const char * device_id, const char * instance_id) {
-  gxPLMessageId id;
+  gxPLId id;
   strcpy (id.vendor, vendor_id);
   strcpy (id.device, device_id);
   strcpy (id.instance, instance_id);
@@ -943,7 +881,7 @@ gxPLMessageTargetInstanceIdGet (const gxPLMessage * message) {
 }
 
 // -----------------------------------------------------------------------------
-const gxPLMessageId *
+const gxPLId *
 gxPLMessageSourceIdGet (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
@@ -954,7 +892,7 @@ gxPLMessageSourceIdGet (const gxPLMessage * message) {
 }
 
 // -----------------------------------------------------------------------------
-const gxPLMessageId *
+const gxPLId *
 gxPLMessageTargetIdGet (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
@@ -1053,7 +991,7 @@ gxPLMessageBroadcastGet (const gxPLMessage * message) {
 }
 
 // -----------------------------------------------------------------------------
-const gxPLMessageSchema *
+const gxPLSchema *
 gxPLMessageSchemaGet (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
@@ -1061,7 +999,6 @@ gxPLMessageSchemaGet (const gxPLMessage * message) {
   }
 
   return &message->schema;
-
 }
 
 // -----------------------------------------------------------------------------
@@ -1084,6 +1021,28 @@ gxPLMessageSchemaTypeGet (const gxPLMessage * message) {
   }
 
   return message->schema.type;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLMessageSchemaSetAll (gxPLMessage * message, const char * schema_class,
+                         const char * schema_type) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  if (gxPLMessageSchemaClassSet (message, schema_class) == 0) {
+    return gxPLMessageSchemaTypeSet (message, schema_type);
+  }
+  return -1;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLMessageSchemaSet (gxPLMessage * message, const gxPLSchema * schema) {
+
+  return gxPLMessageSchemaSetAll (message, schema->class, schema->type);
 }
 
 // -----------------------------------------------------------------------------
@@ -1115,28 +1074,6 @@ const xVector *
 gxPLMessageBodyGetConst (const gxPLMessage * message) {
 
   return (const xVector *) gxPLMessageBodyGet ( (gxPLMessage *) message);
-}
-
-// -----------------------------------------------------------------------------
-int
-gxPLMessageSchemaSetAll (gxPLMessage * message, const char * schema_class,
-                         const char * schema_type) {
-  if (message == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
-
-  if (gxPLMessageSchemaClassSet (message, schema_class) == 0) {
-    return gxPLMessageSchemaTypeSet (message, schema_type);
-  }
-  return -1;
-}
-
-// -----------------------------------------------------------------------------
-int
-gxPLMessageSchemaSet (gxPLMessage * message, const gxPLMessageSchema * schema) {
-
-  return gxPLMessageSchemaSetAll (message, schema->class, schema->type);
 }
 
 
@@ -1202,31 +1139,31 @@ gxPLMessageHopInc (gxPLMessage * message) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageSourceIdSet (gxPLMessage * message, const gxPLMessageId * id) {
+gxPLMessageSourceIdSet (gxPLMessage * message, const gxPLId * id) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return prvSetId (&message->source, id);
+  return gxPLIdCopy (&message->source, id);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageTargetIdSet (gxPLMessage * message, const gxPLMessageId * id) {
+gxPLMessageTargetIdSet (gxPLMessage * message, const gxPLId * id) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return prvSetId (&message->target, id);
+  return gxPLIdCopy (&message->target, id);
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLMessageTargetSet (gxPLMessage * message, const char * vendor_id,
                       const char * device_id, const char * instance_id) {
-  gxPLMessageId id;
+  gxPLId id;
   strcpy (id.vendor, vendor_id);
   strcpy (id.device, device_id);
   strcpy (id.instance, instance_id);
@@ -1245,56 +1182,6 @@ gxPLMessageBodyClear (gxPLMessage * message) {
   }
 
   return iVectorClear (&message->body);
-}
-
-// -----------------------------------------------------------------------------
-int
-gxPLMessageIdCmp (const gxPLMessageId * n1, const gxPLMessageId * n2) {
-  int ret = strcmp (n1->vendor, n2->vendor);
-  if (ret == 0) {
-    ret = strcmp (n1->device, n2->device);
-    if (ret == 0) {
-      ret = strcmp (n1->instance, n2->instance);
-    }
-  }
-  return ret;
-}
-
-// -----------------------------------------------------------------------------
-// vendor-device.instance\0
-int
-gxPLMessageIdFromString (gxPLMessageId * id, char * str) {
-  char *p, *n;
-
-  n = str;
-  p = strsep (&n, "-");
-  if (n) {
-    if (prvSetVendorId (id, p) == 0) {
-
-      p = strsep (&n, ".");
-      if (n) {
-
-        if (prvSetDeviceId (id, p) == 0) {
-
-          return prvSetInstanceId (id, n);
-        }
-      }
-    }
-
-  }
-  errno = EINVAL;
-  return -1;
-}
-
-// -----------------------------------------------------------------------------
-int
-gxPLMessageSchemaCmp (const gxPLMessageSchema * s1, const gxPLMessageSchema * s2) {
-  int ret = strcmp (s1->class, s2->class);
-  if (ret == 0) {
-    ret = strcmp (s1->type, s2->type);
-  }
-  return ret;
-
 }
 
 // -----------------------------------------------------------------------------

@@ -20,61 +20,6 @@ __BEGIN_C_DECLS
  * @{
  */
 
-/**
- * @brief Maximum number of characters allowed for vendor ID
- */
-#define GXPL_VENDORID_MAX   8
-
-/**
- * @brief Maximum number of characters allowed for device ID
- */
-#define GXPL_DEVICEID_MAX   8
-
-/**
- * @brief Maximum number of characters allowed for instance ID
- */
-#define GXPL_INSTANCEID_MAX 16
-
-/**
- * @brief Maximum number of characters allowed for schema class
- */
-#define GXPL_CLASS_MAX      8
-
-/**
- * @brief Maximum number of characters allowed for schema type
- */
-#define GXPL_TYPE_MAX       8
-
-/**
- * @brief Maximum number of characters allowed for a name of a name/value pair
- */
-#define GXPL_NAME_MAX       16
-
-/**
- * @brief Maximum number of hop count
- */
-#define GXPL_HOP_MAX   9
-
-
-/* structures =============================================================== */
-
-/**
- * @brief Describe a source or destination identifier
- */
-typedef struct _gxPLMessageId {
-  char vendor[GXPL_VENDORID_MAX + 1];
-  char device[GXPL_DEVICEID_MAX + 1];
-  char instance[GXPL_INSTANCEID_MAX + 1];
-} gxPLMessageId;
-
-/**
- * @brief Describe a message schema
- */
-typedef struct _gxPLMessageSchema {
-  char class[GXPL_CLASS_MAX + 1];
-  char type[GXPL_TYPE_MAX + 1];
-} gxPLMessageSchema;
-
 
 /* internal public functions ================================================ */
 
@@ -92,9 +37,8 @@ gxPLMessage * gxPLMessageNew (gxPLMessageType type);
  * @brief Release a message and all it's resources
  *
  * @param message pointer to the message
- * @return 0, -1 if an error occurs
  */
-int gxPLMessageDelete (gxPLMessage * message);
+void gxPLMessageDelete (gxPLMessage * message);
 
 /**
  * @brief Returns xPL message as text
@@ -164,7 +108,7 @@ int gxPLMessageHopInc (gxPLMessage * message);
  * @param message pointer to the message
  * @return pointer to the id, must not be released.  NULL if an error occurs
  */
-const gxPLMessageId * gxPLMessageSourceIdGet (const gxPLMessage * message);
+const gxPLId * gxPLMessageSourceIdGet (const gxPLMessage * message);
 
 /**
  * @brief Source vendor identifier
@@ -193,7 +137,7 @@ const char * gxPLMessageSourceInstanceIdGet (const gxPLMessage * message);
  * @param id pointer to the source identifier
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageSourceIdSet (gxPLMessage * message, const gxPLMessageId * id);
+int gxPLMessageSourceIdSet (gxPLMessage * message, const gxPLId * id);
 
 /**
  * @brief Sets source identifier
@@ -235,7 +179,7 @@ int gxPLMessageSourceInstanceIdSet (gxPLMessage * message, const char * instance
  * @param message pointer to the message
  * @return pointer to the id, must not be released.  NULL if an error occurs
  */
-const gxPLMessageId * gxPLMessageTargetIdGet (const gxPLMessage * message);
+const gxPLId * gxPLMessageTargetIdGet (const gxPLMessage * message);
 
 /**
  * @brief Target vendor identifier
@@ -264,7 +208,7 @@ const char * gxPLMessageTargetInstanceIdGet (const gxPLMessage * message);
  * @param id pointer to the target identifier
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageTargetIdSet (gxPLMessage * message, const gxPLMessageId * id);
+int gxPLMessageTargetIdSet (gxPLMessage * message, const gxPLId * id);
 
 /**
  * @brief Sets target identifier
@@ -306,16 +250,7 @@ int gxPLMessageTargetInstanceIdSet (gxPLMessage * message, const char * instance
  * @param message pointer to the message
  * @return pointer to the schema, must not be released. NULL if an error occurs
  */
-const gxPLMessageSchema * gxPLMessageSchemaGet (const gxPLMessage * message);
-
-/**
- * @brief Compare two schemes
- * @param s1 schema 1
- * @param s2 schema 2
- * @return It returns an integer less than, equal to, or greater than zero if s1 
- * is found, respectively, to be less than, to match, or be greater than s2. 
- */
-int gxPLMessageSchemaCmp (const gxPLMessageSchema * s1, const gxPLMessageSchema * s2);
+const gxPLSchema * gxPLMessageSchemaGet (const gxPLMessage * message);
 
 /**
  * @brief Gets the schema class
@@ -337,7 +272,7 @@ const char * gxPLMessageSchemaTypeGet (const gxPLMessage * message);
  * @param schema pointer to the schema
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageSchemaSet (gxPLMessage * message, const gxPLMessageSchema * schema);
+int gxPLMessageSchemaSet (gxPLMessage * message, const gxPLSchema * schema);
 
 /**
  * @brief Sets the schema
@@ -514,24 +449,6 @@ int gxPLMessageBroadcastGet (const gxPLMessage * message);
  * @return 0, -1 if an error occurs
  */
 int gxPLMessageBroadcastSet (gxPLMessage * message, bool isBroadcast);
-
-/**
- * @brief Compare two identifiers
- * @param id1 first id
- * @param id2 second id
- * @return It returns an integer less than, equal to, or greater than zero if id1 
- * is found, respectively, to be less than, to match, or be greater than id2. 
- */
-int gxPLMessageIdCmp (const gxPLMessageId * id1, const gxPLMessageId * id2);
-
-/**
- * @brief Gets an identifier from a string
- * @param dest destination
- * @param src source, this string is modified by the function and is no longer 
- * valid after apple.
- * @return 0, -1 if an error occurs
- */
-int gxPLMessageIdFromString (gxPLMessageId * dest, char * src);
 
 /**
  * @}

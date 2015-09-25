@@ -24,12 +24,12 @@ typedef struct _gxPLPair {
 /* internal public functions ================================================ */
 
 /**
- * @defgroup xPLUtils Utilities
+ * @defgroup xPLUtil Common Utilities and objects
  * @{
  */
 
 /**
- * @defgroup xPLUtilsText Text functions
+ * @defgroup xPLUtilText Text functions
  * @{
  */
  
@@ -52,15 +52,107 @@ typedef struct _gxPLPair {
 int gxPLStrCpy (char * dst, const char * src);
 
 /**
- * @brief 
- * @param str
- * @return 
+ * @}
+ */
+
+/**
+ * @defgroup xPLUtilPair Name/Value pairs
+ * @{
+ */
+
+/**
+ * @brief Sets a name/value form a string
+ * @param str string name=value\0
+ * @return the pair, NULL if error occurs
  */
 gxPLPair * gxPLPairFromString (char *str);
 
 /**
  * @}
  */
+
+/**
+ * @defgroup xPLUtilId Identifiers
+ * @{
+ */
+
+/**
+ * @brief Sets an identifier
+ * @param id pointer to the identifier
+ * @param vendor_id vendor identifier as string
+ * @param device_id device identifier as string
+ * @param instance_id instance identifier as string
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdSet (gxPLId * id, const char * vendor_id, const char * device_id, const char * instance_id);
+
+/**
+ * @brief Sets vendor identifier
+ * @param id pointer to the identifier
+ * @param vendor_id vendor identifier as string
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdVendorIdSet (gxPLId * id, const char * vendor_id);
+
+/**
+ * @brief Sets device identifier
+ * @param id pointer to the identifier
+ * @param device_id device identifier as string
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdDeviceIdSet (gxPLId * id, const char * device_id);
+
+/**
+ * @brief Sets instance identifier
+ * @param id pointer to the identifier
+ * @param instance_id instance identifier as string
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdInstanceIdSet (gxPLId * id, const char * instance_id);
+
+/**
+ * @brief Copy two identifiers
+ * @param dst destination
+ * @param src source
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdCopy (gxPLId * dst, const gxPLId * src);
+
+/**
+ * @brief Compare two identifiers
+ * @param id1 first id
+ * @param id2 second id
+ * @return It returns an integer less than, equal to, or greater than zero if id1 
+ * is found, respectively, to be less than, to match, or be greater than id2. 
+ */
+int gxPLIdCmp (const gxPLId * id1, const gxPLId * id2);
+
+/**
+ * @brief Gets an identifier from a string
+ * @param dest destination
+ * @param src source string vendor-device.instance\0, this string is modified 
+ * by the function and is no longer valid after call.
+ * @return 0, -1 if an error occurs
+ */
+int gxPLIdFromString (gxPLId * dest, char * src);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup xPLUtilSchema Schemas
+ * @{
+ */
+
+/**
+ * @brief Compare two schemas
+ * @param s1 schema 1
+ * @param s2 schema 2
+ * @return It returns an integer less than, equal to, or greater than zero if s1 
+ * is found, respectively, to be less than, to match, or be greater than s2. 
+ */
+int gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2);
 
 /**
  * @}

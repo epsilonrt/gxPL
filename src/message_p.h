@@ -20,9 +20,9 @@ typedef struct _gxPLMessage {
   gxPLMessageType type;
   int hop;
 
-  gxPLMessageId source;
-  gxPLMessageId target;
-  gxPLMessageSchema schema;
+  gxPLId source;
+  gxPLId target;
+  gxPLSchema schema;
 
   union {
     unsigned int flag;

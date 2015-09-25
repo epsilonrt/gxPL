@@ -1,4 +1,4 @@
-/* xPL_Clock.c -- Simple xPL clock service that sends a time update out once a minute */
+/* gxPLClock.c -- Simple xPL clock service that sends a time update out once a minute */
 /* Copyright (c) 2004, Gerald R. Duprey Jr. */
 
 #include <stdio.h>
@@ -13,32 +13,32 @@
 
 /* private variables ======================================================== */
 static time_t lastTimeSent = 0;
-static xPL_Service * clockService = NULL;
-static xPL_Message * clockTickMessage = NULL;
+static gxPLDevice * clockService = NULL;
+static gxPLMessage * clockTickMessage = NULL;
 
 /* internal public functions ================================================ */
 
 /* -------------------------------------------------------------------------- */
 void
-clockMessageHandler (xPL_Service * theService, xPL_Message * theMessage,
+clockMessageHandler (gxPLDevice * theService, gxPLMessage * theMessage,
                      void * userValue) {
   fprintf (stderr,
            "Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
-           xPL_getSourceVendor (theMessage),
-           xPL_getSourceDeviceID (theMessage),
-           xPL_getSourceInstanceID (theMessage),
-           xPL_getMessageType (theMessage),
-           xPL_getSchemaClass (theMessage),
-           xPL_getSchemaType (theMessage));
+           gxPLgetSourceVendor (theMessage),
+           gxPLgetSourceDeviceID (theMessage),
+           gxPLgetSourceInstanceID (theMessage),
+           gxPLgetMessageType (theMessage),
+           gxPLgetSchemaClass (theMessage),
+           gxPLgetSchemaType (theMessage));
 }
 
 /* -------------------------------------------------------------------------- */
 void
 shutdownHandler (int onSignal) {
 
-  xPL_setServiceEnabled (clockService, FALSE);
-  xPL_releaseService (clockService);
-  xPL_shutdown();
+  gxPLDeviceEnabledSet (clockService, FALSE);
+  gxPLDelete (clockService);
+  gxPLshutdown();
   exit (0);
 }
 
@@ -63,10 +63,10 @@ sendClockTick(void) {
   strftime (theDateTime, 24, "%Y%m%d%H%M%S", decodedTime);
 
   /* Install the value and send the message */
-  xPL_setMessageNamedValue (clockTickMessage, "time", theDateTime);
+  gxPLsetMessageNamedValue (clockTickMessage, "time", theDateTime);
 
   /* Broadcast the message */
-  xPL_sendMessage (clockTickMessage);
+  gxPLsendMessage (clockTickMessage);
 
   /* And reset when we last sent the clock update */
   lastTimeSent = rightNow;
@@ -76,12 +76,12 @@ sendClockTick(void) {
 int
 main (int argc, char * argv[]) {
   /* Parse command line parms */
-  if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
     exit (1);
   }
 
   /* Start xPL up */
-  if (!xPL_initialize (xPL_getParsedConnectionType())) {
+  if (!gxPLinitialize (gxPLgetParsedConnectionType())) {
     
     fprintf (stderr, "Unable to start xPL");
     exit (1);
@@ -90,29 +90,29 @@ main (int argc, char * argv[]) {
   /* Initialze clock service */
 
   /* Create  a service for us */
-  clockService = xPL_createService ("cdp1802", "clock", "default");
-  xPL_setServiceVersion (clockService, CLOCK_VERSION);
+  clockService = gxPLDeviceNew ("cdp1802", "clock", "default");
+  gxPLDeviceVersionSet (clockService, CLOCK_VERSION);
 
   /* Add a responder for time setting */
-  xPL_addServiceListener (clockService, clockMessageHandler, xPL_MESSAGE_ANY, "clock", NULL, NULL);
+  gxPLDeviceListenerAdd (clockService, clockMessageHandler, gxPLMESSAGE_ANY, "clock", NULL, NULL);
 
   /* Create a message to send */
-  clockTickMessage = xPL_createBroadcastMessage (clockService, xPL_MESSAGE_STATUS);
-  xPL_setSchema (clockTickMessage, "clock", "update");
+  clockTickMessage = gxPLcreateBroadcastMessage (clockService, gxPLMESSAGE_STATUS);
+  gxPLsetSchema (clockTickMessage, "clock", "update");
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, shutdownHandler);
   signal (SIGINT, shutdownHandler);
 
   /* Enable the service */
-  xPL_setServiceEnabled (clockService, TRUE);
+  gxPLDeviceEnabledSet (clockService, TRUE);
 
   /** Main Loop of Clock Action **/
 
   for (;;) {
     /* Let XPL run for a while, returning after it hasn't seen any */
     /* activity in 100ms or so                                     */
-    xPL_processMessages (100);
+    gxPLprocessMessages (100);
 
     /* Process clock tick update checking */
     sendClockTick();

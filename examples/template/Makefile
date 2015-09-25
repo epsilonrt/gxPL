@@ -143,9 +143,7 @@ ifeq ($(GXPL_DEBUG_TEST),ON)
 ifeq ($(GXPL_ROOT),)
 $(error GXPL_DEBUG_TEST is On and GXPL_ROOT is not defined, double-check that !)
 else
-VPATH+=:$(GXPL_ROOT)
-EXTRA_INCDIRS += $(GXPL_ROOT)/include
-SRC += $(addprefix src/, $(notdir $(wildcard $(GXPL_ROOT)/src/*.c)))
+include $(GXPL_ROOT)/gxpl.mk
 endif
 else
 EXTRA_LIBS += gxPL

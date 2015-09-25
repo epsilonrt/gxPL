@@ -14,12 +14,13 @@
 #include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
-#ifndef GXPL_INTERNALS
+#if !defined(GXPL_INTERNALS) && !defined(__DOXYGEN__)
 #warning You should not add the header file gxPL/io.h in your source code
 #endif
 
 /**
- * @defgroup xPLIo Internal Io Layer API
+ * @addtogroup 
+ * @defgroup gxPLIoInternal Internal Io Layer API
  * 
  * Description of the IO layer to the application layer.
  * The application layer uses functions described here to access the hardware 
@@ -55,7 +56,7 @@ gxPLIo * gxPLIoOpen (gxPLConfig * config);
  * @param source if not NULL, returns the source address.
  * @return 
  */
-int gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source);
+int gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source);
 
 /**
  * @brief 
@@ -67,7 +68,7 @@ int gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source);
  * broadcast address of the network is used.
  * @return 
  */
-int gxPLIoSend (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target);
+int gxPLIoSend (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * target);
 
 /**
  * @brief 

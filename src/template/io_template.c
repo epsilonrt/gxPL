@@ -41,14 +41,14 @@ gxPLTemplateOpen (gxPLIo * io) {
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateRead (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
+gxPLTemplateRead (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateWrite (gxPLIo * io, const void * buffer, int count, gxPLNetAddress * target) {
+gxPLTemplateWrite (gxPLIo * io, const void * buffer, int count, gxPLIoAddr * target) {
 
   return -1;
 }
@@ -84,9 +84,9 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLNetAddress * bcast_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
     case gxPLIoFuncGetBcastAddr: {
-      gxPLNetAddress * bcast_addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * bcast_addr = va_arg (ap, gxPLIoAddr*);
       // TODO
       // bcast_addr->size = ? ;
       // bcast_addr->family = ? ;
@@ -95,9 +95,9 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLNetAddress * local_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLIoAddr * local_addr)
     case gxPLIoFuncGetLocalAddr: {
-      gxPLNetAddress * local_addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * local_addr = va_arg (ap, gxPLIoAddr*);
       // TODO
       // local_addr->size = ? ;
       // local_addr->family = ? ;
@@ -106,9 +106,9 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLNetAddress * net_addr, char ** str_addr)
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
     case gxPLIoFuncNetAddrToString: {
-      gxPLNetAddress * addr = va_arg (ap, gxPLNetAddress*);
+      gxPLIoAddr * addr = va_arg (ap, gxPLIoAddr*);
 
       if (addr->family == ??) {
         char ** str_addr = va_arg (ap, char**);

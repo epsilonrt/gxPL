@@ -25,7 +25,7 @@
 /* private variables ======================================================== */
 static time_t lastTimeSent = 0;
 static int tickRate = 0;  /* Second between ticks */
-static gxPLService * clockService = NULL;
+static gxPLDevice * clockService = NULL;
 static gxPLMessage * clockTickMessage = NULL;
 
 static char numBuffer[10];
@@ -46,15 +46,15 @@ static char * intToStr (int value) {
  * be used by your configChangedHandler and your startup code that
  * will want to parse the same data after a config file is loaded */
 static void
-parseConfig (gxPLService * service) {
+parseConfig (gxPLDevice * service) {
   /* Get the tickrate */
-  char * newRate = xPL_getServiceConfigValue (service, TICK_RATE_CFG_NAME);
+  char * newRate = gxPLgetServiceConfigValue (service, TICK_RATE_CFG_NAME);
   int newTickRate;
   char * endChar;
 
   /* Handle bad configurable (override it) */
   if ( (newRate == NULL) || (strlen (newRate) == 0)) {
-    xPL_setServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
+    gxPLsetServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
     return;
   }
 
@@ -62,7 +62,7 @@ parseConfig (gxPLService * service) {
   newTickRate = strtol (newRate, &endChar, 10);
   if (*endChar != '\0') {
     /* Bad value -- override it */
-    xPL_setServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
+    gxPLsetServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
     return;
   }
 
@@ -73,7 +73,7 @@ parseConfig (gxPLService * service) {
 /* --------------------------------------------------------------------------
  * Handle a change to the clock service configuration */
 static void
-configChangedHandler (gxPLService * service, void * userData) {
+configChangedHandler (gxPLDevice * service, void * userData) {
   
   /* Read config items for service and install */
   parseConfig (service);
@@ -84,15 +84,15 @@ configChangedHandler (gxPLService * service, void * userData) {
  * the network the service is ending) */                         
 static void
 shutdownHandler (int onSignal) {
-  xPL_setServiceEnabled (clockService, FALSE);
-  xPL_releaseService (clockService);
+  gxPLDeviceEnabledSet (clockService, FALSE);
+  gxPLDelete (clockService);
   gxPLClose();
   exit (0);
 }
 
 /* ----------------------------------------------------------------------------- 
  * Build up a message with the current time in it and send it along.  An 
- * important detail is that we use xPL_sendServiceMessage() to send the  
+ * important detail is that we use gxPLDeviceMessageSend() to send the  
  * message (vs gxPLSendMessage) because this is a configurable service   
  * and since we created the message early on, it could have the wrong    
  * source identifiers after a reconfig. */                                 
@@ -115,7 +115,7 @@ sendClockTick (void) {
   gxPLMessagePairValueSet (clockTickMessage, "time", theDateTime);
 
   /* Broadcast the message */
-  xPL_sendServiceMessage (clockService, clockTickMessage);
+  gxPLDeviceMessageSend (clockService, clockTickMessage);
 
   /* And reset when we last sent the clock update */
   lastTimeSent = rightNow;
@@ -126,13 +126,13 @@ int
 main (int argc, char * argv[]) {
 
   /* Parse command line parms */
-  if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
 
     exit (1);
   }
 
   /* Start xPL up */
-  if (!gxPLNewConfig (gxPLGetConnectionType())) {
+  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (1);
@@ -141,8 +141,8 @@ main (int argc, char * argv[]) {
   /* Initialze clock service */
 
   /* Create a configurable service and ser our applications version */
-  clockService = xPL_createConfigurableService ("cdp1802", "clock", "clock.xpl");
-  xPL_setServiceVersion (clockService, CLOCK_VERSION);
+  clockService = gxPLcreateConfigurableService ("cdp1802", "clock", "clock.xpl");
+  gxPLDeviceVersionSet (clockService, CLOCK_VERSION);
 
   /* If the configuration was not reloaded, then this is our first time and   */
   /* we need to define what the configurables are and what the default values */
@@ -150,8 +150,8 @@ main (int argc, char * argv[]) {
   if (!gxPLIsServiceConfigured (clockService)) {
 
     /* Define a configurable item and give it a default */
-    xPL_addServiceConfigurable (clockService, TICK_RATE_CFG_NAME, gxPLConfigReconf, 1);
-    xPL_setServiceConfigValue (clockService, TICK_RATE_CFG_NAME, intToStr (DEFAULT_TICK_RATE));
+    gxPLaddServiceConfigurable (clockService, TICK_RATE_CFG_NAME, gxPLConfigReconf, 1);
+    gxPLsetServiceConfigValue (clockService, TICK_RATE_CFG_NAME, intToStr (DEFAULT_TICK_RATE));
   }
 
   /* Parse the service configurables into a form this program */
@@ -159,12 +159,12 @@ main (int argc, char * argv[]) {
   parseConfig (clockService);
 
   /* Add a service change listener we'll use to pick up a new tick rate */
-  xPL_addServiceConfigChangedListener (clockService, configChangedHandler, NULL);
+  gxPLaddServiceConfigChangedListener (clockService, configChangedHandler, NULL);
 
   /* Create a message to send.  We don't have to do it here -- you can */
   /* create a message anytime and release it later.  But since we know */
   /* we're going to use this over and over, create one for our life    */
-  clockTickMessage = gxPLMessageNewBroadcast (clockService, gxPLMessageStatus);
+  clockTickMessage = gxPLDeviceMessageNewBroadcast (clockService, gxPLMessageStatus);
   gxPLMessageSchemaSetAll (clockTickMessage, "clock", "update");
 
   /* Install signal traps for proper shutdown */
@@ -172,14 +172,14 @@ main (int argc, char * argv[]) {
   signal (SIGINT, shutdownHandler);
 
   /* Enable the service */
-  xPL_setServiceEnabled (clockService, TRUE);
+  gxPLDeviceEnabledSet (clockService, TRUE);
 
   /** Main Loop of Clock Action **/
 
   for (;;) {
     /* Let XPL run for a while, returning after it hasn't seen any */
     /* activity in 100ms or so                                     */
-    xPL_processMessages (100);
+    gxPLprocessMessages (100);
 
     /* Process clock tick update checking */
     sendClockTick();

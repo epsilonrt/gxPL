@@ -11,7 +11,7 @@
 
 #include <stdarg.h>
 #include <gxPL/defs.h>
-#ifndef GXPL_IO_INTERNALS
+#if !defined(GXPL_IO_INTERNALS) && !defined(__DOXYGEN__)
 #warning You should not add the header file gxPL/io.h in your source code
 #endif
 
@@ -32,8 +32,8 @@
  */
 typedef struct _gxPLIoOps {
   int (*open)   (gxPLIo * io);
-  int (*recv)   (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source);
-  int (*send)   (gxPLIo * io, const void * buffer, int count, const gxPLNetAddress * target);
+  int (*recv)   (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source);
+  int (*send)   (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * target);
   int (*close)  (gxPLIo * io);
   int (*ctl)    (gxPLIo * io, int c, va_list ap);
 } gxPLIoOps;

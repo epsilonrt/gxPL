@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="gxPL" InternalType="">
+<CodeLite_Project Name="gxpl-test-core" InternalType="">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -26,76 +26,11 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="src">
-    <VirtualDirectory Name="sys">
-      <VirtualDirectory Name="unix">
-        <File Name="src/sys/unix/gxpl.c"/>
-        <File Name="src/sys/unix/io_udp.c"/>
-      </VirtualDirectory>
-    </VirtualDirectory>
-    <VirtualDirectory Name="old">
-      <File Name="src/old/utils_p.h"/>
-      <File Name="src/old/listeners.c"/>
-      <File Name="src/old/io_p.h"/>
-      <File Name="src/old/xpl_p.h"/>
-      <File Name="src/old/message.c"/>
-      <File Name="src/old/hub.c"/>
-      <File Name="src/old/message_p.h"/>
-      <File Name="src/old/utils.c"/>
-      <File Name="src/old/service.c"/>
-      <File Name="src/old/service_p.h"/>
-      <File Name="src/old/io.c"/>
-      <File Name="src/old/alloc.c"/>
-      <File Name="src/old/config.c"/>
-    </VirtualDirectory>
-    <File Name="src/io_p.h"/>
-    <File Name="src/gxpl.c"/>
-    <File Name="src/io.c"/>
-    <File Name="src/gxpl_p.h"/>
-    <File Name="src/message.c"/>
-    <File Name="src/message_p.h"/>
-    <File Name="src/util.c"/>
-    <VirtualDirectory Name="template">
-      <File Name="src/template/io_template.c"/>
-    </VirtualDirectory>
-    <File Name="src/device.c"/>
-    <File Name="src/device_p.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="include">
-    <VirtualDirectory Name="gxPL">
-      <VirtualDirectory Name="old">
-        <File Name="include/gxPL/old/service.h"/>
-        <File Name="include/gxPL/old/defs.h"/>
-        <File Name="include/gxPL/old/hub.h"/>
-        <File Name="include/gxPL/old/io.h"/>
-        <File Name="include/gxPL/old/utils.h"/>
-        <File Name="include/gxPL/old/message.h"/>
-        <File Name="include/gxPL/old/compat.h"/>
-      </VirtualDirectory>
-      <File Name="include/gxPL/defs.h"/>
-      <File Name="include/gxPL/io.h"/>
-      <File Name="include/gxPL/message.h"/>
-      <File Name="include/gxPL/util.h"/>
-      <File Name="include/gxPL/device.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="old">
-      <File Name="include/old/gxPL.h"/>
-    </VirtualDirectory>
-    <File Name="include/gxPL.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="script">
-    <VirtualDirectory Name="init.d">
-      <File Name="script/init.d/gxpl-hub"/>
-      <File Name="script/init.d/gxpl-hub.conf"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="gxPL">
+  <VirtualDirectory Name="gxpl-test-core">
     <File Name="Makefile"/>
-    <File Name="NOTICE"/>
-    <File Name="README.md"/>
-    <File Name="config.h"/>
+    <File Name="gxpl-test-core.c"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -113,7 +48,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/gxpl-test-core" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-test-core" CommandArguments="-d -i wlan0" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -139,7 +74,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -152,7 +87,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="gxpl-test-core" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-test-core" CommandArguments="-d -i wlan0" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -178,7 +113,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>

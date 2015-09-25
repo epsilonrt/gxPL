@@ -151,7 +151,7 @@ parseCmdLine (int *argc, char *argv[]) {
       if (!strcmp (argv[swptr], "-xpldebug")) {
         debugMode = TRUE;
         daemonMode = FALSE;
-        xPL_setDebugging (TRUE);
+        gxPLsetDebugging (TRUE);
         vLog (LOG_ERR, "xPL Debug mode enabled");
         continue;
       }
@@ -193,7 +193,7 @@ printUsage (char * ourName) {
  * Shutdown gracefully if user hits ^C or received TERM signal */
 static void 
 hubShutdownHandler (int onSignal) {
-  xPL_stopHub();
+  gxPLstopHub();
   gxPLClose();
   exit (0);
 }
@@ -210,7 +210,7 @@ runHub (void) {
   vLog (LOG_ERR, "gxPLib started");
 
   /* Start gxPL Hub */
-  xPL_startHub();
+  gxPLstartHub();
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, hubShutdownHandler);
@@ -218,7 +218,7 @@ runHub (void) {
 
   /* Hand control over to gxPLib */
   writeInfo ("gxPL Hub now running");
-  xPL_processMessages (-1);
+  gxPLprocessMessages (-1);
   exit (0);
 }
 
@@ -311,7 +311,7 @@ int
 main (int argc, char * argv[]) {
   
   /* Check for xPL command parameters */
-  xPL_parseCommonArgs (&argc, argv, TRUE);
+  gxPLparseCommonArgs (&argc, argv, TRUE);
 
   /* Parse Hub command arguments */
   if (!parseCmdLine (&argc, argv)) {

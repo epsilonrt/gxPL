@@ -20,9 +20,10 @@
 typedef struct _gxPL {
 
   gxPLConfig * config;
-  gxPLIo * io;  /**< abstract structure can not be used on top level */
-  xVector listeners;
-  gxPLNetAddress net_info;
+  gxPLIo * io;  /**< abstract structure can not be used directly on top level */
+  xVector msg_listener;
+  xVector device;
+  gxPLIoAddr net_info;
 } gxPL;
 
 /* constants ================================================================ */

@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <gxPL/message.h>
+#include <gxPL/util.h>
 
 /* macros =================================================================== */
 #define test(t) do { \
@@ -71,10 +72,10 @@ main (int argc, char **argv) {
 
 
   const char large_text[] = "012345678901234567890123456789";
-  gxPLMessageId source = { .vendor = "xpl", .device = "xplhal", .instance = "myhouse" };
-  gxPLMessageId target = { .vendor = "acme", .device = "cm12", .instance = "server" };
-  gxPLMessageId empty_id  = { .vendor = "", .device = "", .instance = "" };
-  const gxPLMessageId * pid;
+  gxPLId source = { .vendor = "xpl", .device = "xplhal", .instance = "myhouse" };
+  gxPLId target = { .vendor = "acme", .device = "cm12", .instance = "server" };
+  gxPLId empty_id  = { .vendor = "", .device = "", .instance = "" };
+  const gxPLId * pid;
 
   // Tests for source
   test_count++;
@@ -82,7 +83,7 @@ main (int argc, char **argv) {
   test (pid);
   
   test_count++;
-  ret = gxPLMessageIdCmp (&empty_id, pid);
+  ret = gxPLIdCmp (&empty_id, pid);
   test (ret == 0);
 
   test_count++;
@@ -94,25 +95,25 @@ main (int argc, char **argv) {
   test (pid);
   
   test_count++;
-  ret = gxPLMessageIdCmp (&source, pid);
+  ret = gxPLIdCmp (&source, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageSourceVendorIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&source, pid);
+  ret = gxPLIdCmp (&source, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageSourceDeviceIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&source, pid);
+  ret = gxPLIdCmp (&source, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageSourceInstanceIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&source, pid);
+  ret = gxPLIdCmp (&source, pid);
   test (ret == 0);
 
   // Tests for target
@@ -121,7 +122,7 @@ main (int argc, char **argv) {
   test (pid);
   
   test_count++;
-  ret = gxPLMessageIdCmp (&empty_id, pid);
+  ret = gxPLIdCmp (&empty_id, pid);
   test (ret == 0);
 
   test_count++;
@@ -133,38 +134,38 @@ main (int argc, char **argv) {
   test (pid);
   
   test_count++;
-  ret = gxPLMessageIdCmp (&target, pid);
+  ret = gxPLIdCmp (&target, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageTargetVendorIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&target, pid);
+  ret = gxPLIdCmp (&target, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageTargetDeviceIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&target, pid);
+  ret = gxPLIdCmp (&target, pid);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageTargetInstanceIdSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageIdCmp (&target, pid);
+  ret = gxPLIdCmp (&target, pid);
   test (ret == 0);
 
   // Tests for schema
-  gxPLMessageSchema schema = { .class = "x10", .type = "basic" };
-  gxPLMessageSchema empty_schema = { .class = "", .type = "" };
-  const gxPLMessageSchema * psch;
+  gxPLSchema schema = { .class = "x10", .type = "basic" };
+  gxPLSchema empty_schema = { .class = "", .type = "" };
+  const gxPLSchema * psch;
   
   test_count++;
   psch = gxPLMessageSchemaGet (m);
   test (psch);
   
   test_count++;
-  ret = gxPLMessageSchemaCmp (&empty_schema, psch);
+  ret = gxPLSchemaCmp (&empty_schema, psch);
   test (ret == 0);
 
   test_count++;
@@ -176,19 +177,19 @@ main (int argc, char **argv) {
   test (psch);
   
   test_count++;
-  ret = gxPLMessageSchemaCmp (&schema, psch);
+  ret = gxPLSchemaCmp (&schema, psch);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageSchemaClassSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageSchemaCmp (&schema, psch);
+  ret = gxPLSchemaCmp (&schema, psch);
   test (ret == 0);
 
   test_count++;
   ret = gxPLMessageSchemaTypeSet (m, large_text);
   test (ret == -1);
-  ret = gxPLMessageSchemaCmp (&schema, psch);
+  ret = gxPLSchemaCmp (&schema, psch);
   test (ret == 0);
   
 
@@ -299,9 +300,7 @@ main (int argc, char **argv) {
   test(ret == 0);
   printf("the received message is the same as that which was sent\n\n");
 
-  test_count++;
-  ret = gxPLMessageDelete(rm);
-  test(ret == 0);
+  gxPLMessageDelete(rm);
   free(str);
   free(str1);
   free(str2);
@@ -339,9 +338,7 @@ main (int argc, char **argv) {
   test(ret == 0);
   printf("the received message is the same as that which was sent\n\n");
 
-  test_count++;
-  ret = gxPLMessageDelete(rm);
-  test(ret == 0);
+  gxPLMessageDelete(rm);
   free(str);
   free(str1);
   free(str2);
@@ -354,9 +351,7 @@ main (int argc, char **argv) {
   test (ret == 0);
   
   // Delete the message
-  test_count++;
-  ret = gxPLMessageDelete (m);
-  test (ret == 0);
+  gxPLMessageDelete (m);
 
   printf ("All tests (%d) were successful !\n", test_count);
   return 0;

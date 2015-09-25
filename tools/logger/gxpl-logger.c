@@ -25,15 +25,15 @@
 static FILE * logFile = NULL;
 static char * logFileName = "";
 static bool appendToLog = FALSE;
-static gxPLService * loggerService = NULL;
+static gxPLDevice * loggerService = NULL;
 
 /* private functions ======================================================== */
 
 // -----------------------------------------------------------------------------
 void
 shutdownHandler (int onSignal) {
-  xPL_setServiceEnabled (loggerService, FALSE);
-  xPL_releaseService (loggerService);
+  gxPLDeviceEnabledSet (loggerService, FALSE);
+  gxPLDelete (loggerService);
   gxPLClose();
   exit (0);
 }
@@ -44,18 +44,18 @@ shutdownHandler (int onSignal) {
  * be used by your configChangedHandler and your startup code that
  * will want to parse the same data after a config file is loaded */
 static void
-parseConfig (gxPLService * service) {
+parseConfig (gxPLDevice * service) {
   char * configValue;
   FILE * newLogFile = NULL;
 
   /* Get append status */
-  if ( (configValue = xPL_getServiceConfigValue (service, LOG_APPEND_CFG_NAME)) != NULL) {
+  if ( (configValue = gxPLgetServiceConfigValue (service, LOG_APPEND_CFG_NAME)) != NULL) {
 
     appendToLog = strcasecmp (configValue, "true") == 0;
   }
 
   /* Get log file name and see if it's changed */
-  if ( (configValue = xPL_getServiceConfigValue (service, LOG_FILE_CFG_NAME)) != NULL) {
+  if ( (configValue = gxPLgetServiceConfigValue (service, LOG_FILE_CFG_NAME)) != NULL) {
 
     /* Log file changed and not blank -- try to open the new one */
     if ( (strlen (configValue) != 0) && (strcmp (logFileName, configValue) != 0)) {
@@ -93,7 +93,7 @@ parseConfig (gxPLService * service) {
 /* --------------------------------------------------------------------------
  * Handle a change to the logger service configuration */
 static void
-configChangedHandler (gxPLService * service, void * userData) {
+configChangedHandler (gxPLDevice * service, void * userData) {
 
   /* Read config items for service and install */
   parseConfig (service);
@@ -115,7 +115,7 @@ void printTimestamp (void) {
 void printXPLMessage (gxPLMessage * message, void * userValue) {
 
   printTimestamp();
-  fprintf (logFile, "[xPL_MSG] TYPE=");
+  fprintf (logFile, "[gxPLMSG] TYPE=");
   switch (gxPLMessageTypeGet (message)) {
     case gxPLMessageCommand:
       fprintf (logFile, "xpl-cmnd");
@@ -168,12 +168,12 @@ void printXPLMessage (gxPLMessage * message, void * userValue) {
 int
 main (int argc, char * argv[]) {
   /* Parse the command line */
-  if (!xPL_parseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
     exit (1);
   }
 
   /* Start gxPLib */
-  if (!gxPLNewConfig (gxPLGetConnectionType())) {
+  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start gxPLib\n");
     exit (1);
   }
@@ -186,17 +186,17 @@ main (int argc, char * argv[]) {
   /* forward messages to us until they have seen a xPL-looking     */
   /* device on the end of a hub connection, so this just gets us a */
   /* place at the table, so to speak                               */
-  loggerService = xPL_createConfigurableService ("cdp1802", "logger", "logger.xpl");
-  xPL_setServiceVersion (loggerService, LOGGER_VERSION);
+  loggerService = gxPLcreateConfigurableService ("cdp1802", "logger", "logger.xpl");
+  gxPLDeviceVersionSet (loggerService, LOGGER_VERSION);
 
   if (!gxPLIsServiceConfigured (loggerService)) {
     
     /* Define a configurable item and give it a default */
-    xPL_addServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, gxPLConfigReconf, 1);
-    xPL_setServiceConfigValue (loggerService, LOG_FILE_CFG_NAME, "stderr");
+    gxPLaddServiceConfigurable (loggerService, LOG_FILE_CFG_NAME, gxPLConfigReconf, 1);
+    gxPLsetServiceConfigValue (loggerService, LOG_FILE_CFG_NAME, "stderr");
 
-    xPL_addServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, gxPLConfigReconf, 1);
-    xPL_setServiceConfigValue (loggerService, LOG_APPEND_CFG_NAME, "false");
+    gxPLaddServiceConfigurable (loggerService, LOG_APPEND_CFG_NAME, gxPLConfigReconf, 1);
+    gxPLsetServiceConfigValue (loggerService, LOG_APPEND_CFG_NAME, "false");
   }
 
   /* Parse the service configurables into a form this program */
@@ -204,17 +204,17 @@ main (int argc, char * argv[]) {
   parseConfig (loggerService);
 
   /* Add a service change listener we'll use to pick up changes */
-  xPL_addServiceConfigChangedListener (loggerService, configChangedHandler, NULL);
+  gxPLaddServiceConfigChangedListener (loggerService, configChangedHandler, NULL);
 
   /* Enable the service */
-  xPL_setServiceEnabled (loggerService, TRUE);
+  gxPLDeviceEnabledSet (loggerService, TRUE);
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, shutdownHandler);
   signal (SIGINT, shutdownHandler);
 
   /* Hand control over to gxPLib */
-  xPL_processMessages (-1);
+  gxPLprocessMessages (-1);
   exit (0);
 }
 /* ========================================================================== */

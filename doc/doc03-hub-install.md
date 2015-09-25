@@ -40,10 +40,10 @@ started.
 
 ## Installation 
 
-Two executables are supplied -- gxpl-hub and xPL_Hub_static.  On most systems,
+Two executables are supplied -- gxpl-hub and gxPLHub_static.  On most systems,
 the gxpl-hub executable is all you need.  However, if you get errors running
 the gxpl-hub (errors about linkage, libraries, etc), it may be the that gxpl-hub
-is not compatible with your system.  In that case, use the xPL_Hub_static
+is not compatible with your system.  In that case, use the gxPLHub_static
 executable (and just rename it to gxpl-hub).  This a larger executable and will
 consume a little bit more of RAM, but has no dependencies on your system.
 

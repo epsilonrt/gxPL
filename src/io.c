@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sysio/dlist.h>
+#include <sysio/vector.h>
 #include <sysio/log.h>
 
 #include "config.h"
@@ -47,10 +48,15 @@ prvIoKey (const xDListElmt * element) {
 
 // -----------------------------------------------------------------------------
 static int
-prvIoMatch (const void *key1, const void *key2) {
+prvNameMatch (const void *key1, const void *key2) {
   return strcmp ( (const char *) key1, (const char *) key2);
 }
 
+// -----------------------------------------------------------------------------
+static const void *
+prvIoNameKey (const void * item) {
+  return item;
+}
 
 // -----------------------------------------------------------------------------
 static gxPLIoOps *
@@ -73,7 +79,7 @@ gxPLIoOpen (gxPLConfig * config) {
   assert (io);
 
   if (strlen (config->iolayer) == 0) {
-    
+
     strcpy (config->iolayer, DEFAULT_IO_LAYER);
     PDEBUG ("set iolayer to default (%s)", config->iolayer);
   }
@@ -83,7 +89,7 @@ gxPLIoOpen (gxPLConfig * config) {
   if (io->ops) {
 
     if (io->ops->open (io) == 0) {
-      
+
       // great ! everything was done
       return io;
     }
@@ -104,26 +110,57 @@ gxPLIoClose (gxPLIo * io) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLNetAddress * source) {
+gxPLIoRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 
   return io->ops->recv (io, buffer, count, source);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoSend (gxPLIo * io, const void * buffer, int count, gxPLNetAddress * target) {
+gxPLIoSend (gxPLIo * io, const void * buffer, int count, gxPLIoAddr * target) {
 
   return io->ops->send (io, buffer, count, target);
 }
 
 // -----------------------------------------------------------------------------
-int 
+int
 gxPLIoIoCtl (gxPLIo * io, int c, va_list ap) {
-  
+
   return io->ops->ctl (io, c, ap);
 }
 
 /* internal public functions ================================================ */
+// -----------------------------------------------------------------------------
+xVector *
+gxPLIoLayerList (void) {
+  int i;
+  xDListElmt *element;
+
+  int count = iDListSize (&iolist) ;
+  xVector * list = malloc (sizeof (xVector));
+  assert (list);
+  list->malloc = 1;
+
+  if (iVectorInit (list, count, NULL, NULL) == 0) {
+    if (iVectorInitSearch (list, prvIoNameKey, prvNameMatch) == 0) {
+      if (count > 0) {
+        for (element = pxDListHead (&iolist), i = 0;
+             element != NULL;
+             element = pxDListElmtNext (element), i++) {
+          struct ioitem * item = pvDListElmtData (element);
+          if (iVectorAppend (list, item->name) != 0) {
+
+            free (list);
+            return NULL;
+          }
+        }
+      }
+      return list;
+    }
+  }
+  free (list);
+  return NULL;
+}
 
 // -----------------------------------------------------------------------------
 int
@@ -167,8 +204,8 @@ int __gxpl_init
 gxPLIoInit (void) {
 
   if (iDListInit (&iolist, prvIoDestroy) == 0) {
-    
-    return iDListInitSearch (&iolist, prvIoKey, prvIoMatch);
+
+    return iDListInitSearch (&iolist, prvIoKey, prvNameMatch);
   }
   return -1;
 }

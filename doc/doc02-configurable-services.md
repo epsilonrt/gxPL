@@ -24,13 +24,13 @@ for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
 <pre class="fragment">
-myService = xPL_createService(myVendor, myDevice, myInstance);
+myService = gxPLDeviceNew(myVendor, myDevice, myInstance);
 </pre>
 
 with
 
 <pre class="fragment">
-myService = xPL_createConfigurableService(myVendor, myDevice, configFilename);
+myService = gxPLcreateConfigurableService(myVendor, myDevice, configFilename);
 </pre>
 
 That's it! configFileName is the file configuration data it stored in and
@@ -60,14 +60,14 @@ You should insure that every message you send that is supposed to come from
 this service is sent with the
 
 <pre class="fragment">
-xPL_sendServiceMessage(myService, myMessage);
+gxPLDeviceMessageSend(myService, myMessage);
 </pre>
 
 instead of the more generic *gxPLSendMessage()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
 simpler *gxPLSendMessage()* on *gxPLMessage* instances you created earlier, your
 messages source fields may no longer match what the services identifiers are
-now.  *xPL_sendServiceMessage()* makes sure (and corrects, if needed) they
+now.  *gxPLDeviceMessageSend()* makes sure (and corrects, if needed) they
 always match.
 
 
@@ -106,10 +106,10 @@ Now, some details:
     your configurables in.  Here's a code sample:
 
     <pre class="fragment">
-    myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
+    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!gxPLIsServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      xPL_setServiceConfigValue(clockService, "debugMode", "false");
+      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
+      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
     </pre>
 
@@ -136,9 +136,9 @@ Now, some details:
     configuration values.  In this case, it might look like this:
 
     <pre class="fragment">
-    static void parseServiceConfigValues(gxPLService * service) {
+    static void parseServiceConfigValues(gxPLDevice * service) {
      /* Extract the value, if any, for a configurable named "debugMode" */
-     char * debugFlag = xPL_getServiceConfigValue(service, "debugMode");
+     char * debugFlag = gxPLgetServiceConfigValue(service, "debugMode");
      if (debugFlag != NULL) {
        /* Do a case insensitive compare to see if it's true or not */
        debugMode = (strcasecmp(debugFlag, "true") == 0);
@@ -172,10 +172,10 @@ Now, some details:
 
     <pre class="fragment">
     /** Create the service */
-    myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
+    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!gxPLIsServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      xPL_setServiceConfigValue(clockService, "debugMode", "false");
+      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
+      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
 
     /* Parse configuration */
@@ -190,7 +190,7 @@ Now, some details:
     For example:
 
     <pre class="fragment">
-    static void configChangedHandler(gxPLService * service, xPL_Object * userData) {
+    static void configChangedHandler(gxPLDevice * service, gxPLObject * userData) {
       parseServiceConfigValues(service);
     }
     </pre>
@@ -198,22 +198,22 @@ Now, some details:
     This handler will just invoke the same parser we used earlier to parse
     things after the service was created.
 
-    To register that handler, use xPL_addServiceConfigChangedListener() right after you
+    To register that handler, use gxPLaddServiceConfigChangedListener() right after you
     finish the initial parsing of config values.  Like this:
 
     <pre class="fragment">
     /** Create the service */
-    myService = xPL_createConfigurableService("myVendor", "myDevice", "test.xpl");
+    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
     if (!gxPLIsServiceConfigured(myService) {
-      xPL_addServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      xPL_setServiceConfigValue(clockService, "debugMode", "false");
+      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
+      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
 
     /* Parse configuration */
     parseServiceConfigValues(myService);
 
     /* Add a listener for configuration changes */
-    xPL_addServiceConfigChangedListener(myService, configChangedHandler, NULL);
+    gxPLaddServiceConfigChangedListener(myService, configChangedHandler, NULL);
     </pre>
 
 
