@@ -232,7 +232,7 @@ sendMessage (int argc, char * argv[]) {
   }
 
   /* Install the schema */
-  gxPLMessageSchemaSetAll (message, msgSchemaClass, msgSchemaType);
+  gxPLMessageSchemaSet (message, msgSchemaClass, msgSchemaType);
 
   /* Install named values */
   for (argIndex = 1; argIndex < argc; argIndex++) {
@@ -247,7 +247,7 @@ sendMessage (int argc, char * argv[]) {
   }
 
   /* Send the message */
-  if (!gxPLSendMessage (message)) {
+  if (!gxPLMessageSend (message)) {
     fprintf (stderr, "Unable to send xPL message\n");
     return FALSE;
   }
@@ -280,7 +280,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
+  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }

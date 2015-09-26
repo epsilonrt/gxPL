@@ -22,7 +22,7 @@ __BEGIN_C_DECLS
 /* types ==================================================================== */
 
 /**
- * @brief Service Listener Support
+ * @brief Listener for a device
  */
 typedef void (* gxPLDeviceListener) (gxPLDevice *, const gxPLMessage *, void *);
 
@@ -30,99 +30,48 @@ typedef void (* gxPLDeviceListener) (gxPLDevice *, const gxPLMessage *, void *);
 
 
 /* internal public functions ================================================ */
-/**
- * @brief Return number of devices
- *
- * @return
- */
-int gxPLDeviceCount (gxPL * gxpl);
 
 /**
- * @brief Return a device at a given index.
- *
- * @param index
- * @return If the index is out of range, return NULL
+ * @brief Create a message for the device
+ * 
+ * The message can be modified using the functions of the message module 
+ * before being sent with gxPLDeviceMessageSend(). A message to send can not 
+ * be gxPLMessageAny type. The message should be released with gxPLMessageDelete
+ * after use.
+ * 
+ * @param device pointer on the device
+ * @param type the type of message
+ * @return  the message, NULL if an error occurs
  */
-gxPLDevice * gxPLDeviceAt (gxPL * gxpl, int index);
-
-/**
- * @brief Create a new xPL device
- */
-gxPLDevice * gxPLDeviceNew (gxPL * gxpl,
-                            const char * vendor_id,
-                            const char * device_id,
-                            const char * instance_id);
-
-/**
- * @brief Release an xPL device
- */
-void gxPLDeviceDelete (gxPLDevice * device);
-
-const gxPLId * gxPLDeviceIdGet (const gxPLDevice * device);
-int gxPLDeviceEnabledGet (const gxPLDevice * device);
-int gxPLDeviceHeartbeatIntervalGet (const gxPLDevice * device);
-const char * gxPLDeviceVersionGet (const gxPLDevice * device);
-int gxPLRespondToBroadcastGet (const gxPLDevice * device);
-int gxPLReportOwnMessagesGet (const gxPLDevice * device);
-
-int gxPLDeviceIdSet (gxPLDevice * device,  const gxPLId * id);
-int gxPLDeviceVendorIdSet (gxPLDevice * device, const char * vendor_id);
-int gxPLDeviceDeviceIdSet (gxPLDevice * device, const char * device_id);
-int gxPLDeviceInstanceIdSet (gxPLDevice * device, const char * instance_id);
-int gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled);
-int gxPLDeviceHeartbeatIntervalSet (gxPLDevice * device, int interval);
-int gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond);
-int gxPLReportOwnMessagesSet (gxPLDevice * device, bool reportmsg);
-
-//------------------------------------------------------------------------------
-/**
- * @brief Create a message suitable for broadcasting to all listeners
- * @param device
- * @param type
- * @return
- */
-gxPLMessage * gxPLDeviceMessageNewBroadcast (gxPLDevice * device,
-    gxPLMessageType type);
-
-/**
- * @brief Create a message suitable for sending to a specific receiver
- * @param device
- * @param type
- * @param vendor_id
- * @param device
- * @param instance
- * @return
- */
-gxPLMessage * gxPLDeviceMessageNewTargeted (gxPLDevice * device,
-    gxPLMessageType type,
-    char * target_vendor_id,
-    char * target_device_id,
-    char * target_instance_id);
-
-/**
- * @brief
- * @param device
- * @param type
- * @param group
- * @return
- */
-gxPLMessage * gxPLDeviceMessageNewGroupTargeted (gxPLDevice * device,
-    gxPLMessageType type,
-    char * group);
+gxPLMessage * gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type);
 
 /**
  * @brief Send a message out from this device
  *
- * If the message has not had it's source set or the source does not match the
- * sending device, it is updated and the message sent
- * @param device
+ * The source of the message should be the device but no check is performed.
+ * 
+ * @param device pointer on the device
  * @param message
- * @return
+ * @return number of bytes send, -1 if error occurs
  */
-bool gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message);
+int gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message);
 
 /**
- * @brief Add a device listener
+ * @brief Add a listener for the device
+ * 
+ * This function allows the user to install a listener that will be called for 
+ * each message received for the service. \n
+ * Only messages matching type, schema_class and schema_type are forwarded to 
+ * the listener.
+ * 
+ * @param device pointer on the device
+ * @param listener the function listening device messages
+ * @param type type of message to be processed, gxPLMessageAny to manage any
+ * @param schema_class schema class to process, NULL to manage everything
+ * @param schema_type schema type to process, NULL to manage everything
+ * @param udata pointer to the user data that will be passed to the listener, 
+ * NULL if not used.
+ * @return 0, -1 if error occurs
  */
 int gxPLDeviceListenerAdd (gxPLDevice * device,
                            gxPLDeviceListener listener,
@@ -132,38 +81,219 @@ int gxPLDeviceListenerAdd (gxPLDevice * device,
 
 /**
  * @brief Remove a device listener
- * @param device
- * @param listener
- * @return
+ * @param device pointer on the device
+ * @param listener the listener
+ * @return 0, -1 if error occurs
  */
 int gxPLDeviceListenerRemove (gxPLDevice * device,
                               gxPLDeviceListener listener);
 
+/**
+ * @brief Gets the parent gxPL object
+ * 
+ * @param device pointer on the device
+ * @return pointer to an gxPL object that is the parent of the device, NULL if error occurs
+ */
+gxPL * gxPLDeviceParentGet (gxPLDevice * device);
+
+/**
+ * @brief Gets the identifier
+ * @param device pointer on the device
+ * @return the identifier, NULL if error occurs
+ */
+const gxPLId * gxPLDeviceIdGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device is enabled.
+ * @param device pointer on the device
+ * @return true if enabled, false if not, -1 if an error occurs
+ */
+int gxPLDeviceEnabledGet (const gxPLDevice * device);
+
+/**
+ * @brief Gets the heartbeat interval
+ * 
+ * @param device pointer on the device
+ * @return the interval in seconds, -1
+ */
+int gxPLDeviceHeartbeatIntervalGet (const gxPLDevice * device);
+
+/**
+ * @brief Gets the time of the last heartbeat sent
+ * 
+ * The time is given in a unit dependent on the host system, most of the time 
+ * is given in seconds. On a unix system with a real time clock that value is 
+ * the number of seconds since the first second of January 1, 1970.
+ * 
+ * @param device pointer on the device
+ * @return the last time, -1 if error occurs
+ */
+long gxPLDeviceHeartbeatLastGet (const gxPLDevice * device);
+
+/**
+ * @brief Gets the version string
+ * 
+ * This information is transmitted with the heartbeat.
+ * @param device pointer on the device
+ * @return the last time, NULL if error occurs
+ */
+const char * gxPLDeviceVersionGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device will respond to broadcast messages.
+ * @param device pointer on the device
+ * @return true if respond, false if not, -1 if an error occurs
+ */
+int gxPLRespondToBroadcastGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device will transmit its own messages to the listeners
+ * @param device pointer on the device
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLReportOwnMessagesGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device has detected a hub.
+ * @param device pointer on the device
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLDeviceHubConfirmedGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device is configurable
+ * @param device pointer on the device
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLDeviceConfiguraleGet (const gxPLDevice * device);
+
+/**
+ * @brief Indicates whether the device is configur
+ * @param device pointer on the device
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLDeviceConfiguredGet (const gxPLDevice * device);
+
+/**
+ * @brief Sets the identifier
+ * @param device pointer on the device
+ * @param id pointer to identifier
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceIdSet (gxPLDevice * device,  const gxPLId * id);
+
+/**
+ * @brief Sets the vendor identifier
+ * @param device pointer on the device
+ * @param vendor_id pointer to the vendor id
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceVendorIdSet (gxPLDevice * device, const char * vendor_id);
+
+/**
+ * @brief Sets the device identifier
+ * @param device pointer on the device
+ * @param device_id pointer to the device id
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceDeviceIdSet (gxPLDevice * device, const char * device_id);
+
+/**
+ * @brief Sets the instance identifier
+ * @param device pointer on the device
+ * @param instance_id pointer to the instance id
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceInstanceIdSet (gxPLDevice * device, const char * instance_id);
+
+/**
+ * @brief Sets the version
+ * @param device pointer on the device
+ * @param version
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceVersionSet (gxPLDevice * device, const char * version);
+
+/**
+ * @brief Enabled or not a device
+ * @param device pointer on the device
+ * @param enabled true for eanbled
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled);
+
+/**
+ * @brief Sets the heartbeat interval
+ * @param device pointer on the device
+ * @param interval interval in seconds
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceHeartbeatIntervalSet (gxPLDevice * device, int interval);
+
+/**
+ * @brief Enable the response to broadcast messages
+ * @param device pointer on the device
+ * @param respond true for respond
+ * @return 0, -1 if an error occurs
+ */
+int gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond);
+
+/**
+ * @brief Process own messages
+ * @param device pointer on the device
+ * @param isreportownmsg true or flase
+ * @return 0, -1 if an error occurs
+ */
+int gxPLReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
+
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * @brief
- * @param device
+ * @param device pointer on the device
  * @return
  */
 bool gxPLdoesServiceHaveGroups (gxPLDevice * device);
 
 /**
  * @brief Clear out all groups
- * @param device
+ * @param device pointer on the device
  */
 void gxPLclearServiceGroups (gxPLDevice * device);
 
 
 /**
  * @brief Clear out any/all installed filters
- * @param device
+ * @param device pointer on the device
  */
 void gxPLclearServiceFilters (gxPLDevice * device);
 
 
 /**
  * @brief
- * @param device
+ * @param device pointer on the device
  * @return
  */
 bool gxPLIsServiceFiltered (gxPLDevice * device);

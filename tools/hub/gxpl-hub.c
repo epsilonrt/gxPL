@@ -203,7 +203,7 @@ hubShutdownHandler (int onSignal) {
 static void 
 runHub (void) {
   /* Start gxPLib */
-  if (!gxPLNewConfig (gxPLConnectStandAlone)) {
+  if (!gxPLConfigNew (gxPLConnectStandAlone)) {
     writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
     exit (1);
   }

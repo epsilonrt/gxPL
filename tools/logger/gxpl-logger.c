@@ -173,7 +173,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start gxPLib */
-  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
+  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start gxPLib\n");
     exit (1);
   }

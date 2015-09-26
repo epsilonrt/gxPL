@@ -93,7 +93,7 @@ shutdownHandler (int onSignal) {
 /* ----------------------------------------------------------------------------- 
  * Build up a message with the current time in it and send it along.  An 
  * important detail is that we use gxPLDeviceMessageSend() to send the  
- * message (vs gxPLSendMessage) because this is a configurable service   
+ * message (vs gxPLMessageSend) because this is a configurable service   
  * and since we created the message early on, it could have the wrong    
  * source identifiers after a reconfig. */                                 
 static void
@@ -132,7 +132,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!gxPLNewConfig (gxPLConnectionTypeGet())) {
+  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (1);
@@ -165,7 +165,7 @@ main (int argc, char * argv[]) {
   /* create a message anytime and release it later.  But since we know */
   /* we're going to use this over and over, create one for our life    */
   clockTickMessage = gxPLDeviceMessageNewBroadcast (clockService, gxPLMessageStatus);
-  gxPLMessageSchemaSetAll (clockTickMessage, "clock", "update");
+  gxPLMessageSchemaSet (clockTickMessage, "clock", "update");
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, shutdownHandler);

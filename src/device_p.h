@@ -13,7 +13,10 @@
 #include <sysio/vector.h>
 #include <gxPL/defs.h>
 
+/* types ==================================================================== */
+
 /* structures =============================================================== */
+
 /*
  * @brief Describe a xPL service
  */
@@ -32,33 +35,15 @@ typedef struct _gxPLDevice {
     unsigned int flag;
     struct {
 
+      unsigned int ishubconfirmed: 1;
       unsigned int isenabled : 1;
       unsigned int nobroadcast : 1;
-      unsigned int reportmsg: 1;
+      unsigned int isreportownmsg: 1;
+      unsigned int isconfigured: 1;
+      unsigned int isconfigurable: 1;
     };
   };
 } gxPLDevice;
-
-#if 0
-int groupCount;
-int groupAllocCount;
-char **groupList;
-
-bool configurableService;
-bool serviceConfigured;
-char * configFileName;
-int configChangedCount;
-int configChangedAllocCount;
-gxPLDeviceChangedListenerDef * changedListenerList;
-
-int configCount;
-int configAllocCount;
-gxPLDeviceConfigurable * configList;
-
-int filterCount;
-int filterAllocCount;
-gxPLDeviceFilter * messageFilterList;
-#endif
 
 /* ========================================================================== */
 #endif /* _GXPL_SERVICE_PRIVATE_HEADER_ defined */

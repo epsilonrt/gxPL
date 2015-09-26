@@ -169,7 +169,7 @@ main (int argc, char **argv) {
   test (ret == 0);
 
   test_count++;
-  ret = gxPLMessageSchemaSet (m, &schema);
+  ret = gxPLMessageSchemaCopy (m, &schema);
   test (ret == 0);
   
   test_count++;

@@ -63,9 +63,9 @@ this service is sent with the
 gxPLDeviceMessageSend(myService, myMessage);
 </pre>
 
-instead of the more generic *gxPLSendMessage()*.  The reason is that if the
+instead of the more generic *gxPLMessageSend()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
-simpler *gxPLSendMessage()* on *gxPLMessage* instances you created earlier, your
+simpler *gxPLMessageSend()* on *gxPLMessage* instances you created earlier, your
 messages source fields may no longer match what the services identifiers are
 now.  *gxPLDeviceMessageSend()* makes sure (and corrects, if needed) they
 always match.

@@ -155,6 +155,45 @@ int gxPLIdFromString (gxPLId * dest, char * src);
 int gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2);
 
 /**
+ * @brief 
+ * @param s
+ * @param schema_class
+ * @return 
+ */
+int gxPLSchemaClassSet (gxPLSchema * s, const char * schema_class);
+
+/**
+ * @brief 
+ * @param s
+ * @param schema_type
+ * @return 
+ */
+int gxPLSchemaTypeSet (gxPLSchema * s, const char * schema_type);
+
+/**
+ * @brief 
+ * @param schema
+ * @param schema_class
+ * @param schema_type
+ * @return 
+ */
+int gxPLSchemaSet (gxPLSchema * schema, const char * schema_class, const char * schema_type);
+
+/**
+ * @brief 
+ * @param dst
+ * @param src
+ * @return 
+ */
+int gxPLSchemaCopy (gxPLSchema * dst, const gxPLSchema * src);
+
+/**
+ * @brief 
+ * @param schema
+ * @return 
+ */
+int gxPLSchemaIsEmpty (const gxPLSchema * schema);
+/**
  * @}
  */
 

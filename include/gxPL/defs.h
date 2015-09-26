@@ -153,6 +153,14 @@ typedef enum {
   gxPLMessageStateError = -1
 } gxPLMessageState;
 
+/**
+ * @brief Heartbeat type
+ */
+typedef enum {
+  gxPLHeartbeatHello    = 0,
+  gxPLHeartbeatGoodbye  = 1,
+} gxPLHeartbeatType;
+
 /* types ==================================================================== */
 
 /* structures =============================================================== */

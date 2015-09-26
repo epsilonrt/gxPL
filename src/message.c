@@ -515,6 +515,7 @@ gxPLMessageToString (const gxPLMessage * message) {
 // -----------------------------------------------------------------------------
 gxPLMessage *
 gxPLMessageNew (gxPLMessageType type) {
+
   gxPLMessage * message = calloc (1, sizeof (gxPLMessage));
 
   if (message) {
@@ -540,7 +541,7 @@ gxPLMessageDelete (gxPLMessage * message) {
 
   if (message) {
 
-    (void) iVectorDestroy (&message->body);
+    vVectorDestroy (&message->body);
     free (message);
   }
 }
@@ -548,30 +549,23 @@ gxPLMessageDelete (gxPLMessage * message) {
 // -----------------------------------------------------------------------------
 int
 gxPLMessageSchemaClassSet (gxPLMessage * message, const char * schema_class) {
-  if ( (message == NULL) || (schema_class == NULL)) {
+
+  if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
-  if (strlen (schema_class) > GXPL_CLASS_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  return (gxPLStrCpy (message->schema.class, schema_class) > 0) ? 0 : -1;
+  return gxPLSchemaClassSet (&message->schema, schema_class);
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLMessageSchemaTypeSet (gxPLMessage * message, const char * schema_type) {
 
-  if ( (message == NULL) || (schema_type == NULL)) {
+  if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
-  if (strlen (schema_type) > GXPL_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  return (gxPLStrCpy (message->schema.type, schema_type) > 0) ? 0 : -1;
+  return gxPLSchemaTypeSet (&message->schema, schema_type);
 }
 
 // -----------------------------------------------------------------------------
@@ -936,47 +930,47 @@ gxPLMessageSourceInstanceIdGet (const gxPLMessage * message) {
 }
 
 // -----------------------------------------------------------------------------
-int 
+int
 gxPLMessageIsValid (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return message->isvalid;  
+  return message->isvalid;
 }
 
 // -----------------------------------------------------------------------------
-int 
+int
 gxPLMessageIsError (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return message->iserror;  
+  return message->iserror;
 }
 
 // -----------------------------------------------------------------------------
-gxPLMessageState 
+gxPLMessageState
 gxPLMessageStateGet (const gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return message->state;  
+  return message->state;
 }
 
 // -----------------------------------------------------------------------------
-int 
+int
 gxPLMessageFlagClear (gxPLMessage * message) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  return message->flag = 0;  
+  return message->flag = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -1025,24 +1019,25 @@ gxPLMessageSchemaTypeGet (const gxPLMessage * message) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageSchemaSetAll (gxPLMessage * message, const char * schema_class,
-                         const char * schema_type) {
+gxPLMessageSchemaSet (gxPLMessage * message, const char * schema_class,
+                      const char * schema_type) {
   if (message == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  if (gxPLMessageSchemaClassSet (message, schema_class) == 0) {
-    return gxPLMessageSchemaTypeSet (message, schema_type);
-  }
-  return -1;
+  return gxPLSchemaSet (&message->schema, schema_class, schema_type);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageSchemaSet (gxPLMessage * message, const gxPLSchema * schema) {
+gxPLMessageSchemaCopy (gxPLMessage * message, const gxPLSchema * schema) {
+  if (message == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
 
-  return gxPLMessageSchemaSetAll (message, schema->class, schema->type);
+  return gxPLSchemaCopy (&message->schema, schema);
 }
 
 // -----------------------------------------------------------------------------

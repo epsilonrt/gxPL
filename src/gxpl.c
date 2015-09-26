@@ -74,7 +74,7 @@ prvDeviceMatch (const void *key1, const void *key2) {
 static void
 prvDeviceDelete (void * d) {
 
-  (void) gxPLDeviceDelete ( (gxPLDevice *) d);
+  gxPLDeviceDelete ( (gxPLDevice *) d);
 }
 
 /* -----------------------------------------------------------------------------
@@ -125,6 +125,93 @@ prvParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
   optind = 1; // rewinds to allow the user to analyze again the parameters
 }
 
+// -----------------------------------------------------------------------------
+// Public
+// Stop (disable) all services, usually in preparation for shutdown, but
+// that isn't the only possible reason
+int gxPLDeviceDisableAll (gxPL * gxpl) {
+  gxPLDevice * device;
+
+  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+
+    device = pvVectorGet (&gxpl->device, i);
+    if (gxPLDeviceEnabledSet (device, false) != 0) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+/* -----------------------------------------------------------------------------
+ * Private
+ * Check each known device for when it last sent a heart
+ * beat and if it's time to send another, do it. */
+static void
+prvHeartbeatPoll (gxPL * gxpl) {
+  gxPLDevice * device;
+  time_t now = time (NULL);
+  time_t elapsed;
+
+  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+
+    device = pvVectorGet (&gxpl->device, i);
+
+    if (gxPLDeviceEnabledGet (device)) {
+      int interval = gxPLDeviceHeartbeatIntervalGet (device);
+      time_t last = gxPLDeviceHeartbeatLastGet (device);
+
+      // See how much time has gone by
+      elapsed = now - last;
+
+      if (gxPLDeviceHubConfirmedGet (device)) {
+
+        if (last >= 1) {
+
+          if (gxPLDeviceConfiguraleGet (device) &&
+              !gxPLDeviceConfiguredGet (device)) {
+
+            // If we are in configuration mode, we send out once a minute
+            if (elapsed < CONFIG_HEARTBEAT_INTERVAL) {
+
+              continue;
+            }
+          }
+
+          // For normal heartbeats, once each "hbeat_interval"
+          if (elapsed < interval) {
+
+            continue;
+          }
+        }
+      }
+      else {
+
+        // If we are still waiting to hear from the hub,
+        // then send a message every 3 seconds until we do
+        if (elapsed < CONFIG_HUB_DISCOVERY_INTERVAL) {
+
+          continue;
+        }
+      }
+
+      gxPLDeviceHeartbeatSend (device, gxPLHeartbeatHello);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Run the passed message by each device and see who is interested
+void prvDeviceMessageDispatcher (gxPL * gxpl, const gxPLMessage * message,
+                                 void * udata) {
+  gxPLDevice * device;
+
+  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+
+    device = pvVectorGet (&gxpl->device, i);
+    gxPLDeviceMessageHandler (device, message, udata);
+  }
+}
+
 
 /* internal public functions ================================================ */
 
@@ -132,7 +219,7 @@ prvParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
 /* api functions ============================================================ */
 // -----------------------------------------------------------------------------
 gxPLConfig *
-gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnectType type) {
+gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnectType type) {
   gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
   assert (config);
 
@@ -146,7 +233,7 @@ gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnectType type) {
 
 // -----------------------------------------------------------------------------
 gxPLConfig *
-gxPLNewConfigFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
+gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
   assert (config);
 
@@ -183,20 +270,26 @@ gxPLOpen (gxPLConfig * config) {
       gxpl->config->malloc = 1;
     }
     else {
+
       gxpl->config = config;
     }
 
     if (iVectorInit (&gxpl->msg_listener, 2, NULL, free) == 0) {
+
       if (iVectorInitSearch (&gxpl->msg_listener, prvListenerKey,
                              prvListenerMatch) == 0) {
 
         if (iVectorInit (&gxpl->device, 2, NULL, prvDeviceDelete) == 0) {
+
           if (iVectorInitSearch (&gxpl->device, prvDeviceKey,
                                  prvDeviceMatch) == 0) {
 
             // everything was done, we copy the network information and returns.
             (void) gxPLIoCtl (gxpl, gxPLIoFuncGetLocalAddr, &gxpl->net_info);
-            return gxpl;
+            if (gxPLMessageListenerAdd (gxpl, prvDeviceMessageDispatcher, NULL) == 0) {
+
+              return gxpl;
+            }
           }
         }
       }
@@ -210,16 +303,24 @@ gxPLOpen (gxPLConfig * config) {
 // -----------------------------------------------------------------------------
 int
 gxPLClose (gxPL * gxpl) {
-  int ret;
 
-  ret = gxPLIoClose (gxpl->io);
-  iVectorDestroy (&gxpl->msg_listener);
-  if (gxpl->config->malloc) {
+  if (gxpl) {
+    int ret;
+    
+    // for each device, sends a goodbye heartbeat and removes all listeners,
+    vVectorDestroy (&gxpl->device);
+    // then releases all message listeners
+    vVectorDestroy (&gxpl->msg_listener);
+    // an close !
+    ret = gxPLIoClose (gxpl->io);
+    if (gxpl->config->malloc) {
 
-    free (gxpl->config);
+      free (gxpl->config);
+    }
+    free (gxpl);
+    return ret;
   }
-  free (gxpl);
-  return ret;
+  return -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -231,13 +332,18 @@ gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata)
   h->func = listener;
   h->data = udata;
 
-  return iVectorAppend (&gxpl->msg_listener, h);
+  if (iVectorAppend (&gxpl->msg_listener, h) == 0) {
+    return 0;
+  }
+  free(h);
+  return -1;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLMessageListenerRemove (gxPL * gxpl, gxPLMessageListener listener) {
   int i = iVectorFindFirstIndex (&gxpl->msg_listener, &listener);
+  
 
   return iVectorRemove (&gxpl->msg_listener, i);
 }
@@ -250,6 +356,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
   ret = gxPLIoCtl (gxpl, gxPLIoFuncPoll, &size, timeout_ms);
 
   if (ret == 0)  {
+
     if (size > 0) {
       char * buffer = malloc (size + 1);
       assert (buffer);
@@ -279,15 +386,14 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
 
               listener_elmt * h = pvVectorGet (&gxpl->msg_listener, i);
               if (h->func) {
-                if (h->func (gxpl, msg, h->data) != 0) {
-                  vLog (LOG_INFO, "Handler message failed");
-                }
+
+                h->func (gxpl, msg, h->data);
               }
             }
           }
 
           if (gxPLMessageIsValid (msg) || gxPLMessageIsError (msg)) {
-            
+
             // Release the message
             gxPLMessageDelete (msg);
             msg = NULL;
@@ -301,6 +407,10 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
       }
       free (buffer);
     }
+    else {
+
+      prvHeartbeatPoll (gxpl);
+    }
   }
   else {
 
@@ -311,7 +421,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLSendMessage (gxPL * gxpl, gxPLMessage * message) {
+gxPLMessageSend (gxPL * gxpl, gxPLMessage * message) {
   int ret = -1;
   int count;
   char * str = gxPLMessageToString (message);
@@ -320,8 +430,12 @@ gxPLSendMessage (gxPL * gxpl, gxPLMessage * message) {
 
     count = strlen (str);
     ret = gxPLIoSend (gxpl->io, str, count, NULL);
+    if (ret < 0) {
+      vLog (LOG_ERR, "Unable to send message: [%10s...]", str);
+    }
     free (str);
   }
+
   return ret;
 }
 
@@ -373,10 +487,10 @@ gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
 
   gxPLDevice * device = gxPLDeviceNew (gxpl, vendor_id, device_id, instance_id);
   if (device) {
-    
+
     // verifies that the device does not exist
-    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceIdGet(device)) == NULL) {
-      
+    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceIdGet (device)) == NULL) {
+
       // if not, add it to the list
       if (iVectorAppend (&gxpl->device, device) == 0) {
 
@@ -392,12 +506,12 @@ gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceRemove (gxPL * gxpl, gxPLDevice * device) {
-  
- int index = iVectorFindFirstIndex (&gxpl->device, device);
- if (index >= 0) {
-   return iVectorRemove(&gxpl->device, index);
- }
- return -1;
+
+  int index = iVectorFindFirstIndex (&gxpl->device, device);
+  if (index >= 0) {
+    return iVectorRemove (&gxpl->device, index);
+  }
+  return -1;
 }
 
 // -----------------------------------------------------------------------------
@@ -412,6 +526,12 @@ gxPLDevice *
 gxPLDeviceAt (gxPL * gxpl, int index) {
 
   return (gxPLDevice *) pvVectorGet (&gxpl->device, index);
+}
+
+// -----------------------------------------------------------------------------
+int 
+gxPLDeviceIndex (gxPL * gxpl, const gxPLDevice * device) {
+  return iVectorFindFirstIndex(&gxpl->device, device);
 }
 
 // -----------------------------------------------------------------------------

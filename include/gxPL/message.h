@@ -27,8 +27,10 @@ __BEGIN_C_DECLS
  * @brief Create a new empty message
  * 
  * All fields are set to zero except the hop count is set to 1 and the type that
- * is set with the value passed as parameter.
+ * is set with the value passed as parameter. The message should be released 
+ * with gxPLMessageDelete after use.
  *
+ * @param type the type of message
  * @return  the message, NULL if an error occurs
  */
 gxPLMessage * gxPLMessageNew (gxPLMessageType type);
@@ -272,7 +274,7 @@ const char * gxPLMessageSchemaTypeGet (const gxPLMessage * message);
  * @param schema pointer to the schema
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageSchemaSet (gxPLMessage * message, const gxPLSchema * schema);
+int gxPLMessageSchemaCopy (gxPLMessage * message, const gxPLSchema * schema);
 
 /**
  * @brief Sets the schema
@@ -281,7 +283,7 @@ int gxPLMessageSchemaSet (gxPLMessage * message, const gxPLSchema * schema);
  * @param schema_type pointer to the schema type
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageSchemaSetAll (gxPLMessage * message,
+int gxPLMessageSchemaSet (gxPLMessage * message,
                           const char * schema_class, const char * schema_type);
 
 /**

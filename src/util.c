@@ -84,6 +84,7 @@ gxPLStrCpy (char * dst, const char * src) {
       return -1;
     }
   }
+  *p = '\0';
   return count;
 }
 
@@ -104,7 +105,7 @@ gxPLIdSet (gxPLId * id, const char * vendor_id, const char * device_id, const ch
 // -----------------------------------------------------------------------------
 int
 gxPLIdVendorIdSet (gxPLId * id, const char * vendor_id) {
-  if ((id == NULL) || (vendor_id == NULL)) {
+  if ( (id == NULL) || (vendor_id == NULL)) {
     errno = EFAULT;
     return -1;
   }
@@ -119,7 +120,7 @@ gxPLIdVendorIdSet (gxPLId * id, const char * vendor_id) {
 // -----------------------------------------------------------------------------
 int
 gxPLIdDeviceIdSet (gxPLId * id, const char * device_id) {
-  if ((id == NULL) || (device_id == NULL)) {
+  if ( (id == NULL) || (device_id == NULL)) {
     errno = EFAULT;
     return -1;
   }
@@ -134,7 +135,7 @@ gxPLIdDeviceIdSet (gxPLId * id, const char * device_id) {
 // -----------------------------------------------------------------------------
 int
 gxPLIdInstanceIdSet (gxPLId * id, const char * instance_id) {
-  if ((id == NULL) || (instance_id == NULL)) {
+  if ( (id == NULL) || (instance_id == NULL)) {
     errno = EFAULT;
     return -1;
   }
@@ -203,11 +204,86 @@ gxPLIdFromString (gxPLId * id, char * str) {
 // -----------------------------------------------------------------------------
 int
 gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2) {
+  if ( (s1 == NULL) || (s2 == NULL)) {
+    errno = EFAULT;
+    return -1;
+  }
+
   int ret = strcmp (s1->class, s2->class);
   if (ret == 0) {
     ret = strcmp (s1->type, s2->type);
   }
   return ret;
-
 }
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaClassSet (gxPLSchema * schema, const char * schema_class) {
+  if ( (schema == NULL) || (schema_class == NULL)) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  if (strlen (schema_class) > GXPL_CLASS_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  return (gxPLStrCpy (schema->class, schema_class) > 0) ? 0 : -1;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaTypeSet (gxPLSchema * schema, const char * schema_type) {
+  if ( (schema == NULL) || (schema_type == NULL)) {
+    errno = EFAULT;
+    return -1;
+  }
+
+  if (strlen (schema_type) > GXPL_TYPE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  return (gxPLStrCpy (schema->type, schema_type) > 0) ? 0 : -1;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaSet (gxPLSchema * schema, const char * schema_class,
+               const char * schema_type) {
+  int ret;
+  
+  if ( (ret = gxPLSchemaClassSet (schema, schema_class)) == 0) {
+    
+    return gxPLSchemaTypeSet (schema, schema_type);
+  }
+  return ret;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaCopy (gxPLSchema * dst, const gxPLSchema * src) {
+  int ret;
+
+  if ((ret = gxPLSchemaClassSet (dst, src->class)) == 0) {
+    
+    return gxPLSchemaTypeSet (dst, src->type);
+  }
+  return ret;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaIsEmpty (const gxPLSchema * schema) {
+  
+  if (schema == NULL) {
+    errno = EFAULT;
+    return -1;
+  }
+  if ((strlen(schema->class) == 0) && (strlen(schema->type) == 0)) {
+    return true;
+  }
+  return false;
+}
+
 /* ========================================================================== */

@@ -42,7 +42,7 @@ static int msg_count;
 /* private functions ======================================================== */
 static void prvSignalHandler (int sig) ;
 static int prvMessageHandler (gxPL * gxpl, const gxPLMessage * msg, void * p);
-static void prvCreateHeartbeatMessage (void);
+static void prvHeartbeatMessageNew (void);
 
 /* main ===================================================================== */
 int
@@ -63,7 +63,7 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_count++;
-  config = gxPLNewConfigFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  config = gxPLConfigNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
   test (config);
 
   // verify that the requested io layer is available
@@ -73,14 +73,14 @@ main (int argc, char **argv) {
 
   // opens the xPL network
   test_count++;
-  ret = iVectorDestroy (iolist);
+  ret = vVectorDestroy (iolist);
   gxpl = gxPLOpen (config);
   test (gxpl);
 
   // adds a message listener
   test_count++;
   ret = gxPLMessageListenerAdd (gxpl, prvMessageHandler, hello);
-  prvCreateHeartbeatMessage();
+  prvHeartbeatMessageNew();
 
   // View network information
   printf ("Starting test service on %s...\n", gxPLIoInterfaceGet (gxpl));
@@ -120,7 +120,7 @@ prvSignalHandler (int sig) {
     case SIGALRM:
       msg_count++;
       printf ("\n\n******** Sending message[%d] ********\n", msg_count);
-      ret = gxPLSendMessage (gxpl, message);
+      ret = gxPLMessageSend (gxpl, message);
       test (ret > 0);
       if (hasHub) {
 
@@ -165,7 +165,7 @@ prvMessageHandler (gxPL * gxpl, const gxPLMessage * msg, void * p) {
 // -----------------------------------------------------------------------------
 // Create Heartbeat message
 static void
-prvCreateHeartbeatMessage (void) {
+prvHeartbeatMessageNew (void) {
   int ret;
 
   test_count++;

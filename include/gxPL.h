@@ -30,7 +30,7 @@ __BEGIN_C_DECLS
  * @param type network connection type
  * @return the config or NULL if error occurs
  */
-gxPLConfig * gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnectType type);
+gxPLConfig * gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnectType type);
 
 /**
  * @brief Returns a new gxPL config from command line parameters
@@ -46,7 +46,7 @@ gxPLConfig * gxPLNewConfig (const char * iface, const char * iolayer, gxPLConnec
  * @param type network connection type
  * @return the config or NULL if error occurs
  */
-gxPLConfig * gxPLNewConfigFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
+gxPLConfig * gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
 
 /**
  * @brief Opens a new gxPL object
@@ -76,9 +76,9 @@ int gxPLPoll (gxPL * gxpl, int timeout_ms);
  *
  * @param gxpl pointer to a gxPL object
  * @param message pointer to the message
- * @return 0, -1 if error occurs
+ * @return number of bytes send, -1 if error occurs
  */
-int gxPLSendMessage (gxPL * gxpl, gxPLMessage * message);
+int gxPLMessageSend (gxPL * gxpl, gxPLMessage * message);
 
 /**
  * @brief Check if a message is an echo hub
@@ -100,12 +100,45 @@ int gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * message, const 
 gxPLConnectType gxPLConnectionTypeGet (const gxPL * gxpl);
 
 /**
- * @brief 
+ * @brief Return number of devices
+ *
+ * @return
+ */
+int gxPLDeviceCount (gxPL * gxpl);
+
+/**
+ * @brief Return a device at a given index.
+ *
+ * @param index
+ * @return If the index is out of range, return NULL
+ */
+gxPLDevice * gxPLDeviceAt (gxPL * gxpl, int index);
+
+/**
+ * @brief Return index for a given device
+ *
+ * @param index
+ * @return the index, -1 if not found
+ */
+int gxPLDeviceIndex (gxPL * gxpl, const gxPLDevice * device);
+
+/**
+ * @brief Stop all devices
+ * 
+ * Usually in preparation for shutdown, but that isn't the only possible reason.
+ * It is not necessary to call this function before calling gxPLClose()
  * @param gxpl
- * @param vendor_id
- * @param device_id
- * @param instance_id
  * @return 
+ */
+int gxPLDeviceDisableAll (gxPL * gxpl);
+
+/**
+ * @brief Adds a new device on the network
+ * @param gxpl pointer to a gxPL object
+ * @param vendor_id pointer to the vendor id
+ * @param device_id pointer to the device id
+ * @param instance_id pointer to the instance id
+ * @return pointer on the device, NULL if error occurs
  */
 gxPLDevice * gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
                             const char * device_id, const char * instance_id);
@@ -113,9 +146,7 @@ gxPLDevice * gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
 /**
  * @brief 
  * @param gxpl
- * @param vendor_id
- * @param device_id
- * @param instance_id
+ * @param device
  * @return 
  */
 int gxPLDeviceRemove (gxPL * gxpl, gxPLDevice * device);
@@ -153,7 +184,7 @@ int gxPLGenerateUniqueId (const gxPL * gxpl, char * id, int len);
 /**
  * @brief Function that will be called each valid message reception
  */
-typedef int (* gxPLMessageListener) (gxPL * gxpl, const gxPLMessage *, void *);
+typedef void (* gxPLMessageListener) (gxPL * gxpl, const gxPLMessage *, void *);
 
 /* internal public functions ================================================ */
 
@@ -232,7 +263,7 @@ int gxPLVersionSha1 (void);
  * @return returned list of io layers as a pointeur on an vector of const string,
  * NULL if error occurs
  *
- * @warnig the list returned by the pointer must be freed with iVectorDestroy()
+ * @warnig the list returned by the pointer must be freed with vVectorDestroy()
  * after use.
  */
 xVector * gxPLIoLayerList (void);
