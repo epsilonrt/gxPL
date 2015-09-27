@@ -1,6 +1,6 @@
 /**
  * @file gxPL/io.h
- * API IO functions
+ * Low-level API, used by high level to access the hardware
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -18,7 +18,6 @@ __BEGIN_C_DECLS
 #endif
 
 /**
- * @addtogroup 
  * @defgroup gxPLIoInternal Internal Io Layer API
  * 
  * Description of the IO layer to the application layer.

@@ -144,14 +144,14 @@ const char * gxPLDeviceVersionGet (const gxPLDevice * device);
  * @param device pointer on the device
  * @return true if respond, false if not, -1 if an error occurs
  */
-int gxPLRespondToBroadcastGet (const gxPLDevice * device);
+int gxPLDeviceRespondToBroadcastGet (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device will transmit its own messages to the listeners
  * @param device pointer on the device
  * @return true, false, -1 if an error occurs
  */
-int gxPLReportOwnMessagesGet (const gxPLDevice * device);
+int gxPLDeviceReportOwnMessagesGet (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device has detected a hub.
@@ -236,7 +236,7 @@ int gxPLDeviceHeartbeatIntervalSet (gxPLDevice * device, int interval);
  * @param respond true for respond
  * @return 0, -1 if an error occurs
  */
-int gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond);
+int gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond);
 
 /**
  * @brief Process own messages
@@ -244,7 +244,7 @@ int gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond);
  * @param isreportownmsg true or flase
  * @return 0, -1 if an error occurs
  */
-int gxPLReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
+int gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
 
 
 

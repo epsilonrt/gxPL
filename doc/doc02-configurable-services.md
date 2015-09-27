@@ -24,13 +24,13 @@ for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
 <pre class="fragment">
-myService = gxPLDeviceNew(myVendor, myDevice, myInstance);
+myDevice = gxPLDeviceNew(myVendor, myDevice, myInstance);
 </pre>
 
 with
 
 <pre class="fragment">
-myService = gxPLcreateConfigurableService(myVendor, myDevice, configFilename);
+myDevice = gxPLcreateConfigurableService(myVendor, myDevice, configFilename);
 </pre>
 
 That's it! configFileName is the file configuration data it stored in and
@@ -60,7 +60,7 @@ You should insure that every message you send that is supposed to come from
 this service is sent with the
 
 <pre class="fragment">
-gxPLDeviceMessageSend(myService, myMessage);
+gxPLDeviceMessageSend(myDevice, myMessage);
 </pre>
 
 instead of the more generic *gxPLMessageSend()*.  The reason is that if the
@@ -106,8 +106,8 @@ Now, some details:
     your configurables in.  Here's a code sample:
 
     <pre class="fragment">
-    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myService) {
+    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
+    if (!gxPLIsServiceConfigured(myDevice) {
       gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
@@ -172,14 +172,14 @@ Now, some details:
 
     <pre class="fragment">
     /** Create the service */
-    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myService) {
+    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
+    if (!gxPLIsServiceConfigured(myDevice) {
       gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
 
     /* Parse configuration */
-    parseServiceConfigValues(myService);
+    parseServiceConfigValues(myDevice);
     </pre>
 
 
@@ -203,17 +203,17 @@ Now, some details:
 
     <pre class="fragment">
     /** Create the service */
-    myService = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myService) {
+    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
+    if (!gxPLIsServiceConfigured(myDevice) {
       gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
       gxPLsetServiceConfigValue(clockService, "debugMode", "false");
     }
 
     /* Parse configuration */
-    parseServiceConfigValues(myService);
+    parseServiceConfigValues(myDevice);
 
     /* Add a listener for configuration changes */
-    gxPLaddServiceConfigChangedListener(myService, configChangedHandler, NULL);
+    gxPLaddServiceConfigChangedListener(myDevice, configChangedHandler, NULL);
     </pre>
 
 

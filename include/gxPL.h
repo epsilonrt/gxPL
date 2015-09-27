@@ -1,6 +1,6 @@
 /**
  * @file gxPL.h
- * gxPL API
+ * Top level API
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

@@ -1,6 +1,6 @@
 /**
  * @file gxPL/defs.h
- * gxPL Defs
+ * gxPL Definitions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

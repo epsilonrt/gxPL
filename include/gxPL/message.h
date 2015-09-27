@@ -1,6 +1,6 @@
 /**
  * @file gxPL/message.h
- * xPL Messages
+ * High level interface for manage xPL messages
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

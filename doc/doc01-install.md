@@ -36,7 +36,7 @@ Build and run clock example:
 cd ../examples
 make
 cd clock
-./gxpl-clock -xlpdebug
+./gxpl-clock -d
 </pre>
 
 **Be sure to open the UDP Port 3865 on your firewall, or your xPL 

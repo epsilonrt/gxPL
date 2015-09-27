@@ -588,7 +588,7 @@ gxPLDeviceHeartbeatIntervalSet (gxPLDevice * device, int interval) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond) {
+gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond) {
   if (device == NULL) {
     errno = EFAULT;
     return -1;
@@ -599,7 +599,7 @@ gxPLRespondToBroadcastSet (gxPLDevice * device, bool respond) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
+gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
   if (device == NULL) {
     errno = EFAULT;
     return -1;
@@ -672,7 +672,7 @@ gxPLDeviceVersionGet (const gxPLDevice * device) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLRespondToBroadcastGet (const gxPLDevice * device) {
+gxPLDeviceRespondToBroadcastGet (const gxPLDevice * device) {
 
   if (device == NULL) {
 
@@ -685,7 +685,7 @@ gxPLRespondToBroadcastGet (const gxPLDevice * device) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLReportOwnMessagesGet (const gxPLDevice * device) {
+gxPLDeviceReportOwnMessagesGet (const gxPLDevice * device) {
 
   if (device == NULL) {
 
