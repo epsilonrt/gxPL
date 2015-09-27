@@ -81,7 +81,7 @@ main (int argc, char **argv) {
     ret = gxPLGenerateUniqueId (gxpl, str, GXPL_INSTANCEID_MAX);
     test_ok (ret == GXPL_INSTANCEID_MAX);
     printf ("Unique id: %s\n", str);
-    delay_ms (1);
+    gxPLTimeDelayMs (1);
   }
 
   test_new ("adds a new device on the network");

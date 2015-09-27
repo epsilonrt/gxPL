@@ -13,13 +13,6 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
-/**
- * @brief Describe a name=value pair
- */
-typedef struct _gxPLPair {
-  char * name;
-  char * value;
-} gxPLPair;
 
 /* internal public functions ================================================ */
 
@@ -59,6 +52,14 @@ int gxPLStrCpy (char * dst, const char * src);
  * @defgroup xPLUtilPair Name/Value pairs
  * @{
  */
+
+/**
+ * @brief Describe a name=value pair
+ */
+typedef struct _gxPLPair {
+  char * name;
+  char * value;
+} gxPLPair;
 
 /**
  * @brief Sets a name/value form a string
@@ -193,6 +194,44 @@ int gxPLSchemaCopy (gxPLSchema * dst, const gxPLSchema * src);
  * @return 
  */
 int gxPLSchemaIsEmpty (const gxPLSchema * schema);
+/**
+ * @}
+ */
+
+/**
+ * @defgroup xPLUtilTime Time
+ * @{
+ */
+/**
+ * @brief System time 
+ * @return time in seconds
+ */
+long gxPLTime(void);
+
+/**
+ * @brief System time in milliseconds
+ * @param ms pointer on the result
+ * @return 0, < 0 if error occurs
+ */
+int gxPLTimeMs (unsigned long * ms);
+
+/**
+ * @brief converts the system time t into a null-terminated string
+ * @param t time return by gxPLTime
+ * @return system time t into a null-terminated string
+ */
+char * gxPLTimeStr(unsigned long t);
+
+/**
+ * @brief suspends execution for (at least) ms milliseconds
+ * @param ms delay in milliseconds
+ * @return 0, < 0 if error occurs
+ */
+int gxPLTimeDelayMs (unsigned long ms);
+
+/**
+ * @}
+ */
 /**
  * @}
  */

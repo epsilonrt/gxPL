@@ -6,17 +6,16 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#include "config.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <sysio/log.h>
 
 #include <gxPL/util.h>
 #include "message_p.h"
-#include "config.h"
 
 /* constants ================================================================ */
 #ifndef CONFIG_ALLOC_STR_GROW

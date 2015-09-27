@@ -2,87 +2,73 @@
  * @file unix/gxpl.c
  * Top Layer of API, Unix code
  *
- * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #ifdef  __unix__
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
+#include <getopt.h>
 #include <sys/time.h>
 #include <gxPL/util.h>
-#include "config.h"
 #include "gxpl_p.h"
 
 /* private functions ======================================================== */
-// -----------------------------------------------------------------------------
-static void
-prvEncodeLong (unsigned long value, char * str, int size) {
-  int i, len, str_len = strlen (str);
-  static const char alphanum[] =
-    "0123456789"
-    "abcdefghijklmnopqrstuvwxyz";
-  const int base = sizeof (alphanum) - 1;
-
-  // Fill with zeros 
-  for (i = str_len; i < size; i++) {
-    
-    str[i] = '0';
-  }
-  str[size] = '\0';
-  len = strlen (str);
-
-  // Handle the simple case
-  if (value == 0) {
-    return;
-  }
-
-  for (i = len - 1; i >= (len - str_len); i--) {
-    
-    str[i] = alphanum[value % base];
-    if (value < base) {
-      
-      break;
-    }
-    value = value / base;
-  }
-}
 
 
 /* api functions ============================================================ */
 
-// -----------------------------------------------------------------------------
-int
-gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
-  int max, len = 0;
 
-  if (gxpl->net_info.addrlen > 0) {
+/* -----------------------------------------------------------------------------
+ * This will parse the passed command array for options and parameters
+ * It supports the following options:
+ *    -i / --interface xxx : interface or device used to access the network
+ *    -h / --hal       xxx : hardware abstraction layer to access the network
+ *    -d / --debug         : enable debugging
+ */
+void
+gxPLParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
+  int c;
+  static const char short_options[] = "i:h:d";
+  static struct option long_options[] = {
+    {"interface", required_argument, NULL, 'i'},
+    {"hal",       required_argument, NULL, 'h'},
+    {"debug",     no_argument,       NULL, 'd' },
+    {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
+  };
 
-    for (int i = 0; (i < gxpl->net_info.addrlen) && (len < size); i++) {
-      
-      max = size - len + 1;
-      len += snprintf (&s[len], max, "%02x", gxpl->net_info.addr[i]);
-    }
-    if (len > size) {
+  do  {
+    c = getopt_long (argc, argv, short_options, long_options, NULL);
 
-      len = size;
+    switch (c) {
+
+      case 'i':
+        strcpy (config->iface, optarg);
+        PDEBUG ("set interface to %s", config->iface);
+        break;
+
+      case 'h':
+        strcpy (config->iolayer, optarg);
+        PDEBUG ("set iolayer to %s", config->iolayer);
+        break;
+
+      case 'd':
+        vLogSetMask (LOG_UPTO (LOG_DEBUG));
+        config->debug = 1;
+        PDEBUG ("enable debugging");
+        break;
+
+      default:
+        break;
     }
   }
-  if (len < size) {
-    struct timeval tv;
+  while (c != -1);
 
-    if (gettimeofday (&tv, NULL) == 0) {
-      
-      unsigned long ms = (tv.tv_sec * 1000UL) + (tv.tv_usec / 1000UL);
-      // better if the function calls are very close but there is a risk of duplication
-      // unsigned long ms = (tv.tv_sec * 1000000UL) + (tv.tv_usec);
-      prvEncodeLong (ms, s, size);
-    }
-  }
-
-  return strlen(s);
+  optind = 1; // rewinds to allow the user to analyze again the parameters
 }
+
 
 #endif /* __unix__ defined */
 /* ========================================================================== */

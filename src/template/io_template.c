@@ -6,12 +6,12 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#include "config.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <sysio/log.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"

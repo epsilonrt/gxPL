@@ -2,7 +2,6 @@
  * @file gxPL/io.h
  * API IO functions
  *
- * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")

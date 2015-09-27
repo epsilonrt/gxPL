@@ -2,27 +2,24 @@
  * @file gxpl.c
  * Top Layer of API
  *
+ * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-
+#include "config.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <time.h>
-#include <getopt.h>
-#include <sysio/log.h>
 #include <sysio/dlist.h>
-#include <gxPL.h>
 
+#include <gxPL.h>
 #define GXPL_INTERNALS
 #include <gxPL/io.h>
 #include <gxPL/util.h>
 #include <gxPL/device.h>
-#include "config.h"
 #include "gxpl_p.h"
 #include "version-git.h"
 
@@ -77,54 +74,6 @@ prvDeviceDelete (void * d) {
   gxPLDeviceDelete ( (gxPLDevice *) d);
 }
 
-/* -----------------------------------------------------------------------------
- * This will parse the passed command array for options and parameters
- * It supports the following options:
- *    -i / --interface xxx : interface or device used to access the network
- *    -h / --hal       xxx : hardware abstraction layer to access the network
- *    -d / --debug         : enable debugging
- */
-static void
-prvParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
-  int c;
-  static const char short_options[] = "i:h:d";
-  static struct option long_options[] = {
-    {"interface", required_argument, NULL, 'i'},
-    {"hal",       required_argument, NULL, 'h'},
-    {"debug",     no_argument,       NULL, 'd' },
-    {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
-  };
-
-  do  {
-    c = getopt_long (argc, argv, short_options, long_options, NULL);
-
-    switch (c) {
-
-      case 'i':
-        strcpy (config->iface, optarg);
-        PDEBUG ("set interface to %s", config->iface);
-        break;
-
-      case 'h':
-        strcpy (config->iolayer, optarg);
-        PDEBUG ("set iolayer to %s", config->iolayer);
-        break;
-
-      case 'd':
-        vLogSetMask (LOG_UPTO (LOG_DEBUG));
-        config->debug = 1;
-        PDEBUG ("enable debugging");
-        break;
-
-      default:
-        break;
-    }
-  }
-  while (c != -1);
-
-  optind = 1; // rewinds to allow the user to analyze again the parameters
-}
-
 // -----------------------------------------------------------------------------
 // Public
 // Stop (disable) all services, usually in preparation for shutdown, but
@@ -149,8 +98,8 @@ int gxPLDeviceDisableAll (gxPL * gxpl) {
 static void
 prvHeartbeatPoll (gxPL * gxpl) {
   gxPLDevice * device;
-  time_t now = time (NULL);
-  time_t elapsed;
+  long now = gxPLTime();
+  long elapsed;
 
   for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
 
@@ -212,6 +161,38 @@ void prvDeviceMessageDispatcher (gxPL * gxpl, const gxPLMessage * message,
   }
 }
 
+// -----------------------------------------------------------------------------
+static void
+prvEncodeLong (unsigned long value, char * str, int size) {
+  int i, len, str_len = strlen (str);
+  static const char alphanum[] =
+    "0123456789"
+    "abcdefghijklmnopqrstuvwxyz";
+  const int base = sizeof (alphanum) - 1;
+
+  // Fill with zeros 
+  for (i = str_len; i < size; i++) {
+    
+    str[i] = '0';
+  }
+  str[size] = '\0';
+  len = strlen (str);
+
+  // Handle the simple case
+  if (value == 0) {
+    return;
+  }
+
+  for (i = len - 1; i >= (len - str_len); i--) {
+    
+    str[i] = alphanum[value % base];
+    if (value < base) {
+      
+      break;
+    }
+    value = value / base;
+  }
+}
 
 /* internal public functions ================================================ */
 
@@ -237,7 +218,7 @@ gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
   assert (config);
 
-  prvParseCommonArgs (config, argc, argv);
+  gxPLParseCommonArgs (config, argc, argv);
   if (strlen (config->iolayer) == 0) {
 
     strcpy (config->iolayer, DEFAULT_IO_LAYER);
@@ -648,6 +629,37 @@ int
 gxPLVersionSha1 (void) {
 
   return VERSION_SHA1;
+}
+
+
+// -----------------------------------------------------------------------------
+int
+gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
+  int max, len = 0;
+
+  if (gxpl->net_info.addrlen > 0) {
+
+    for (int i = 0; (i < gxpl->net_info.addrlen) && (len < size); i++) {
+      
+      max = size - len + 1;
+      len += snprintf (&s[len], max, "%02x", gxpl->net_info.addr[i]);
+    }
+    if (len > size) {
+
+      len = size;
+    }
+  }
+  if (len < size) {
+    unsigned long ms;
+
+    if (gxPLTimeMs (&ms) == 0) {
+      
+      prvEncodeLong (ms, s, size);
+      gxPLTimeDelayMs(1);
+    }
+  }
+
+  return strlen(s);
 }
 
 /* ========================================================================== */

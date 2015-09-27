@@ -52,7 +52,7 @@ main (int argc, char **argv) {
     // Remplacer les lignes ci-dessous par votre code
     putchar ('.');
     fflush (stdout);
-    delay_ms (1000);
+    gxPLTimeDelayMs (1000);
   }
 
   return 0;

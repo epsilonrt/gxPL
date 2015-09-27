@@ -1,5 +1,5 @@
 /**
- * @file service_p.h
+ * @file device_p.h
  * gxPLib internal include
  * 
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -9,7 +9,6 @@
 #ifndef _GXPL_SERVICE_PRIVATE_HEADER_
 #define _GXPL_SERVICE_PRIVATE_HEADER_
 
-#include <time.h>
 #include <sysio/vector.h>
 #include <gxPL/defs.h>
 
@@ -28,7 +27,7 @@ typedef struct _gxPLDevice {
   xVector listener;
   
   int hbeat_interval; /**< heartbeat interval in seconds */
-  time_t hbeat_last;
+  long hbeat_last;
   gxPLMessage * hbeat_msg;
 
   union {

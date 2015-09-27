@@ -7,16 +7,13 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-// #include <unistd.h>
-#include <sysio/log.h>
-#include <sysio/delay.h>
 #include <gxPL.h>
 #include "device_p.h"
-#include "config.h"
 
 /* constants ================================================================ */
 /* macros =================================================================== */
@@ -124,12 +121,12 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
   }
 
   // Send the message
-  time_t now = time (NULL);
-  vLog (LOG_DEBUG, "Sent heartbeat message at %s", ctime (&now));
   if (gxPLDeviceMessageSend (device, message) > 0) {
 
     // Update last heartbeat time
-    device->hbeat_last = time (NULL);
+    long now = gxPLTime();
+    vLog (LOG_DEBUG, "Sent heartbeat message at %s", gxPLTimeStr (now));
+    device->hbeat_last = now;
     return 0;
   }
   vLog (LOG_ERR, "Unable to send heartbeat");
@@ -224,7 +221,7 @@ gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
                                            (double) RAND_MAX) * 2000.0) + 500;
       vLog (LOG_DEBUG, "Sending heartbeat in response to discovery request "
             "after a %u millisecond delay", ms);
-      delay_ms (ms);
+      gxPLTimeDelayMs (ms);
       prvHeartbeatMessageSendHello (device);
     }
 
@@ -331,7 +328,6 @@ gxPLDeviceNew (gxPL * gxpl,
                                       GXPL_INSTANCEID_MAX) == GXPL_INSTANCEID_MAX) {
 
               // setting up successful
-              delay_ms (1);
               return device;
             }
           }

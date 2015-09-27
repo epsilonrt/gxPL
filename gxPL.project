@@ -31,6 +31,7 @@
       <VirtualDirectory Name="unix">
         <File Name="src/sys/unix/gxpl.c"/>
         <File Name="src/sys/unix/io_udp.c"/>
+        <File Name="src/sys/unix/util.c"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="old">

@@ -71,5 +71,12 @@ void gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
  */
 int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
 
+/*
+ * @brief 
+ * @param config
+ * @param argc
+ * @param argv
+ */
+void gxPLParseCommonArgs (gxPLConfig * config, int argc, char *argv[]);
 /* ========================================================================== */
 #endif /* _GXPL_PRIVATE_HEADER_ defined */

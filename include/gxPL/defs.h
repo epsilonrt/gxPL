@@ -2,7 +2,6 @@
  * @file gxPL/defs.h
  * gxPL Defs
  *
- * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
@@ -14,6 +13,7 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 #include <errno.h>
+#include <sysio/log.h>
 
 /* forward struct defined */
 typedef struct _gxPL gxPL;
