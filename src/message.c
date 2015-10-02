@@ -395,7 +395,8 @@ char * xPL_formatMessage (xPL_Message * theMessage) {
   }
   else {
     if (xPL_isGroupMessage (theMessage)) {
-      WRITE_TEXT ("target=XPL-GROUP.");
+      //WRITE_TEXT ("target=XPL-GROUP.");
+      WRITE_TEXT ("target=");
       WRITE_TEXT (xPL_getTargetGroup (theMessage));
     }
     else {

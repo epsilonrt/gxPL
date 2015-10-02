@@ -8,10 +8,9 @@
   <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
-  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
+  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="Yes"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
-  <Project Name="gxpl-xbee" Path="tools/xbee/gxpl-xbee.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
