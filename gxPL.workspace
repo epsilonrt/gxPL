@@ -3,7 +3,7 @@
   <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
   <Project Name="gxpl-logger" Path="tools/logger/gxpl-logger.project" Active="No"/>
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
-  <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="Yes"/>
+  <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
   <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
@@ -16,6 +16,7 @@
   <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
+  <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -35,6 +36,7 @@
       <Project Name="gxpl-test-core" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test-device" ConfigName="Debug"/>
+      <Project Name="gxpl-test" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -54,6 +56,7 @@
       <Project Name="gxpl-test-core" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test-device" ConfigName="Release"/>
+      <Project Name="gxpl-test" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

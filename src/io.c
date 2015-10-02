@@ -73,7 +73,7 @@ prvGetOps (const char * iolayer) {
 
 // -----------------------------------------------------------------------------
 gxPLIo *
-gxPLIoOpen (gxPLConfig * config) {
+gxPLIoOpen (gxPLSetting * config) {
   gxPLIo * io = calloc (1, sizeof (gxPLIo));
   assert (io);
 

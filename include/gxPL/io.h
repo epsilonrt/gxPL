@@ -41,7 +41,7 @@ __BEGIN_C_DECLS
  * @param config
  * @return 
  */
-gxPLIo * gxPLIoOpen (gxPLConfig * config);
+gxPLIo * gxPLIoOpen (gxPLSetting * config);
 
 /**
  * @brief  Receive a message from the network

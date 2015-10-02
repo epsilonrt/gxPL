@@ -1,5 +1,5 @@
 ###############################################################################
-# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# Copyright © 2015 Pascal JEAN aka epsilonRT <pascal.jean--AT--btssn.net>     #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
@@ -29,10 +29,10 @@ DEBUG_FORMAT = dwarf-2
 DEBUG_OPT = 0
 
 # Enabling Debug information (ON / OFF)
-#DEBUG = ON
+DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
-VIEW_GCC_LINE = OFF
+#VIEW_GCC_LINE = ON
 
 # Disable the deletion of variables and functions "unnecessary"
 # The linker checks of a function or variable is called, if it is not the case, 
@@ -85,7 +85,7 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = gxPL
+EXTRA_LIBS = sysio
 
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON
@@ -99,7 +99,18 @@ CSTANDARD = -std=gnu99
 #---------------- Install Options ----------------
 prefix=/usr/local
 INSTALL_BINDIR=$(prefix)/bin
-VERSION=1.3
+VERSION=1.0.0
+
+#---------------- gxPL Options ----------------
+# Enable debug a gxPL test (ON / OFF). 
+# If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
+# are recompiled. GXPL_ROOT and ARCH must be defined
+GXPL_DEBUG_TEST = ON
+
+ifeq ($(GXPL_ROOT),)
+GXPL_ROOT = $(PROJECT_TOPDIR)
+endif
+#-----------------------------------------------
 
 #-------------------------------------------------------------------------------
 # Define programs and commands.
@@ -128,10 +139,20 @@ CPPDEFS += -D_REENTRANT -D$(ARCH)
 EXTRA_LIBS += pthread rt
 LDFLAGS += -pthread
 
+ifeq ($(GXPL_DEBUG_TEST),ON)
+ifeq ($(GXPL_ROOT),)
+$(error GXPL_DEBUG_TEST is On and GXPL_ROOT is not defined, double-check that !)
+else
+include $(GXPL_ROOT)/gxpl.mk
+endif
+else
+EXTRA_LIBS += gxPL
+endif
+
 ifeq ($(PROJECT_TOPDIR),)
 else
-VPATH+=:$(PROJECT_TOPDIR)/src
-EXTRA_INCDIRS += $(PROJECT_TOPDIR) $(PROJECT_TOPDIR)/include
+VPATH+=:$(PROJECT_TOPDIR)
+EXTRA_INCDIRS += $(PROJECT_TOPDIR)
 endif
 
 #-------------------------------------------------------------------------------
@@ -309,12 +330,12 @@ $(DEPDIRS):
 
 version-git.h:
 ifeq ($(GIT_VERSION),ON)
-	@git-version $@
+	@sysio-ver $@
 endif
 
 version-git.mk:
 ifeq ($(GIT_VERSION),ON)
-	@git-version $@
+	@sysio-ver $@
 endif
 
 sizebefore:
@@ -402,7 +423,6 @@ clean_list :
 	@$(REMOVEDIR) $(OBJDIRS)
 
 distclean_list :
-	@$(REMOVE) clock.xpl
 	@$(REMOVE) *.bak
 	@$(REMOVE) *~
 ifeq ($(GIT_VERSION),ON)

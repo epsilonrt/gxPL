@@ -1,6 +1,6 @@
 /**
- * @file io_udp.c
- * xPL Hardware Layer, POSIX Socket UDP/IP
+ * @file src/sys/unix/io_udp.c
+ * xPL Hardware Layer, POSIX Socket UDP/IP (unix source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -59,7 +59,7 @@ set_nonblock (int fd) {
   if ( (status = fcntl (fd, F_GETFL, 0)) != -1) {
     return fcntl (fd, F_SETFL, status | O_NONBLOCK);
   }
-  vLog (LOG_ERR, "%s", strerror (errno));
+  PERROR ("%s", strerror (errno));
   return -1;
 }
 
@@ -77,12 +77,12 @@ maximize_rxbuffer_size (int fd) {
   /* Get current receive buffer size */
   if (getsockopt (fd, SOL_SOCKET, SO_RCVBUF, &initial_size, &size_len) != 0) {
 
-    vLog (LOG_ERR, "Unable to read receive socket buffer size - %s (%d)",
+    PERROR ("Unable to read receive socket buffer size - %s (%d)",
           strerror (errno), errno);
   }
   else {
 
-    vLog (LOG_DEBUG, "Initial receive socket buffer size is %d bytes",
+    PDEBUG ("Initial receive socket buffer size is %d bytes",
           initial_size);
   }
 
@@ -92,7 +92,7 @@ maximize_rxbuffer_size (int fd) {
     /* Attempt to set the buffer size */
     if (setsockopt (fd, SOL_SOCKET, SO_RCVBUF, &ideal_size, sizeof (int)) != 0) {
 
-      vLog (LOG_DEBUG, "Not able to set receive buffer to %d bytes - retrying",
+      PDEBUG ("Not able to set receive buffer to %d bytes - retrying",
             ideal_size);
       ideal_size -= 64000;
       continue;
@@ -102,12 +102,12 @@ maximize_rxbuffer_size (int fd) {
     size_len = sizeof (int);
     if (getsockopt (fd, SOL_SOCKET, SO_RCVBUF, &final_size, &size_len) != 0) {
 
-      vLog (LOG_ERR, "Unable to read receive socket buffer size - %s (%d)",
+      PERROR ("Unable to read receive socket buffer size - %s (%d)",
             strerror (errno), errno);
     }
     else {
 
-      vLog (LOG_DEBUG, "Actual receive socket buffer size is %d bytes",
+      PDEBUG ("Actual receive socket buffer size is %d bytes",
             final_size);
     }
 
@@ -115,7 +115,7 @@ maximize_rxbuffer_size (int fd) {
   }
 
   /* We weren't able to increase it */
-  vLog (LOG_WARNING, "Unable to increase receive buffer size - dang!");
+  PWARNING ("Unable to increase receive buffer size - dang!");
   return -1;
 }
 
@@ -146,7 +146,7 @@ find_default_iface (int fd, gxPLIo * io) {
     return -1;
   }
   ifcount = iflist.ifc_len / sizeof (struct ifreq);
-  vLog (LOG_DEBUG, "%d interfaces found on this system", ifcount);
+  PDEBUG ("%d interfaces found on this system", ifcount);
 
   // Try each interface until one works
   ifr = iflist.ifc_req;
@@ -163,25 +163,25 @@ find_default_iface (int fd, gxPLIo * io) {
       continue;
     }
 
-    vLog (LOG_DEBUG, "Checking if interface %s is valid w/flags 0x%x",
+    PDEBUG ("Checking if interface %s is valid w/flags 0x%x",
           ifinfo.ifr_name, ifinfo.ifr_flags);
 
     // Insure this interface is active and not loopback
     if ( (ifinfo.ifr_flags & IFF_UP) == 0) {
 
-      vLog (LOG_DEBUG, "  %s is down, continue...", ifinfo.ifr_name);
+      PDEBUG ("  %s is down, continue...", ifinfo.ifr_name);
       continue;
     }
 
     if ( (ifinfo.ifr_flags & IFF_LOOPBACK) != 0) {
 
-      vLog (LOG_DEBUG, "  %s is loopback, continue...", ifinfo.ifr_name);
+      PDEBUG ("  %s is loopback, continue...", ifinfo.ifr_name);
       continue;
     }
 
     // If successful, use this interface
     strcpy (io->config->iface, ifr[i].ifr_name);
-    vLog (LOG_DEBUG, "Choose interface %s as default interface",
+    PDEBUG ("Choose interface %s as default interface",
           io->config->iface);
     return 0;
   }
@@ -204,14 +204,14 @@ make_broadcast_connection (gxPLIo * io) {
   // Map protocol name
   if ( (ppe = getprotobyname ("udp")) == 0) {
 
-    vLog (LOG_ERR, "Unable to lookup UDP protocol info");
+    PERROR ("Unable to lookup UDP protocol info");
     return -1;
   }
 
   // Attempt to create a socket
   if ( (fd = socket (AF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
 
-    vLog (LOG_ERR, "Unable to create broadcast socket %s (%d)",
+    PERROR ("Unable to create broadcast socket %s (%d)",
           strerror (errno), errno);
     return -1;
   }
@@ -220,7 +220,7 @@ make_broadcast_connection (gxPLIo * io) {
   if (setsockopt (fd, SOL_SOCKET, SO_BROADCAST, &flag,
                   sizeof (flag)) < 0) {
 
-    vLog (LOG_ERR, "Unable to set SO_BROADCAST on socket %s (%d)",
+    PERROR ("Unable to set SO_BROADCAST on socket %s (%d)",
           strerror (errno), errno);
     close (fd);
     return -1;
@@ -231,7 +231,7 @@ make_broadcast_connection (gxPLIo * io) {
 
     if (find_default_iface (fd, io)) {
 
-      vLog (LOG_ERR, "Could not find a working, non-loopback network interface");
+      PERROR ("Could not find a working, non-loopback network interface");
       close (fd);
       return -1;
     }
@@ -245,13 +245,13 @@ make_broadcast_connection (gxPLIo * io) {
   // Get our interface address
   if (ioctl (fd, SIOCGIFADDR, &ifinfo) != 0) {
 
-    vLog (LOG_ERR, "Unable to get IP addr for interface %s", io->config->iface);
+    PERROR ("Unable to get IP addr for interface %s", io->config->iface);
     close (fd);
     return -1;
   }
 
   dp->local_addr.s_addr = ( (struct sockaddr_in *) &ifinfo.ifr_addr)->sin_addr.s_addr;
-  vLog (LOG_DEBUG, "Assigned IP address to %s", inet_ntoa (dp->local_addr));
+  PDEBUG ("Assigned IP address to %s", inet_ntoa (dp->local_addr));
 
   // Get interface netmask
   memset (&ifinfo, 0, sizeof (struct ifreq));
@@ -260,7 +260,7 @@ make_broadcast_connection (gxPLIo * io) {
   strcpy (ifinfo.ifr_name, io->config->iface);
   if (ioctl (fd, SIOCGIFNETMASK, &ifinfo) != 0) {
 
-    vLog (LOG_ERR, "Unable to extract the interface net mask");
+    PERROR ("Unable to extract the interface net mask");
     close (fd);
     return -1;
   }
@@ -276,7 +276,7 @@ make_broadcast_connection (gxPLIo * io) {
   set_nonblock (fd);
 
   // And we are done
-  vLog (LOG_DEBUG, "Assigned broadcast address to %s:%d",
+  PDEBUG ("Assigned broadcast address to %s:%d",
         inet_ntoa (dp->bcast_addr.sin_addr),
         XPL_PORT);
   return 0;
@@ -308,13 +308,13 @@ make_connection (gxPLIo * io) {
   /* Map protocol name */
   if ( (ppe = getprotobyname ("udp")) == 0) {
 
-    vLog (LOG_ERR, "Unable to lookup UDP protocol info");
+    PERROR ("Unable to lookup UDP protocol info");
     return -1;
   }
 
   /* Attempt to creat the socket */
   if ( (fd = socket (PF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
-    vLog (LOG_ERR, "Unable to create listener socket %s (%d)",
+    PERROR ("Unable to create listener socket %s (%d)",
           strerror (errno), errno);
     return -1;
   }
@@ -324,7 +324,7 @@ make_connection (gxPLIo * io) {
     if (setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &flag,
                     sizeof (flag)) < 0) {
 
-      vLog (LOG_ERR, "Unable to set SO_REUSEADDR on socket %s (%d)",
+      PERROR ("Unable to set SO_REUSEADDR on socket %s (%d)",
             strerror (errno), errno);
       close (fd);
       return -1;
@@ -335,7 +335,7 @@ make_connection (gxPLIo * io) {
   if (setsockopt (fd, SOL_SOCKET, SO_BROADCAST, &flag,
                   sizeof (flag)) < 0) {
 
-    vLog (LOG_ERR, "Unable to set SO_BROADCAST on socket %s (%d)",
+    PERROR ("Unable to set SO_BROADCAST on socket %s (%d)",
           strerror (errno), errno);
     close (fd);
     return -1;
@@ -345,7 +345,7 @@ make_connection (gxPLIo * io) {
   if ( (bind (fd, (struct sockaddr *) &socket_info,
               socket_size)) < 0) {
 
-    vLog (LOG_ERR, "Unable to bind listener socket to port %d, %s (%d)",
+    PERROR ("Unable to bind listener socket to port %d, %s (%d)",
           ntohs (socket_info.sin_port), strerror (errno), errno);
     close (fd);
     return -1;
@@ -357,7 +357,7 @@ make_connection (gxPLIo * io) {
     if (getsockname (fd, (struct sockaddr *) &socket_info,
                      (socklen_t *) &socket_size)) {
 
-      vLog (LOG_ERR, "Unable to fetch socket info for bound listener, %s (%d)",
+      PERROR ("Unable to fetch socket info for bound listener, %s (%d)",
             strerror (errno), errno);
       close (fd);
       return -1;
@@ -387,28 +387,28 @@ make_bind_connection (gxPLIo * io) {
 
 
     /* Attempt the connection */
-    vLog (LOG_DEBUG, "Attemping standalone xPL connection");
+    PDEBUG ("Attemping standalone xPL connection");
     if (make_connection (io) < 0) {
 
       /* If we failed and this what we want, bomb out */
-      vLog (LOG_ERR, "Standalone connect failed - %d %d",
+      PERROR ("Standalone connect failed - %d %d",
             io->config->connecttype, gxPLConnectStandAlone);
       return -1;
     }
 
-    vLog (LOG_DEBUG, "xPL Starting in standalone mode on port %d",
+    PDEBUG ("xPL Starting in standalone mode on port %d",
           dp->iport);
     return 0;
   }
 
   /* Try a hub based connection */
-  vLog (LOG_DEBUG, "Attempting via hub xPL connection");
+  PDEBUG ("Attempting via hub xPL connection");
   if (make_connection (io) < 0) {
 
     return -1;
   }
 
-  vLog (LOG_DEBUG, "xPL Starting in Hub mode on port %d",
+  PDEBUG ("xPL Starting in Hub mode on port %d",
         dp->iport);
   return 0;
 }
@@ -433,7 +433,7 @@ iopoll (gxPLIo * io, int * available_data, int timeout_ms) {
   ret = select (FD_SETSIZE, &set, NULL, NULL, &timeout);
   if (ret == -1) {
     if (errno != EINTR) {
-      vLog (LOG_ERR, "failed to poll listen socket: %s", strerror (errno));
+      PERROR ("failed to poll listen socket: %s", strerror (errno));
     }
     else {
       ret = 0;
@@ -471,7 +471,7 @@ gxPLUdpOpen (gxPLIo * io) {
 
       ret = close (dp->ofd);
       if (ret != 0) {
-        vLog (LOG_ERR, "failed to close broadcast socket: %s", strerror (errno));
+        PERROR ("failed to close broadcast socket: %s", strerror (errno));
       }
       free (io->pdata);
       return -1;
@@ -512,7 +512,7 @@ gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
     }
 
     // Note the error and bail
-    vLog (LOG_ERR, "Error reading xPL message from network - %s (%d)",
+    PERROR ("Error reading xPL message from network - %s (%d)",
           strerror (errno), errno);
     return -1;
   }
@@ -538,11 +538,11 @@ gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * tar
 
   // Try to send the message
   if ( (bytes_sent = sendto (dp->ofd, buffer, count, 0, addrdst, addrlen)) != count) {
-    vLog (LOG_ERR, "Unable to broadcast message, %s (%d)",
+    PERROR ("Unable to broadcast message, %s (%d)",
           strerror (errno), errno);
     return -1;
   }
-  vLog (LOG_DEBUG, "Send broadcast %d bytes (of %d attempted)", bytes_sent, count);
+  PDEBUG ("Send broadcast %d bytes (of %d attempted)", bytes_sent, count);
 
   return bytes_sent;
 }
@@ -560,12 +560,12 @@ gxPLUdpClose (gxPLIo * io) {
 
   ret = close (dp->ofd);
   if (ret != 0) {
-    vLog (LOG_ERR, "failed to close broadcast socket: %s", strerror (errno));
+    PERROR ("failed to close broadcast socket: %s", strerror (errno));
   }
 
   ret = close (dp->ifd);
   if (ret != 0) {
-    vLog (LOG_ERR, "failed to close bind socket: %s", strerror (errno));
+    PERROR ("failed to close bind socket: %s", strerror (errno));
   }
 
   free (io->pdata);

@@ -1,6 +1,6 @@
 /**
- * @file gxPL/device.h
- * High level interface for manage xPL devices
+ * @file include/gxPL/.h
+ * High level interface to manage xPL devices (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -9,6 +9,7 @@
 #ifndef _GXPL_SERVICE_HEADER_
 #define _GXPL_SERVICE_HEADER_
 
+#include <sysio/vector.h>
 #include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
@@ -24,21 +25,31 @@ __BEGIN_C_DECLS
 /**
  * @brief Listener for a device
  */
-typedef void (* gxPLDeviceListener) (gxPLDevice *, const gxPLMessage *, void *);
+typedef void (* gxPLDeviceListener) (gxPLDevice *, gxPLMessage *, void *);
 
 /* structures =============================================================== */
+/**
+ * @brief Describe a element of configuration
+ */
+typedef struct  _gxPLDeviceConfigItem {
+
+  char * name;
+  gxPLConfigurableType type;
+  uint8_t values_max;
+  xVector values; /**< vector of strings */
+} gxPLDeviceConfigItem;
 
 
 /* internal public functions ================================================ */
 
 /**
  * @brief Create a message for the device
- * 
- * The message can be modified using the functions of the message module 
- * before being sent with gxPLDeviceMessageSend(). A message to send can not 
+ *
+ * The message can be modified using the functions of the message module
+ * before being sent with gxPLDeviceMessageSend(). A message to send can not
  * be gxPLMessageAny type. The message should be released with gxPLMessageDelete
  * after use.
- * 
+ *
  * @param device pointer on the device
  * @param type the type of message
  * @return  the message, NULL if an error occurs
@@ -49,7 +60,7 @@ gxPLMessage * gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type);
  * @brief Send a message out from this device
  *
  * The source of the message should be the device but no check is performed.
- * 
+ *
  * @param device pointer on the device
  * @param message
  * @return number of bytes send, -1 if error occurs
@@ -58,18 +69,18 @@ int gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message);
 
 /**
  * @brief Add a listener for the device
- * 
- * This function allows the user to install a listener that will be called for 
+ *
+ * This function allows the user to install a listener that will be called for
  * each message received for the service. \n
- * Only messages matching type, schema_class and schema_type are forwarded to 
+ * Only messages matching type, schema_class and schema_type are forwarded to
  * the listener.
- * 
+ *
  * @param device pointer on the device
  * @param listener the function listening device messages
  * @param type type of message to be processed, gxPLMessageAny to manage any
  * @param schema_class schema class to process, NULL to manage everything
  * @param schema_type schema type to process, NULL to manage everything
- * @param udata pointer to the user data that will be passed to the listener, 
+ * @param udata pointer to the user data that will be passed to the listener,
  * NULL if not used.
  * @return 0, -1 if error occurs
  */
@@ -90,7 +101,7 @@ int gxPLDeviceListenerRemove (gxPLDevice * device,
 
 /**
  * @brief Gets the parent gxPL object
- * 
+ *
  * @param device pointer on the device
  * @return pointer to an gxPL object that is the parent of the device, NULL if error occurs
  */
@@ -101,78 +112,79 @@ gxPL * gxPLDeviceParentGet (gxPLDevice * device);
  * @param device pointer on the device
  * @return the identifier, NULL if error occurs
  */
-const gxPLId * gxPLDeviceIdGet (const gxPLDevice * device);
+const gxPLId * gxPLDeviceId (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device is enabled.
  * @param device pointer on the device
  * @return true if enabled, false if not, -1 if an error occurs
  */
-int gxPLDeviceEnabledGet (const gxPLDevice * device);
+int gxPLDeviceIsEnabled (const gxPLDevice * device);
 
 /**
  * @brief Gets the heartbeat interval
- * 
+ *
  * @param device pointer on the device
  * @return the interval in seconds, -1
  */
-int gxPLDeviceHeartbeatIntervalGet (const gxPLDevice * device);
+int gxPLDeviceHeartbeatInterval (const gxPLDevice * device);
 
 /**
  * @brief Gets the time of the last heartbeat sent
- * 
- * The time is given in a unit dependent on the host system, most of the time 
- * is given in seconds. On a unix system with a real time clock that value is 
+ *
+ * The time is given in a unit dependent on the host system, most of the time
+ * is given in seconds. On a unix system with a real time clock that value is
  * the number of seconds since the first second of January 1, 1970.
- * 
+ *
  * @param device pointer on the device
  * @return the last time, -1 if error occurs
  */
-long gxPLDeviceHeartbeatLastGet (const gxPLDevice * device);
+long gxPLDeviceHeartbeatLast (const gxPLDevice * device);
 
 /**
  * @brief Gets the version string
- * 
+ *
  * This information is transmitted with the heartbeat.
  * @param device pointer on the device
  * @return the last time, NULL if error occurs
  */
-const char * gxPLDeviceVersionGet (const gxPLDevice * device);
+const char * gxPLDeviceVersion (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device will respond to broadcast messages.
  * @param device pointer on the device
  * @return true if respond, false if not, -1 if an error occurs
  */
-int gxPLDeviceRespondToBroadcastGet (const gxPLDevice * device);
+int gxPLDeviceIsRespondToBroadcast (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device will transmit its own messages to the listeners
  * @param device pointer on the device
  * @return true, false, -1 if an error occurs
  */
-int gxPLDeviceReportOwnMessagesGet (const gxPLDevice * device);
+int gxPLDeviceIsReportOwnMessages (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device has detected a hub.
  * @param device pointer on the device
  * @return true, false, -1 if an error occurs
  */
-int gxPLDeviceHubConfirmedGet (const gxPLDevice * device);
+int gxPLDeviceIsHubConfirmed (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device is configurable
  * @param device pointer on the device
  * @return true, false, -1 if an error occurs
  */
-int gxPLDeviceConfiguraleGet (const gxPLDevice * device);
+int gxPLDeviceIsConfigurale (const gxPLDevice * device);
 
 /**
- * @brief Indicates whether the device is configur
+ * @brief Indicates whether the device is configured
  * @param device pointer on the device
  * @return true, false, -1 if an error occurs
  */
-int gxPLDeviceConfiguredGet (const gxPLDevice * device);
+int gxPLDeviceIsConfigured (const gxPLDevice * device);
+
 
 /**
  * @brief Sets the identifier
@@ -246,138 +258,185 @@ int gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond);
  */
 int gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
 
-
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
- * @brief
- * @param device pointer on the device
- * @return
- */
-bool gxPLdoesServiceHaveGroups (gxPLDevice * device);
-
-/**
- * @brief Clear out all groups
- * @param device pointer on the device
- */
-void gxPLclearServiceGroups (gxPLDevice * device);
-
-
-/**
- * @brief Clear out any/all installed filters
- * @param device pointer on the device
- */
-void gxPLclearServiceFilters (gxPLDevice * device);
-
-
-/**
- * @brief
- * @param device pointer on the device
- * @return
- */
-bool gxPLIsServiceFiltered (gxPLDevice * device);
-
-/**
- * @defgroup xPLServiceConfig Configurable devices
+ * @defgroup xPLDeviceGroup Groups
  * @{
  */
+
+/**
+ * @brief Adds a group to the device
+ *
+ * @param device pointer on the device
+ * @param group_name new group
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceGroupAdd (gxPLDevice * device, const char * group_name);
+
+/**
+ * @brief Adds a group to the device form a string
+ *
+ * @param device pointer on the device
+ * @param str string xpl-group.name where name is the group name
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceGroupAddFromString (gxPLDevice * device, const char * str);
+/**
+ * @brief Indicates whether the device has groups
+ *
+ * @param device pointer on the device
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceGroupHave (const gxPLDevice * device);
+
+/**
+ * @brief Erases all groups
+ *
+ * @param device pointer on the device
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceGroupClearAll (gxPLDevice * device);
+
+/**
+ * @brief Number of groups
+ *
+ * @param device pointer on the device
+ * @return the value, -1 if an error occurs
+ */
+int gxPLDeviceGroupCount (const gxPLDevice * device);
+
+/**
+ * @brief Gets a group
+ *
+ * @param device pointer on the device
+ * @param index index of the group to read
+ * @return the group, NULL if error occurs
+ */
+const char * gxPLDeviceGroupGet (const gxPLDevice * device, int index);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup xPLDeviceFilter Filters
+ * @{
+ */
+
+/**
+ * @brief Adds a filter to the device
+ *
+ * @param device pointer on the device
+ * @param filter_name new filter
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceFilterAdd (gxPLDevice * device, gxPLMessageType type,
+                         const gxPLId * source, const gxPLSchema * schema);
+
+/**
+ * @brief Adds a filter to the device from a string
+ * 
+ * the format of the string is as follows:
+ * @code
+ * filter = [msgtype].[vendor].[device].[instance].[class].[type]
+ * @endcode
+ * for example:
+ * - xpl-cmnd.wmute.k400.bedroom.drapes.basic 
+ * - xpl-cmnd.wmute.k400.bedroom.drapes.*
+ * - xpl-cmnd.wmute.k400.bedroom.*.*
+ * - xpl-cmnd.wmute.k400.*.drapes.basic
+ * - .
+ * 
+ * @param device pointer on the device
+ * @param filter_name new filter as a string, will be modified by the function 
+ * unusable after the call.
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceFilterAddFromStr (gxPLDevice * device, char * filter);
+
+/**
+ * @brief filter to string
+ * @param filter the filter
+ * @return the string
+ */
+const char * gxPLDeviceFilterToString (const gxPLFilter * filter);
+
+/**
+ * @brief Indicates whether the device has filters
+ *
+ * @param device pointer on the device
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceFilterHave (const gxPLDevice * device);
+
+/**
+ * @brief Erases all filters
+ *
+ * @param device pointer on the device
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceFilterClearAll (gxPLDevice * device);
+
+/**
+ * @brief Number of filters
+ *
+ * @param device pointer on the device
+ * @return the value, -1 if an error occurs
+ */
+int gxPLDeviceFilterCount (const gxPLDevice * device);
+
+/**
+ * @brief Gets a filter
+ *
+ * @param device pointer on the device
+ * @param index index of the filter to read
+ * @return the filter, NULL if error occurs
+ */
+const char * gxPLDeviceFilterGet (const gxPLDevice * device, int index);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup xPLDeviceConfig Configurable devices
+ * @{
+ */
+
 
 /* types ==================================================================== */
 
 /**
  * @brief Changes to a devices configuration
  */
-typedef void (* gxPLDeviceConfigChangedListener) (struct _gxPLDevice *, void *);
+typedef void (* gxPLDeviceConfigListener) (gxPLDevice *, void *);
 
 /* structures =============================================================== */
-/**
- * @brief
- */
-typedef struct _gxPLDeviceChangedListenerDef {
-
-  gxPLDeviceConfigChangedListener changeListener;
-  void * userValue;
-} gxPLDeviceChangedListenerDef;
-
-/**
- * @brief
- */
-typedef struct  _gxPLDeviceConfigurable {
-
-  char * name;
-  gxPLConfigurableType itemType;
-  int maxValueCount;
-
-  int valueCount;
-  int valueAllocCount;
-  char **valueList;
-} gxPLDeviceConfigurable;
 
 /* internal public functions ================================================ */
-
-/**
- * @brief Create a new device and prepare it for configuration
- *
- * Like other devices, this will still require being enabled to start.
- * Before it's started, you need to define and attach the configurable items
- * for the device.   When the device is enabled, if there is a non-null
- * configFile, it's values are read.  The devices instance value will be
- * created in a fairly unique method for devices that have not yet been
- * configured.
- *
- * @param vendor_id
- * @param device_id
- * @param localConfigFile
- * @return
- */
-gxPLDevice * gxPLcreateConfigurableService (char * vendor_id,
-    char * device_id,
-    char * localConfigFile);
-
-/**
- * @brief Return TRUE if this is a configured device
- * @param device
- * @return
- */
-bool gxPLIsConfigurableService (gxPLDevice * device);
 
 /**
  * @brief Return the installed config file, if any
  * @param device
  * @return
  */
-char * gxPLgetServiceConfigFile (gxPLDevice * device);
+int gxPLDeviceConfigFilenameSet (gxPLDevice * device, const char * filename);
+
+/**
+ * @brief Return the installed config file, if any
+ * @param device
+ * @return
+ */
+const char * gxPLDeviceConfigFilenameGet (const gxPLDevice * device);
 
 /**
  * @brief Add a device config change listener
  * @param device
  * @param listener
- * @param userValue
+ * @param udata
  */
-void gxPLaddServiceConfigChangedListener (gxPLDevice * device,
-    gxPLDeviceConfigChangedListener listener,
-    void * userValue) ;
+int gxPLDeviceConfigListenerAdd (gxPLDevice * device,
+                                 gxPLDeviceConfigListener listener,
+                                 void * udata) ;
 
 /**
  * @brief Remove a config change listener
@@ -385,36 +444,44 @@ void gxPLaddServiceConfigChangedListener (gxPLDevice * device,
  * @param listener
  * @return
  */
-bool gxPLremoveServiceConfigChangedListener (gxPLDevice * device,
-    gxPLDeviceConfigChangedListener listener);
+int gxPLDeviceConfigListenerRemove (gxPLDevice * device,
+                                    gxPLDeviceConfigListener listener);
 
 /**
  * @brief Add a new configurable
  *
- * If the item is added, TRUE is returned.  If the item already exists,
- * FALSE is returned and it's not added or altered
+ * If the item is added, true is returned.  If the item already exists,
+ * false is returned and it's not added or altered
  * @param device
  * @param name
- * @param itemType
- * @param maxValues
+ * @param type
+ * @param max_values
  * @return
  */
-bool gxPLaddServiceConfigurable (gxPLDevice * device, char * name,
-                                 gxPLConfigurableType itemType, int maxValues);
+int gxPLDeviceConfigItemAdd (gxPLDevice * device, const char * name,
+                             gxPLConfigurableType type, int max_values);
 
 /**
  * @brief Remove a configurable.
  * @param device
  * @param name
- * @return Return TRUE if item found and removed, FALSE if not found
+ * @return Return true if item found and removed, false if not found
  */
-bool gxPLremoveServiceConfigurable (gxPLDevice * device, char * name);
+int gxPLDeviceConfigItemRemove (gxPLDevice * device, const char * name);
 
 /**
  * @brief Remove all configurables
  * @param device
  */
-void gxPLremoveAllServiceConfigurables (gxPLDevice * device);
+int gxPLDeviceConfigItemRemoveAll (gxPLDevice * device);
+
+/**
+ * @brief Clear all configurable values out
+ *
+ * The configurable definitions remain intact
+ * @param device
+ */
+int gxPLDeviceConfigItemClearAll (gxPLDevice * device);
 
 /**
  * @brief Search for a configurable and return it (or NULL)
@@ -422,8 +489,16 @@ void gxPLremoveAllServiceConfigurables (gxPLDevice * device);
  * @param name
  * @return
  */
-gxPLDeviceConfigurable * gxPLfindServiceConfigurable (gxPLDevice * device,
-    char * name);
+gxPLDeviceConfigItem * gxPLDeviceConfigItemFind (const gxPLDevice * device,
+    const char * name);
+
+/**
+ * @brief Return the number of values for a given configurable
+ * @param device
+ * @param name
+ * @return
+ */
+int gxPLDeviceConfigValueCount (const gxPLDevice * device, const char * name);
 
 /**
  * @brief Add a device item value
@@ -435,8 +510,8 @@ gxPLDeviceConfigurable * gxPLfindServiceConfigurable (gxPLDevice * device,
  * @param value
  * @return
  */
-bool gxPLaddServiceConfigValue (gxPLDevice * device,
-                                char * name, char * value);
+int gxPLDeviceConfigValueAdd (gxPLDevice * device,
+                              const char * name, const char * value);
 
 
 /**
@@ -446,8 +521,8 @@ bool gxPLaddServiceConfigValue (gxPLDevice * device,
  * @param name
  * @param value
  */
-void gxPLsetServiceConfigValue (gxPLDevice * device,
-                                char * name, char * value);
+int gxPLDeviceConfigValueSet (gxPLDevice * device,
+                              const char * name, const char * value);
 
 /**
  * @brief Set a item value at a given index.
@@ -456,18 +531,18 @@ void gxPLsetServiceConfigValue (gxPLDevice * device,
  * (i.e. may not be the same index as passed)
  * @param device
  * @param name
- * @param valueIndex
+ * @param index
  * @param value
  */
-void gxPLsetServiceConfigValueAt (gxPLDevice * device, char * name,
-                                  int valueIndex, char * value);
+int gxPLDeviceConfigValueSetAt (gxPLDevice * device, const char * name,
+                                int index, const char * value);
 
 /**
  * @brief Clear values for a given configurable
  * @param device
  * @param name
  */
-void gxPLclearServiceConfigValues (gxPLDevice * device, char * name);
+int gxPLDeviceConfigValueClearAll (gxPLDevice * device, const char * name);
 
 /**
  * @brief Return the value of the first/only index for an item
@@ -475,40 +550,17 @@ void gxPLclearServiceConfigValues (gxPLDevice * device, char * name);
  * @param name
  * @return
  */
-char * gxPLgetServiceConfigValue (gxPLDevice * device, char * name);
+const char * gxPLDeviceConfigValueGet (gxPLDevice * device, const char * name);
 
 /**
  * @brief Return the value at the given index.
  * If the value is NULL of the index is out of range, NULL is returned
  * @param device
  * @param name
- * @param valueIndex
+ * @param index
  * @return
  */
-char * gxPLgetServiceConfigValueAt (gxPLDevice * device, char * name, int valueIndex);
-
-/**
- * @brief Clear all configurable values out
- *
- * The configurable definitions remain intact
- * @param device
- */
-void gxPLclearAllServiceConfigValues (gxPLDevice * device);
-
-/**
- * @brief Return the number of values for a given configurable
- * @param device
- * @param name
- * @return
- */
-int gxPLgetServiceConfigValueCount (gxPLDevice * device, char * name);
-
-/**
- * @brief Return TRUE if this is a configured device and a configuration has been received
- * @param device
- * @return
- */
-bool gxPLIsServiceConfigured (gxPLDevice * device);
+const char * gxPLDeviceConfigValueGetAt (gxPLDevice * device, const char * name, int index);
 
 /**
  * @}

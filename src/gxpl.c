@@ -1,6 +1,6 @@
 /**
  * @file gxpl.c
- * Top Layer of API
+ * Top Layer of API (source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -57,7 +57,7 @@ static const void *
 prvDeviceKey (const void * elmt) {
   gxPLDevice * d = (gxPLDevice *) elmt;
 
-  return gxPLDeviceIdGet (d);
+  return gxPLDeviceId (d);
 }
 
 // -----------------------------------------------------------------------------
@@ -105,22 +105,22 @@ prvHeartbeatPoll (gxPL * gxpl) {
 
     device = pvVectorGet (&gxpl->device, i);
 
-    if (gxPLDeviceEnabledGet (device)) {
-      int interval = gxPLDeviceHeartbeatIntervalGet (device);
-      time_t last = gxPLDeviceHeartbeatLastGet (device);
+    if (gxPLDeviceIsEnabled (device)) {
+      int interval = gxPLDeviceHeartbeatInterval (device);
+      time_t last = gxPLDeviceHeartbeatLast (device);
 
       // See how much time has gone by
       elapsed = now - last;
 
-      if (gxPLDeviceHubConfirmedGet (device)) {
+      if (gxPLDeviceIsHubConfirmed (device)) {
 
         if (last >= 1) {
 
-          if (gxPLDeviceConfiguraleGet (device) &&
-              !gxPLDeviceConfiguredGet (device)) {
+          if (gxPLDeviceIsConfigurale (device) &&
+              !gxPLDeviceIsConfigured (device)) {
 
             // If we are in configuration mode, we send out once a minute
-            if (elapsed < CONFIG_HEARTBEAT_INTERVAL) {
+            if (elapsed < DEFAULT_CONFIG_HEARTBEAT_INTERVAL) {
 
               continue;
             }
@@ -137,7 +137,7 @@ prvHeartbeatPoll (gxPL * gxpl) {
 
         // If we are still waiting to hear from the hub,
         // then send a message every 3 seconds until we do
-        if (elapsed < CONFIG_HUB_DISCOVERY_INTERVAL) {
+        if (elapsed < DEFAULT_HUB_DISCOVERY_INTERVAL) {
 
           continue;
         }
@@ -150,8 +150,9 @@ prvHeartbeatPoll (gxPL * gxpl) {
 
 // -----------------------------------------------------------------------------
 // Run the passed message by each device and see who is interested
-void prvDeviceMessageDispatcher (gxPL * gxpl, const gxPLMessage * message,
-                                 void * udata) {
+static void
+prvDeviceMessageDispatcher (gxPL * gxpl, gxPLMessage * message,
+                            void * udata) {
   gxPLDevice * device;
 
   for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
@@ -170,9 +171,9 @@ prvEncodeLong (unsigned long value, char * str, int size) {
     "abcdefghijklmnopqrstuvwxyz";
   const int base = sizeof (alphanum) - 1;
 
-  // Fill with zeros 
+  // Fill with zeros
   for (i = str_len; i < size; i++) {
-    
+
     str[i] = '0';
   }
   str[size] = '\0';
@@ -184,10 +185,10 @@ prvEncodeLong (unsigned long value, char * str, int size) {
   }
 
   for (i = len - 1; i >= (len - str_len); i--) {
-    
+
     str[i] = alphanum[value % base];
     if (value < base) {
-      
+
       break;
     }
     value = value / base;
@@ -199,9 +200,9 @@ prvEncodeLong (unsigned long value, char * str, int size) {
 
 /* api functions ============================================================ */
 // -----------------------------------------------------------------------------
-gxPLConfig *
-gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnectType type) {
-  gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
+gxPLSetting *
+gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) {
+  gxPLSetting * config = calloc (1, sizeof (gxPLSetting));
   assert (config);
 
   strcpy (config->iface, iface);
@@ -213,9 +214,9 @@ gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnectType type) {
 }
 
 // -----------------------------------------------------------------------------
-gxPLConfig *
-gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
-  gxPLConfig * config = calloc (1, sizeof (gxPLConfig));
+gxPLSetting *
+gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
+  gxPLSetting * config = calloc (1, sizeof (gxPLSetting));
   assert (config);
 
   gxPLParseCommonArgs (config, argc, argv);
@@ -231,7 +232,7 @@ gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
 
 // -----------------------------------------------------------------------------
 gxPL *
-gxPLOpen (gxPLConfig * config) {
+gxPLOpen (gxPLSetting * config) {
   gxPL * gxpl = calloc (1, sizeof (gxPL));
   assert (gxpl);
 
@@ -246,8 +247,8 @@ gxPLOpen (gxPLConfig * config) {
 
     if (config->malloc == 0) {
 
-      gxpl->config = malloc (sizeof (gxPLConfig));
-      memcpy (gxpl->config, config, sizeof (gxPLConfig));
+      gxpl->config = malloc (sizeof (gxPLSetting));
+      memcpy (gxpl->config, config, sizeof (gxPLSetting));
       gxpl->config->malloc = 1;
     }
     else {
@@ -268,7 +269,8 @@ gxPLOpen (gxPLConfig * config) {
             // everything was done, we copy the network information and returns.
             (void) gxPLIoCtl (gxpl, gxPLIoFuncGetLocalAddr, &gxpl->net_info);
             if (gxPLMessageListenerAdd (gxpl, prvDeviceMessageDispatcher, NULL) == 0) {
-
+              
+              srand (gxPLRandomSeed (gxpl));
               return gxpl;
             }
           }
@@ -276,7 +278,7 @@ gxPLOpen (gxPLConfig * config) {
       }
     }
   }
-  vLog (LOG_ERR, "Unable to setup gxPL object");
+  PERROR ("Unable to setup gxPL object");
   free (gxpl);
   return NULL;
 }
@@ -287,7 +289,7 @@ gxPLClose (gxPL * gxpl) {
 
   if (gxpl) {
     int ret;
-    
+
     // for each device, sends a goodbye heartbeat and removes all listeners,
     vVectorDestroy (&gxpl->device);
     // then releases all message listeners
@@ -316,7 +318,7 @@ gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata)
   if (iVectorAppend (&gxpl->msg_listener, h) == 0) {
     return 0;
   }
-  free(h);
+  free (h);
   return -1;
 }
 
@@ -324,7 +326,7 @@ gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata)
 int
 gxPLMessageListenerRemove (gxPL * gxpl, gxPLMessageListener listener) {
   int i = iVectorFindFirstIndex (&gxpl->msg_listener, &listener);
-  
+
 
   return iVectorRemove (&gxpl->msg_listener, i);
 }
@@ -348,7 +350,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
 
         // We receive a message, append null character to terminate the string
         buffer[size] = '\0';
-        vLog (LOG_DEBUG, "Just read %d bytes as packet:\n%s", size, buffer);
+        PDEBUG ("Just read %d bytes, raw buffer below >>>\n%s<<<", size, buffer);
 
         // TODO: Send the raw message to any raw message msg_listener ?
 
@@ -361,7 +363,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
           else if (gxPLMessageIsValid (msg)) {
 
             // Dispatch the message
-            vLog (LOG_DEBUG, "Now dispatching valid message");
+            PDEBUG ("Now dispatching valid message");
 
             for (int i = 0; i < iVectorSize (&gxpl->msg_listener); i++) {
 
@@ -412,7 +414,7 @@ gxPLMessageSend (gxPL * gxpl, gxPLMessage * message) {
     count = strlen (str);
     ret = gxPLIoSend (gxpl->io, str, count, NULL);
     if (ret < 0) {
-      vLog (LOG_ERR, "Unable to send message: [%10s...]", str);
+      PERROR ("Unable to send message: [%10s...]", str);
     }
     free (str);
   }
@@ -426,12 +428,13 @@ int
 gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * msg,
                       const gxPLId * my_id) {
 
-  if (strcmp (gxPLMessageSchemaClassGet (msg), "hbeat") == 0) {
+  if ( (strcmp (gxPLMessageSchemaClassGet (msg), "hbeat") == 0) ||
+       (strcmp (gxPLMessageSchemaClassGet (msg), "config") == 0)) {
     if (strcmp (gxPLMessageSchemaTypeGet (msg), "app") == 0) {
-      const char * remote_ip = gxPLMessagePairValueGet (msg, "remote-ip");
+      const char * remote_ip = gxPLMessagePairGet (msg, "remote-ip");
 
       if (remote_ip) {
-        const char * str_port = gxPLMessagePairValueGet (msg, "port");
+        const char * str_port = gxPLMessagePairGet (msg, "port");
 
         if (str_port) {
           char *endptr;
@@ -470,7 +473,7 @@ gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
   if (device) {
 
     // verifies that the device does not exist
-    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceIdGet (device)) == NULL) {
+    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceId (device)) == NULL) {
 
       // if not, add it to the list
       if (iVectorAppend (&gxpl->device, device) == 0) {
@@ -480,7 +483,30 @@ gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
     }
   }
   // failure exit
-  (void) gxPLDeviceDelete (device);
+  gxPLDeviceDelete (device);
+  return NULL;
+}
+
+// -----------------------------------------------------------------------------
+gxPLDevice *
+gxPLDeviceConfigAdd (gxPL * gxpl, const char * vendor_id,
+                     const char * device_id, const char * filename) {
+  gxPLDevice * device = gxPLDeviceConfigNew (gxpl,
+                        vendor_id, device_id, filename);
+  if (device) {
+
+    // verifies that the device does not exist
+    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceId (device)) == NULL) {
+
+      // if not, add it to the list
+      if (iVectorAppend (&gxpl->device, device) == 0) {
+
+        return device;
+      }
+    }
+  }
+  // failure exit
+  gxPLDeviceDelete (device);
   return NULL;
 }
 
@@ -510,9 +536,10 @@ gxPLDeviceAt (gxPL * gxpl, int index) {
 }
 
 // -----------------------------------------------------------------------------
-int 
+int
 gxPLDeviceIndex (gxPL * gxpl, const gxPLDevice * device) {
-  return iVectorFindFirstIndex(&gxpl->device, device);
+
+  return iVectorFindFirstIndex (&gxpl->device, device);
 }
 
 // -----------------------------------------------------------------------------
@@ -530,7 +557,7 @@ gxPLIoCtl (gxPL * gxpl, int c, ...) {
     default:
       ret = gxPLIoIoCtl (gxpl->io, c, ap);
       if ( (ret == -1) && (errno == EINVAL)) {
-        vLog (LOG_ERR, "gxPLIoCtl function not supported: %d", c);
+        PERROR ("gxPLIoCtl function not supported: %d", c);
       }
       break;
   }
@@ -543,7 +570,6 @@ gxPLIoCtl (gxPL * gxpl, int c, ...) {
 const char *
 gxPLIoLocalAddrGet (const gxPL * gxpl) {
   static char * str;
-
 
   if (gxPLIoCtl ( (gxPL *) gxpl, gxPLIoFuncNetAddrToString, &gxpl->net_info, &str) == 0) {
 
@@ -631,7 +657,6 @@ gxPLVersionSha1 (void) {
   return VERSION_SHA1;
 }
 
-
 // -----------------------------------------------------------------------------
 int
 gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
@@ -640,7 +665,7 @@ gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
   if (gxpl->net_info.addrlen > 0) {
 
     for (int i = 0; (i < gxpl->net_info.addrlen) && (len < size); i++) {
-      
+
       max = size - len + 1;
       len += snprintf (&s[len], max, "%02x", gxpl->net_info.addr[i]);
     }
@@ -653,13 +678,13 @@ gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
     unsigned long ms;
 
     if (gxPLTimeMs (&ms) == 0) {
-      
+
       prvEncodeLong (ms, s, size);
-      gxPLTimeDelayMs(1);
+      gxPLTimeDelayMs (1);
     }
   }
 
-  return strlen(s);
+  return strlen (s);
 }
 
 /* ========================================================================== */

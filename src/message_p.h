@@ -24,6 +24,9 @@ typedef struct _gxPLMessage {
   gxPLId target;
   gxPLSchema schema;
 
+  gxPLMessageState state;
+
+  xVector body;
   union {
     unsigned int flag;
     struct {
@@ -32,11 +35,9 @@ typedef struct _gxPLMessage {
       unsigned int isreceived: 1;
       unsigned int isvalid: 1;
       unsigned int iserror: 1;
+      unsigned int isgrouped: 1;
     };
   };
-  gxPLMessageState state;
-
-  xVector body;
 } gxPLMessage;
 
 /* ========================================================================== */

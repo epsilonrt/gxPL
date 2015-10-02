@@ -1,6 +1,6 @@
 /**
- * @file gxPL/defs.h
- * gxPL Definitions
+ * @file include/gxPL/defs.h
+ * gxPL library definitions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -18,10 +18,9 @@ __BEGIN_C_DECLS
 /* forward struct defined */
 typedef struct _gxPL gxPL;
 typedef struct _gxPLIo gxPLIo;
-typedef struct _gxPLDevice gxPLDevice;
 typedef struct _gxPLMessage gxPLMessage;
-typedef struct _gxPLDeviceChangedListenerDef gxPLDeviceChangedListenerDef;
-typedef struct _gxPLDeviceConfigurable gxPLDeviceConfigurable;
+typedef struct _gxPLDevice gxPLDevice;
+typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
 
 #if defined(SYSIO_OS_UNIX)
 #include <limits.h>
@@ -90,14 +89,6 @@ typedef enum {
   gxPLConnectAuto
 } gxPLConnectType;
 
-/**
- * @brief xPL Configurable Type
- */
-typedef enum {
-  gxPLConfigOptional,
-  gxPLConfigMandatory,
-  gxPLConfigReconf
-} gxPLConfigurableType;
 
 /**
  * @brief Possible xPL message types
@@ -106,7 +97,8 @@ typedef enum {
   gxPLMessageAny,
   gxPLMessageCommand,
   gxPLMessageStatus,
-  gxPLMessageTrigger
+  gxPLMessageTrigger,
+  gxPLMessageUnknown = -1
 } gxPLMessageType;
 
 
@@ -161,6 +153,15 @@ typedef enum {
   gxPLHeartbeatGoodbye  = 1,
 } gxPLHeartbeatType;
 
+/**
+ * @brief xPL Configurable Type
+ */
+typedef enum {
+  gxPLConfigOptional,
+  gxPLConfigMandatory,
+  gxPLConfigReconf
+} gxPLConfigurableType;
+
 /* types ==================================================================== */
 
 /* structures =============================================================== */
@@ -179,7 +180,7 @@ typedef struct _gxPLConfig {
       unsigned int malloc: 1; /**< this configuration has been allocated on the heap and should be released. */
     };
   };
-} gxPLConfig;
+} gxPLSetting;
 
 /**
  * @brief Describe a network address
@@ -198,7 +199,7 @@ typedef struct _gxPLIoAddr {
 } gxPLIoAddr;
 
 /**
- * @brief Describe a source or destination identifier
+ * @brief Describe a source or destination xPL identifier
  */
 typedef struct _gxPLId {
   char vendor[GXPL_VENDORID_MAX + 1]; /**< vendor id */
@@ -207,12 +208,22 @@ typedef struct _gxPLId {
 } gxPLId;
 
 /**
- * @brief Describe a message schema
+ * @brief Describe a xPL schema
  */
 typedef struct _gxPLSchema {
   char class[GXPL_CLASS_MAX + 1];
   char type[GXPL_TYPE_MAX + 1];
 } gxPLSchema;
+
+/**
+ * @brief Describe a xPL filter
+ */
+typedef struct _gxPLFilter {
+  
+  gxPLMessageType type;
+  gxPLId source;
+  gxPLSchema schema;
+} gxPLFilter;
 
 /**
  * @}

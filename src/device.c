@@ -1,6 +1,6 @@
 /**
- * @file device.c
- * xPL Service Management
+ * @file src/device.c
+ * High level interface to manage xPL devices (source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -51,48 +51,48 @@ static gxPLMessage *
 prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
 
   gxPLMessage * message = gxPLDeviceMessageNew (device, gxPLMessageStatus);
-  if (message) {
-    gxPL * gxpl = gxPLDeviceParentGet (device);
+  assert (message);
+  gxPL * gxpl = gxPLDeviceParentGet (device);
+  assert (gxpl);
 
-    gxPLMessageBroadcastSet (message, true);
+  gxPLMessageBroadcastSet (message, true);
 
-    if (device->isconfigurable && !device->isconfigured) {
+  if (device->isconfigurable && !device->isconfigured) {
 
-      gxPLMessageSchemaClassSet (message, "config");
-    }
-    else {
+    gxPLMessageSchemaClassSet (message, "config");
+  }
+  else {
 
-      gxPLMessageSchemaClassSet (message, "hbeat");
-    }
+    gxPLMessageSchemaClassSet (message, "hbeat");
+  }
 
-    if (type & gxPLHeartbeatGoodbye) {
+  if (type & gxPLHeartbeatGoodbye) {
 
-      gxPLMessageSchemaTypeSet (message, "end");
-    }
-    else {
-
-      if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
-
-        gxPLMessageSchemaTypeSet (message, "app");
-      }
-      else {
-
-        gxPLMessageSchemaTypeSet (message, "basic");
-      }
-    }
-
-    gxPLMessagePairValuePrintf (message, "interval", "%d",
-                                device->hbeat_interval / 60);
+    gxPLMessageSchemaTypeSet (message, "end");
+  }
+  else {
 
     if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
 
-      gxPLMessagePairValuePrintf (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
-      gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (gxpl));
+      gxPLMessageSchemaTypeSet (message, "app");
     }
-    if (device->version) {
+    else {
 
-      gxPLMessagePairAdd (message, "version", device->version);
+      gxPLMessageSchemaTypeSet (message, "basic");
     }
+  }
+
+  gxPLMessagePairAddFormat (message, "interval", "%d",
+                            device->hbeat_interval / 60);
+
+  if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
+
+    gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
+    gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (gxpl));
+  }
+  if (device->version) {
+
+    gxPLMessagePairAdd (message, "version", device->version);
   }
   return message;
 }
@@ -113,7 +113,7 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 
     // Install a new heartbeat message
     device->hbeat_msg = message;
-    vLog (LOG_DEBUG, "Just allocated a new Heartbeat message");
+    PDEBUG ("Just allocated a new Heartbeat message");
   }
   else {
 
@@ -125,11 +125,11 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 
     // Update last heartbeat time
     long now = gxPLTime();
-    vLog (LOG_DEBUG, "Sent heartbeat message at %s", gxPLTimeStr (now));
+    PDEBUG ("Sent heartbeat message at %s", gxPLTimeStr (now));
     device->hbeat_last = now;
     return 0;
   }
-  vLog (LOG_ERR, "Unable to send heartbeat");
+  PERROR ("Unable to send heartbeat");
   return -1;
 }
 
@@ -139,16 +139,14 @@ int
 prvHeartbeatMessageSendGoodbye (gxPLDevice * device) {
 
   gxPLMessage *  message = prvHeartbeatMessageNew (device, gxPLHeartbeatGoodbye);
-  if (message) {
 
-    // Send the message
-    vLog (LOG_DEBUG, "Sent goodbye heartbeat");
-    if (gxPLDeviceMessageSend (device, message) > 0) {
+  // Send the message
+  PDEBUG ("Sent goodbye heartbeat");
+  if (gxPLDeviceMessageSend (device, message) > 0) {
 
-      gxPLMessageDelete (device->hbeat_msg);
-      device->hbeat_msg = NULL;
-      return 0;
-    }
+    gxPLMessageDelete (device->hbeat_msg);
+    device->hbeat_msg = NULL;
+    return 0;
   }
   return -1;
 }
@@ -156,27 +154,33 @@ prvHeartbeatMessageSendGoodbye (gxPLDevice * device) {
 // -----------------------------------------------------------------------------
 // Dispatch device messages to appropriate listeners
 static void
-prvDeviceDispatchEvent (gxPLDevice * device, const gxPLMessage * message) {
+prvDeviceDispatchEvent (gxPLDevice * device, gxPLMessage * message) {
 
   for (int i = 0; i < iVectorSize (&device->listener); i++) {
+
     listener_elmt * listener = pvVectorGet (&device->listener, i);
 
     if ( (listener->msg_type != gxPLMessageAny) &&
          (listener->msg_type != gxPLMessageTypeGet (message))) {
+
       continue;
     }
 
     // the message type matches
     if ( (strlen (listener->schema.class) > 0) &&
          (strcmp (listener->schema.class, gxPLMessageSchemaClassGet (message)) != 0)) {
+
       continue;
     }
     if ( (strlen (listener->schema.type) > 0) &&
          (strcmp (listener->schema.type, gxPLMessageSchemaTypeGet (message)) != 0)) {
+
       continue;
     }
+
     // the schema matches
     if (listener->func) {
+
       // call the user listener
       listener->func (device, message, listener->data);
     }
@@ -187,14 +191,14 @@ prvDeviceDispatchEvent (gxPLDevice * device, const gxPLMessage * message) {
 
 // -----------------------------------------------------------------------------
 void
-gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
+gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
                           void * udata) {
 
   if ( (device->ishubconfirmed == 0) &&
        (gxPLMessageIsHubEcho (device->parent, message, &device->id) == true)) {
 
     device->ishubconfirmed = 1;
-    vLog (LOG_DEBUG, "Hub detected and confirmed existing");
+    PDEBUG ("Hub detected and confirmed existing");
   }
 
   // If we are not reporting your own messages, see if they originated with us
@@ -203,13 +207,13 @@ gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
 
     if (gxPLIdCmp (gxPLMessageSourceIdGet (message), &device->id) == 0) {
 
-      vLog (LOG_DEBUG, "Skipping message from self");
+      PDEBUG ("Skipping message from self");
       return;
     }
   }
 
   // Is this a broadcast message?
-  if (gxPLMessageBroadcastGet (message) == true) {
+  if (gxPLMessageIsBroadcast (message) == true) {
 
     // See if this is a request for a heartbeat
     if ( (gxPLMessageTypeGet (message) == gxPLMessageCommand)
@@ -219,63 +223,80 @@ gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
       // Compute a response delay (.5 to 2.5 seconds)
       unsigned int ms = (unsigned int) ( ( (double) random() /
                                            (double) RAND_MAX) * 2000.0) + 500;
-      vLog (LOG_DEBUG, "Sending heartbeat in response to discovery request "
-            "after a %u millisecond delay", ms);
+      PDEBUG ("Sending heartbeat in response to discovery request "
+              "after a %u millisecond delay", ms);
       gxPLTimeDelayMs (ms);
       prvHeartbeatMessageSendHello (device);
     }
-
-#if 0
+#if CONFIG_DEVICE_FILTER
+// -----------------------------------------------------------------------------
     // If we have filters, see if they match // TODO
-    if (device->filterCount != 0) {
-      for (filterIndex = 0; filterIndex < device->filterCount; filterIndex++) {
-        if (prvDoesFilterMatch (& (device->messageFilterList[filterIndex]), message)) {
-          foundFilter = TRUE;
+    if (device->havefilter) {
+      bool isfound = false;
+
+      // See if we have any groups and if any groups match
+      for (int i = 0; i < iVectorSize (&device->filter); i++) {
+
+        gxPLFilter * filter = (gxPLFilter *) pvVectorGet (&device->filter, i);
+
+        if (gxPLMessageFilterMatch (message, filter) == true) {
+
+          PDEBUG ("message matches my filters");
+          isfound = true;
           break;
         }
       }
 
       // If we had filters and none match, skip this device
-      if (!foundFilter) {
+      if (isfound == false) {
+        PINFO ("skip message, does not match my filters");
         return;
       }
     }
-#endif
+// -----------------------------------------------------------------------------
+#endif /* CONFIG_DEVICE_FILTER true */
+
   }
   else {
 
     // Targeted message
 
-    // Make sure this target matches
-    if (gxPLIdCmp (gxPLMessageTargetIdGet (message), &device->id) != 0) {
-
-      return;
-    }
-
-#if 0
-    if (message->isgrouped == false) {
-
+    if (gxPLMessageIsGrouped (message) == false) {
       // Make sure this target matches
-      if (gxPLIdCmp (&message->target, &device->id) != 0) {
+      if (gxPLIdCmp (gxPLMessageTargetIdGet (message), &device->id) != 0) {
 
         return;
       }
     }
+#if CONFIG_DEVICE_GROUP
+// -----------------------------------------------------------------------------
     else {
-      // See if we have any groups and if any groups match // TODO
-      for (groupIndex = 0; groupIndex < device->groupCount; groupIndex++) {
-        if (!strcasecmp (message->group, device->groupList[groupIndex])) {
-          foundGroup = TRUE;
-          break;
+      // Grouped message
+      bool isfound = false;
+
+      if (device->havegroup) {
+
+        // See if we have any groups and if any groups match
+        for (int i = 0; i < iVectorSize (&device->group); i++) {
+
+          char * group = (char *) pvVectorGet (&device->group, i);
+
+          if (strcmp (gxPLMessageTargetInstanceIdGet (message), group) == 0) {
+            PDEBUG ("message matches my groups");
+            isfound = true;
+            break;
+          }
         }
       }
 
       // If there is no group or no matching group in this device, skip it
-      if (!foundGroup) {
+      if (isfound == false) {
+        PDEBUG ("skip group message that does not match");
         return;
       }
     }
-#endif
+// -----------------------------------------------------------------------------
+#endif /* CONFIG_DEVICE_GROUP true */
   }
 
   /* Message is :
@@ -286,6 +307,7 @@ gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
    */
   prvDeviceDispatchEvent (device, message);
 }
+
 
 // -----------------------------------------------------------------------------
 gxPLDevice *
@@ -300,39 +322,48 @@ gxPLDeviceNew (gxPL * gxpl,
   device->hbeat_interval = DEFAULT_HEARTBEAT_INTERVAL;
 
   // init listener vector
-  if (iVectorInit (&device->listener, 2, NULL, free) == 0) {
+  iVectorInit (&device->listener, 1, NULL, free);
+  iVectorInitSearch (&device->listener, prvListenerKey, prvListenerMatch);
 
-    if (iVectorInitSearch (&device->listener, prvListenerKey,
-                           prvListenerMatch) == 0) {
+  // init vendor id
+  if (gxPLIdVendorIdSet (&device->id, vendor_id) != 0) {
+    free (device);
+    return NULL;
+  }
+  // init device id
+  if (gxPLIdDeviceIdSet (&device->id, device_id) != 0) {
+    free (device);
+    return NULL;
+  }
 
-      // init vendor id
-      if (gxPLIdVendorIdSet (&device->id, vendor_id) == 0) {
+  if (gxPLDeviceGroupInit (device) != 0) {
+    free (device);
+    return NULL;
+  }
 
-        // init device id
-        if (gxPLIdDeviceIdSet (&device->id, device_id) == 0) {
+  if (gxPLDeviceFilterInit (device) != 0) {
+    free (device);
+    return NULL;
+  }
+  // init instance id
+  if (instance_id != NULL) {
 
-          // init instance id
-          if (instance_id != NULL) {
+    // instance id provided
+    if (gxPLIdInstanceIdSet (&device->id, instance_id) == 0) {
 
-            // instance id provided
-            if (gxPLIdInstanceIdSet (&device->id, instance_id) == 0) {
+      // setting up successful
+      return device;
+    }
 
-              // setting up successful
-              return device;
-            }
-          }
-          else {
-            // instance id not provided, generates fairly unique id
+  }
+  else {
+    // instance id not provided, generates fairly unique id
 
-            if (gxPLGenerateUniqueId (gxpl, device->id.instance,
-                                      GXPL_INSTANCEID_MAX) == GXPL_INSTANCEID_MAX) {
+    if (gxPLGenerateUniqueId (gxpl, device->id.instance,
+                              GXPL_INSTANCEID_MAX) == GXPL_INSTANCEID_MAX) {
 
-              // setting up successful
-              return device;
-            }
-          }
-        }
-      }
+      // setting up successful
+      return device;
     }
   }
   // failure exit
@@ -355,13 +386,17 @@ gxPLDeviceDelete (gxPLDevice * device) {
     // Release device resources
     free (device->version);
 
-    // Release group info // TODO
-    // Release filters // TODO
+    // Release group info
+    gxPLDeviceGroupDelete (device);
+
+    // Release filters
+    gxPLDeviceFilterDelete (device);
 
     // Release any listeners
     vVectorDestroy (&device->listener);
 
-    // Release configuration data // TODO
+    // Release configuration data
+    gxPLDeviceConfigDelete (device);
 
     // Free the device
     free (device);
@@ -376,13 +411,12 @@ gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type) {
 
   if (type != gxPLMessageAny) {
     gxPLMessage * message = gxPLMessageNew (type);
-    if (message) {
+    assert (message);
 
-      gxPLMessageSourceIdSet (message, &device->id);
-      return message;
-    }
-    vLog (LOG_ERR, "Unable to create new device message");
+    gxPLMessageSourceIdSet (message, &device->id);
+    return message;
   }
+  PERROR ("Unable to create new device message");
   return NULL;
 }
 
@@ -418,8 +452,8 @@ gxPLDeviceListenerAdd (gxPLDevice * device,
   listener->func = func;
   listener->data = udata;
   listener->msg_type = type;
-  (void) gxPLSchemaClassSet (&listener->schema, schema_class);
-  (void) gxPLSchemaTypeSet (&listener->schema, schema_type);
+  gxPLSchemaClassSet (&listener->schema, schema_class);
+  gxPLSchemaTypeSet (&listener->schema, schema_type);
   if (iVectorAppend (&device->listener, listener) == 0) {
 
     return 0;
@@ -440,20 +474,23 @@ gxPLDeviceListenerRemove (gxPLDevice * device,
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceIdSet (gxPLDevice * device,  const gxPLId * id) {
-  if ( (device == NULL) || (id == NULL)) {
-    errno = EFAULT;
-    return -1;
-  }
 
   if (gxPLIdCmp (id, &device->id) != 0) {
+
     if (device->isenabled) {
+
       if (prvHeartbeatMessageSendGoodbye (device) != 0) {
+
         return -1;
       }
     }
+
     gxPLIdCopy (&device->id, id);
+
     if (device->isenabled) {
+
       if (prvHeartbeatMessageSendHello (device) != 0) {
+
         return -1;
       }
     }
@@ -464,51 +501,40 @@ gxPLDeviceIdSet (gxPLDevice * device,  const gxPLId * id) {
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceVendorIdSet (gxPLDevice * device, const char * vendor_id) {
+  gxPLId id;
 
-  if ( (device) && (vendor_id)) {
-    gxPLId id;
+  gxPLIdCopy (&id, &device->id);
 
-    gxPLIdCopy (&id, &device->id);
-    if (gxPLIdVendorIdSet (&id, vendor_id) == 0) {
-      return gxPLDeviceIdSet (device, &id);
-    }
+  if (gxPLIdVendorIdSet (&id, vendor_id) == 0) {
+
+    return gxPLDeviceIdSet (device, &id);
   }
-
-  errno = EFAULT;
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceDeviceIdSet (gxPLDevice * device, const char * device_id) {
+  gxPLId id;
 
-  if ( (device) && (device_id)) {
-    gxPLId id;
+  gxPLIdCopy (&id, &device->id);
+  if (gxPLIdDeviceIdSet (&id, device_id) == 0) {
 
-    gxPLIdCopy (&id, &device->id);
-    if (gxPLIdDeviceIdSet (&id, device_id) == 0) {
-      return gxPLDeviceIdSet (device, &id);
-    }
+    return gxPLDeviceIdSet (device, &id);
   }
-
-  errno = EFAULT;
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceInstanceIdSet (gxPLDevice * device, const char * instance_id) {
+  gxPLId id;
 
-  if ( (device) && (instance_id)) {
-    gxPLId id;
+  gxPLIdCopy (&id, &device->id);
+  if (gxPLIdInstanceIdSet (&id, instance_id) == 0) {
 
-    gxPLIdCopy (&id, &device->id);
-    if (gxPLIdInstanceIdSet (&id, instance_id) == 0) {
-      return gxPLDeviceIdSet (device, &id);
-    }
+    return gxPLDeviceIdSet (device, &id);
   }
-
-  errno = EFAULT;
   return -1;
 }
 
@@ -516,35 +542,24 @@ gxPLDeviceInstanceIdSet (gxPLDevice * device, const char * instance_id) {
 int
 gxPLDeviceVersionSet (gxPLDevice * device, const char * version) {
 
-  if ( (device) && (version)) {
+  if (device->version) {
 
-    if (device->version) {
+    if (strcmp (version, device->version) == 0) {
 
-      if (strcmp (version, device->version) == 0) {
-
-        return 0;
-      }
-      free (device->version);
+      return 0;
     }
-
-    device->version = malloc (strlen (version) + 1);
-    strcpy (device->version, version);
-    return 0;
+    free (device->version);
   }
 
-  errno = EFAULT;
-  return -1;
+  device->version = malloc (strlen (version) + 1);
+  assert (device->version);
+  strcpy (device->version, version);
+  return 0;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
 
   // Skip if already enabled
   if (device->isenabled != enabled) {
@@ -578,21 +593,15 @@ gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled) {
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceHeartbeatIntervalSet (gxPLDevice * device, int interval) {
-  if (device == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
-// TODO
+
+  device->hbeat_interval = interval;
   return 0;
 }
 
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond) {
-  if (device == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
+
   device->nobroadcast = !respond;
   return 0;
 }
@@ -600,10 +609,7 @@ gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond) {
 // -----------------------------------------------------------------------------
 int
 gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
-  if (device == NULL) {
-    errno = EFAULT;
-    return -1;
-  }
+
   device->isreportownmsg = isreportownmsg;
   return 0;
 }
@@ -611,139 +617,78 @@ gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
 // -----------------------------------------------------------------------------
 gxPL *
 gxPLDeviceParentGet (gxPLDevice * device) {
-  if (device == NULL) {
-    errno = EFAULT;
-    return NULL;
-  }
+
   return device->parent;
 }
 
 // -----------------------------------------------------------------------------
 const gxPLId *
-gxPLDeviceIdGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return NULL;
-  }
+gxPLDeviceId (const gxPLDevice * device) {
 
   return &device->id;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceEnabledGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsEnabled (const gxPLDevice * device) {
 
   return device->isenabled;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceHeartbeatIntervalGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceHeartbeatInterval (const gxPLDevice * device) {
 
   return device->hbeat_interval;
 }
 
 // -----------------------------------------------------------------------------
 const char *
-gxPLDeviceVersionGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return NULL;
-  }
+gxPLDeviceVersion (const gxPLDevice * device) {
 
   return device->version;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceRespondToBroadcastGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsRespondToBroadcast (const gxPLDevice * device) {
 
   return device->nobroadcast;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceReportOwnMessagesGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsReportOwnMessages (const gxPLDevice * device) {
 
   return device->isreportownmsg;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceHubConfirmedGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsHubConfirmed (const gxPLDevice * device) {
 
   return device->ishubconfirmed;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceConfiguraleGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsConfigurale (const gxPLDevice * device) {
 
   return device->isconfigurable;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceConfiguredGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+gxPLDeviceIsConfigured (const gxPLDevice * device) {
 
   return device->isconfigured;
 }
 
 // -----------------------------------------------------------------------------
-long gxPLDeviceHeartbeatLastGet (const gxPLDevice * device) {
-
-  if (device == NULL) {
-
-    errno = EFAULT;
-    return -1;
-  }
+long
+gxPLDeviceHeartbeatLast (const gxPLDevice * device) {
 
   return device->hbeat_last;
 }
+
 /* ========================================================================== */

@@ -19,7 +19,7 @@
  */
 typedef struct _gxPL {
 
-  gxPLConfig * config;
+  gxPLSetting * config;
   gxPLIo * io;  /**< abstract structure can not be used directly on top level */
   xVector msg_listener;
   xVector device;
@@ -35,48 +35,6 @@ typedef struct _gxPL {
 /* macros =================================================================== */
 
 /* private api functions ==================================================== */
-
-/*
- * @brief Create a new xPL device
- * @param gxpl
- * @param vendor_id
- * @param device_id
- * @param instance_id
- * @return 
- */
-gxPLDevice * gxPLDeviceNew (gxPL * gxpl,
-                            const char * vendor_id,
-                            const char * device_id,
-                            const char * instance_id);
-/*
- * @brief Release an xPL device
- * @param device
- */
-void gxPLDeviceDelete (gxPLDevice * device);
-
-/*
- * @brief Messages handler
- * @param device
- * @param message
- * @param udata
- */
-void gxPLDeviceMessageHandler (gxPLDevice * device, const gxPLMessage * message,
-                               void * udata);
-
-/*
- * @brief Sends an heartbeat immediately
- * @param device pointer on the device
- * @param type
- * @return 0, -1 if an error occurs
- */
-int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
-
-/*
- * @brief 
- * @param config
- * @param argc
- * @param argv
- */
-void gxPLParseCommonArgs (gxPLConfig * config, int argc, char *argv[]);
+int gxPLRandomSeed (gxPL * gxpl);
 /* ========================================================================== */
 #endif /* _GXPL_PRIVATE_HEADER_ defined */

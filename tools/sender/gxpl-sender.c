@@ -59,17 +59,17 @@ parseSourceIdent (void) {
   /* Make sure we have something to work with */
   if ( (msgSource == NULL) || (strlen (msgSource) < 5)) {
     fprintf (stderr, "Empty or too short message source ID\n");
-    return FALSE;
+    return false;
   }
 
   /* Locate the delimiters */
   if ( (dashstr = strstr (msgSource, "-")) == NULL) {
     fprintf (stderr, "Missing dash in source ident -- invalid source ID\n");
-    return FALSE;
+    return false;
   }
   if ( (periodstr = strstr (dashstr, ".")) == NULL) {
     fprintf (stderr, "Missing period in source ident -- invalid source ID\n");
-    return FALSE;
+    return false;
   }
 
   /* Install pointers */
@@ -79,7 +79,7 @@ parseSourceIdent (void) {
   srcDeviceId = dashstr;
   srcInstanceId = periodstr;
 
-  return TRUE;
+  return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -89,21 +89,21 @@ parseTargetIdent (void) {
 
   /* Make sure we have something to work with */
   if (msgTarget == NULL) {
-    return TRUE;
+    return true;
   }
   if (strlen (msgTarget) < 5) {
     fprintf (stderr, "Empty or too short message target ID\n");
-    return FALSE;
+    return false;
   }
 
   /* Locate the delimiters */
   if ( (dashstr = strstr (msgTarget, "-")) == NULL) {
     fprintf (stderr, "Missing dash in target ident -- invalid target ID\n");
-    return FALSE;
+    return false;
   }
   if ( (periodstr = strstr (dashstr, ".")) == NULL) {
     fprintf (stderr, "Missing period in target ident -- invalid target ID\n");
-    return FALSE;
+    return false;
   }
 
   /* Install pointers */
@@ -113,7 +113,7 @@ parseTargetIdent (void) {
   tgtDeviceId = dashstr;
   tgtInstanceId = periodstr;
 
-  return TRUE;
+  return true;
 }
 
 /* -----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ bool parseCmdLine (int *argc, char *argv[]) {
         }
         else {
           fprintf (stderr, "Unknown message type of %s for -m", argv[swptr]);
-          return FALSE;
+          return false;
         }
 
         continue;
@@ -182,7 +182,7 @@ bool parseCmdLine (int *argc, char *argv[]) {
 
         if ( (delim = strstr (argv[swptr], ".")) == NULL) {
           fprintf (stderr, "Improperly formatted schema class.type of %s", argv[swptr]);
-          return FALSE;
+          return false;
         }
 
         *delim++ = '\0';
@@ -194,13 +194,13 @@ bool parseCmdLine (int *argc, char *argv[]) {
 
       /* Anything left is unknown */
       fprintf (stderr, "Unknown switch `%s'", argv[swptr]);
-      return FALSE;
+      return false;
     }
   }
 
   /* Set in place the new argument count and exit */
   *argc = newcnt + 1;
-  return TRUE;
+  return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -214,20 +214,20 @@ sendMessage (int argc, char * argv[]) {
   /* Create service so we can create messages */
   if ( (service = gxPLDeviceNew (srcVendor, srcDeviceId, srcInstanceId)) == NULL) {
     fprintf (stderr, "Unable to create xPL service\n");
-    return FALSE;
+    return false;
   }
 
   /* Create an appropriate message */
   if (msgTarget == NULL) {
     if ( (message = gxPLDeviceMessageNewBroadcast (service, msgType)) == NULL) {
       fprintf (stderr, "Unable to create broadcast message\n");
-      return FALSE;
+      return false;
     }
   }
   else {
     if ( (message = gxPLDeviceMessageNewTargeted (service, msgType, tgtVendor, tgtDeviceId, tgtInstanceId)) == NULL) {
       fprintf (stderr, "Unable to create targetted message\n");
-      return FALSE;
+      return false;
     }
   }
 
@@ -238,7 +238,7 @@ sendMessage (int argc, char * argv[]) {
   for (argIndex = 1; argIndex < argc; argIndex++) {
     if ( (delim = strstr (argv[argIndex], "=")) == NULL) {
       fprintf (stderr, "Improperly formatted name/value pair %s\n", argv[argIndex]);
-      return FALSE;
+      return false;
     }
 
     /* Break them up  and add it */
@@ -249,10 +249,10 @@ sendMessage (int argc, char * argv[]) {
   /* Send the message */
   if (!gxPLMessageSend (message)) {
     fprintf (stderr, "Unable to send xPL message\n");
-    return FALSE;
+    return false;
   }
 
-  return TRUE;
+  return true;
 }
 
 /* main ===================================================================== */
@@ -266,7 +266,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Parse xPL & program command line parms */
-  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, false)) {
     exit (1);
   }
   if (!parseCmdLine (&argc, argv)) {
@@ -280,7 +280,7 @@ main (int argc, char * argv[]) {
   }
 
   /* Start xPL up */
-  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
+  if (!gxPLSettingNew (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start xPL");
     exit (1);
   }

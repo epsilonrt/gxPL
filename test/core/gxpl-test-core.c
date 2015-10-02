@@ -41,7 +41,7 @@ static int msg_count;
 
 /* private functions ======================================================== */
 static void prvSignalHandler (int sig) ;
-static int prvMessageHandler (gxPL * gxpl, const gxPLMessage * msg, void * p);
+static void prvMessageHandler (gxPL * gxpl, gxPLMessage * msg, void * p);
 static void prvHeartbeatMessageNew (void);
 
 /* main ===================================================================== */
@@ -49,7 +49,7 @@ int
 main (int argc, char **argv) {
   int ret = 0;
   xVector * iolist;
-  gxPLConfig * config;
+  gxPLSetting * config;
   char hello[] = ".";
 
   // Gets the available io layer list
@@ -63,7 +63,7 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_count++;
-  config = gxPLConfigNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  config = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
   test (config);
 
   // verify that the requested io layer is available
@@ -73,7 +73,7 @@ main (int argc, char **argv) {
 
   // opens the xPL network
   test_count++;
-  ret = vVectorDestroy (iolist);
+  vVectorDestroy (iolist);
   gxpl = gxPLOpen (config);
   test (gxpl);
 
@@ -150,8 +150,8 @@ prvSignalHandler (int sig) {
 
 // -----------------------------------------------------------------------------
 // message handler
-static int
-prvMessageHandler (gxPL * gxpl, const gxPLMessage * msg, void * p) {
+static void
+prvMessageHandler (gxPL * gxpl, gxPLMessage * msg, void * p) {
 
   // See if we need to check the message for hub detection
   if ( (hasHub == false) && (gxPLMessageIsHubEcho (gxpl, msg, NULL) == true)) {
@@ -159,7 +159,6 @@ prvMessageHandler (gxPL * gxpl, const gxPLMessage * msg, void * p) {
     hasHub = true;
     printf ("\n******** Hub detected and confirmed existing ********\n");
   }
-  return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -194,13 +193,13 @@ prvHeartbeatMessageNew (void) {
   }
 
   test_count++;
-  ret = gxPLMessagePairValuePrintf (message, "interval", "%d", HBEAT_INTERVAL);
+  ret = gxPLMessagePairAddFormat (message, "interval", "%d", HBEAT_INTERVAL);
   test (ret == 0);
 
   if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
 
     test_count++;
-    ret = gxPLMessagePairValuePrintf (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
+    ret = gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
     test (ret == 0);
 
     test_count++;

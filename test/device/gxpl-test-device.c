@@ -46,20 +46,20 @@ static int test_count;
 
 /* private functions ======================================================== */
 static void prvSignalHandler (int sig) ;
-static void prvDeviceHandler (gxPLDevice * device, const gxPLMessage * msg, void * p);
+static void prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p);
 
 /* main ===================================================================== */
 int
 main (int argc, char **argv) {
   int ret = 0;
-  gxPLConfig * config;
+  gxPLSetting * config;
   char hello1[] = "hello1";
   char hello2[] = "hello2";
   char str[GXPL_INSTANCEID_MAX + 1];
 
   // retrieved the requested configuration from the command line
   test_new ("retrieved the requested configuration from the command line");
-  config = gxPLConfigNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  config = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
   test_ok (config);
 
   // opens the xPL network
@@ -93,8 +93,8 @@ main (int argc, char **argv) {
   test_new ("adds a device listener");
   ret = gxPLDeviceListenerAdd (device1, prvDeviceHandler, gxPLMessageAny, NULL, NULL, hello1);
   test_ok (ret == 0);
-  
-  
+
+
   test_new ("adds a new device on the network");
   device2 = gxPLDeviceAdd (gxpl, "epsirt", "test", NULL);
   test_ok (device2);
@@ -104,7 +104,7 @@ main (int argc, char **argv) {
   test_new ("adds a device listener");
   ret = gxPLDeviceListenerAdd (device2, prvDeviceHandler, gxPLMessageAny, NULL, NULL, hello2);
   test_ok (ret == 0);
-  
+
   test_new ("enable the new device");
   ret = gxPLDeviceEnabledSet (device1, true);
   test_ok (ret == 0);
@@ -112,7 +112,7 @@ main (int argc, char **argv) {
   test_new ("enable the new device");
   ret = gxPLDeviceEnabledSet (device2, true);
   test_ok (ret == 0);
-  
+
   signal (SIGTERM, prvSignalHandler);
   signal (SIGINT, prvSignalHandler);
   printf ("Press Ctrl+C to abort ...\n");
@@ -122,6 +122,9 @@ main (int argc, char **argv) {
     // Main loop
     ret = gxPLPoll (gxpl, 100);
     test (ret == 0);
+/*    if (gxPLDeviceIsHubConfirmed (device2)) {
+      prvSignalHandler (SIGTERM);
+    }*/
     fflush (stdout);
   }
 
@@ -157,10 +160,10 @@ prvSignalHandler (int sig) {
 // -----------------------------------------------------------------------------
 // message handler
 static void
-prvDeviceHandler (gxPLDevice * device, const gxPLMessage * msg, void * p) {
+prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p) {
   char * str = (char *) p;
-  int i = gxPLDeviceIndex(gxPLDeviceParentGet(device), device) + 1;
-  
+  int i = gxPLDeviceIndex (gxPLDeviceParentGet (device), device) + 1;
+
   printf ("\n********* device%d: [%s] *********\n", i, str);
 }
 

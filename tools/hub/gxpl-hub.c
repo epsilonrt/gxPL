@@ -28,8 +28,8 @@
 #define LOG_BUFF_MAX 512
 
 /* private variables ======================================================== */
-static bool daemonMode = TRUE;
-static bool debugMode = FALSE;
+static bool daemonMode = true;
+static bool debugMode = false;
 /* static buffer to create log messages */
 static char logMessageBuffer[LOG_BUFF_MAX];
 /* Used to track hubs */
@@ -141,37 +141,37 @@ parseCmdLine (int *argc, char *argv[]) {
       
       /* Check for debug mode */
       if (!strcmp (argv[swptr], "-debug")) {
-        debugMode = TRUE;
-        daemonMode = FALSE;
+        debugMode = true;
+        daemonMode = false;
         writeDebug ("Debuging mode enabled");
         continue;
       }
 
       /* Check for debug mode */
       if (!strcmp (argv[swptr], "-xpldebug")) {
-        debugMode = TRUE;
-        daemonMode = FALSE;
-        gxPLsetDebugging (TRUE);
-        vLog (LOG_ERR, "xPL Debug mode enabled");
+        debugMode = true;
+        daemonMode = false;
+        gxPLsetDebugging (true);
+        PERROR ("xPL Debug mode enabled");
         continue;
       }
 
       /* Check for daemon mode */
       if (!strcmp (argv[swptr], "-nodaemon")) {
-        daemonMode = FALSE;
+        daemonMode = false;
         writeInfo ("Running on console");
         continue;
       }
 
       /* Anything left is unknown */
       writeError ("Unknown switch `%s'", argv[swptr]);
-      return FALSE;
+      return false;
     }
   }
 
   /* Set in place the new argument count and exit */
   *argc = newcnt + 1;
-  return TRUE;
+  return true;
 }
 
 /* -----------------------------------------------------------------------------
@@ -203,11 +203,11 @@ hubShutdownHandler (int onSignal) {
 static void 
 runHub (void) {
   /* Start gxPLib */
-  if (!gxPLConfigNew (gxPLConnectStandAlone)) {
+  if (!gxPLSettingNew (gxPLConnectStandAlone)) {
     writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
     exit (1);
   }
-  vLog (LOG_ERR, "gxPLib started");
+  PERROR ("gxPLib started");
 
   /* Start gxPL Hub */
   gxPLstartHub();
@@ -311,7 +311,7 @@ int
 main (int argc, char * argv[]) {
   
   /* Check for xPL command parameters */
-  gxPLparseCommonArgs (&argc, argv, TRUE);
+  gxPLparseCommonArgs (&argc, argv, true);
 
   /* Parse Hub command arguments */
   if (!parseCmdLine (&argc, argv)) {

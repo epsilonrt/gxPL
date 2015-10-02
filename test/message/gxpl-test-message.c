@@ -215,15 +215,15 @@ main (int argc, char **argv) {
   test (ret == false);
   
   test_count++;
-  cstr = gxPLMessagePairValueGet(m, "command");
+  cstr = gxPLMessagePairGet(m, "command");
   test (cstr);
   ret = strcmp (cstr, "dim");
   test (ret == 0);
 
   test_count++;
-  ret = gxPLMessagePairValueSet(m, "command", "test");
+  ret = gxPLMessagePairSet(m, "command", "test");
   test (ret == 0);
-  cstr = gxPLMessagePairValueGet(m, "command");
+  cstr = gxPLMessagePairGet(m, "command");
   test (cstr);
   ret = strcmp (cstr, "test");
   test (ret == 0);
@@ -231,18 +231,18 @@ main (int argc, char **argv) {
   test_count++;
   char buf[64];
   sprintf (buf, "HelloWorld0x%X---%s", 1234, "Ok");
-  ret = gxPLMessagePairValuePrintf (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
+  ret = gxPLMessagePairAddFormat (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
   test (ret == 0);
-  cstr = gxPLMessagePairValueGet(m, "command");
+  cstr = gxPLMessagePairGet(m, "command");
   test (cstr);
   printf ("%s -> %s\n", buf, cstr);
   ret = strcmp (cstr, buf);
   test (ret == 0);
 
   test_count++;
-  ret = gxPLMessagePairValueSet(m, "command", "dim");
+  ret = gxPLMessagePairSet(m, "command", "dim");
   test (ret == 0);
-  cstr = gxPLMessagePairValueGet(m, "command");
+  cstr = gxPLMessagePairGet(m, "command");
   test (cstr);
   ret = strcmp (cstr, "dim");
   test (ret == 0);
@@ -265,15 +265,15 @@ main (int argc, char **argv) {
 
   // Test Received
   test_count++;
-  ret = gxPLMessageReceivedGet(m);
+  ret = gxPLMessageIsReceived(m);
   test(ret == false);
   ret = gxPLMessageReceivedSet(m, true);
   test(ret == 0);
-  ret = gxPLMessageReceivedGet(m);
+  ret = gxPLMessageIsReceived(m);
   test(ret == true);
   ret = gxPLMessageReceivedSet(m, false);
   test(ret == 0);
-  ret = gxPLMessageReceivedGet(m);
+  ret = gxPLMessageIsReceived(m);
   test(ret == false);
 
   // Converts the message to a string and prints it
@@ -307,11 +307,11 @@ main (int argc, char **argv) {
   
   // Converts the message to a string and prints it
   test_count++;
-  ret = gxPLMessageBroadcastGet(m);
+  ret = gxPLMessageIsBroadcast(m);
   test(ret == false);
   ret = gxPLMessageBroadcastSet(m, true);
   test(ret == 0);
-  ret = gxPLMessageBroadcastGet(m);
+  ret = gxPLMessageIsBroadcast(m);
   test(ret == true);
   
   // Print the message

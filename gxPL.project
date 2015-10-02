@@ -32,6 +32,7 @@
         <File Name="src/sys/unix/gxpl.c"/>
         <File Name="src/sys/unix/io_udp.c"/>
         <File Name="src/sys/unix/util.c"/>
+        <File Name="src/sys/unix/device_configurable.c"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="old">
@@ -59,8 +60,10 @@
     <VirtualDirectory Name="template">
       <File Name="src/template/io_template.c"/>
     </VirtualDirectory>
-    <File Name="src/device.c"/>
     <File Name="src/device_p.h"/>
+    <File Name="src/device_configurable.c"/>
+    <File Name="src/device_group.c"/>
+    <File Name="src/device_filter.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">

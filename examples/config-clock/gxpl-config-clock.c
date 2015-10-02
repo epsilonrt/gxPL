@@ -1,6 +1,6 @@
 /**
- * @file gxpl-config-clock.c
- * Simple configurable xPL clock service that sends a time update periodically 
+ * @file gxpl-setting-device.c
+ * Simple configurable xPL device device that sends a time update periodically
  *
  * Copyright 2005 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -18,171 +18,230 @@
 
 /* constants ================================================================ */
 #define CLOCK_VERSION VERSION_SHORT
-
 #define DEFAULT_TICK_RATE 60
 #define TICK_RATE_CFG_NAME "tickrate"
+#define STARTED_CFG_NAME "started"
+
+#define REPORT_OWN_MESSAGE    true
 
 /* private variables ======================================================== */
-static time_t lastTimeSent = 0;
-static int tickRate = 0;  /* Second between ticks */
-static gxPLDevice * clockService = NULL;
-static gxPLMessage * clockTickMessage = NULL;
 
-static char numBuffer[10];
+static gxPL * net;
+static gxPLDevice * device;
+static gxPLMessage * message;
+static int tick_rate;  // Second between ticks */
+static bool started;
+
+/* private functions ======================================================== */
+static void prvSignalHandler (int s);
+static void prvSendTick (void);
+static void prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) ;
+static const char * prvIntToStr (int value);
+static void prvSetConfig (gxPLDevice * device);
+static void prvConfigChanged (gxPLDevice * device, void * udata);
+
+/* main ===================================================================== */
+int
+main (int argc, char * argv[]) {
+  int ret;
+  gxPLSetting * setting;
+
+  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  assert (setting);
+
+  // opens the xPL network
+  net = gxPLOpen (setting);
+  if (net == NULL) {
+
+    fprintf (stderr, "Unable to start xPL");
+    exit (EXIT_FAILURE);
+  }
+
+  // Create a configurable device and set our application version
+  device = gxPLDeviceConfigAdd (net, "epsirt", "clock", "clock.xpl");
+  assert (device);
+  
+  ret = gxPLDeviceVersionSet (device, CLOCK_VERSION);
+  assert (ret == 0);
+  
+  ret = gxPLDeviceReportOwnMessagesSet (device, REPORT_OWN_MESSAGE);
+  assert (ret == 0);
+
+  // If the configuration was not reloaded, then this is our first time and
+  // we need to define what the configurables are and what the default values
+  // should be.
+  if (gxPLDeviceIsConfigured (device) == false) {
+
+    // Define a configurable item and give it a default
+    ret = gxPLDeviceConfigItemAdd (device, TICK_RATE_CFG_NAME, gxPLConfigReconf, 1);
+    assert (ret == 0);
+    ret = gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (DEFAULT_TICK_RATE));
+    assert (ret == 0);
+    ret = gxPLDeviceConfigItemAdd (device, STARTED_CFG_NAME, gxPLConfigReconf, 1);
+    assert (ret == 0);
+    ret = gxPLDeviceConfigValueSet (device, STARTED_CFG_NAME, "on");
+    assert (ret == 0);
+  }
+
+  // Parse the device configurables into a form this program
+  // can use (whether we read a setting or not)
+  prvSetConfig (device);
+
+  // Add a responder for time setting
+  ret = gxPLDeviceListenerAdd (device, prvMessageListener, gxPLMessageAny,
+                               "clock", NULL, NULL);
+  assert (ret == 0);
+
+  // Add a device change listener we'll use to pick up a new tick rate
+  ret = gxPLDeviceConfigListenerAdd (device, prvConfigChanged, NULL);
+  assert (ret == 0);
+
+  // Create a message to send
+  message = gxPLDeviceMessageNew (device, gxPLMessageStatus);
+  assert (message);
+  // Setting up the message
+  ret = gxPLMessageBroadcastSet (message, true);
+  assert (ret == 0);
+  ret = gxPLMessageSchemaSet (message, "clock", "update");
+  assert (ret == 0);
+
+  // Install signal traps for proper shutdown
+  signal (SIGTERM, prvSignalHandler);
+  signal (SIGINT, prvSignalHandler);
+
+  // Enable the service
+  ret = gxPLDeviceEnabledSet (device, true);
+  assert (ret == 0);
+
+  for (;;) {
+    // Let XPL run for a while, returning after it hasn't seen any
+    // activity in 100ms or so
+    ret = gxPLPoll (net, 100);
+
+    // Process clock tick update checking
+    prvSendTick();
+  }
+}
+
 
 /* private functions ======================================================== */
 
 /* --------------------------------------------------------------------------
  * Quickly to convert an integer to string */
-static char * intToStr (int value) {
+static const char *
+prvIntToStr (int value) {
+  static char numBuffer[10];
 
   sprintf (numBuffer, "%d", value);
   return numBuffer;
 }
 
 /* --------------------------------------------------------------------------
- * It's best to put the logic for reading the service configuration
+ * It's best to put the logic for reading the device configuration
  * and parsing it into your code in a seperate function so it can
- * be used by your configChangedHandler and your startup code that
- * will want to parse the same data after a config file is loaded */
+ * be used by your prvConfigChanged and your startup code that
+ * will want to parse the same data after a setting file is loaded */
 static void
-parseConfig (gxPLDevice * service) {
-  /* Get the tickrate */
-  char * newRate = gxPLgetServiceConfigValue (service, TICK_RATE_CFG_NAME);
-  int newTickRate;
-  char * endChar;
+prvSetConfig (gxPLDevice * device) {
+  
+  // Get the tickrate */
+  const char * str_rate = gxPLDeviceConfigValueGet (device, TICK_RATE_CFG_NAME);
+  const char * str_started = gxPLDeviceConfigValueGet (device, STARTED_CFG_NAME);
+  int new_rate;
+  char * endptr;
 
-  /* Handle bad configurable (override it) */
-  if ( (newRate == NULL) || (strlen (newRate) == 0)) {
-    gxPLsetServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
+  // Handle bad configurable (override it) */
+  if ( (str_rate == NULL) || (strlen (str_rate) == 0)) {
+    gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (tick_rate));
     return;
   }
 
-  /* Convert text to a number */
-  newTickRate = strtol (newRate, &endChar, 10);
-  if (*endChar != '\0') {
-    /* Bad value -- override it */
-    gxPLsetServiceConfigValue (service, TICK_RATE_CFG_NAME, intToStr (tickRate));
+  // Convert text to a number */
+  new_rate = strtol (str_rate, &endptr, 10);
+  
+  if (*endptr != '\0') {
+    // Bad value -- override it */
+    gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (tick_rate));
     return;
   }
+  
+  if (strcmp(str_started, "on") == 0) {
+    started = true;
+  }
+  else if (strcmp(str_started, "off") == 0) {
+    started = false;
+  }
 
-  /* Install new tick rate */
-  tickRate = newTickRate;
+  // Install new tick rate */
+  tick_rate = new_rate;
 }
 
 /* --------------------------------------------------------------------------
- * Handle a change to the clock service configuration */
+ * Handle a change to the device device configuration */
 static void
-configChangedHandler (gxPLDevice * service, void * userData) {
+prvConfigChanged (gxPLDevice * device, void * udata) {
+
+  // Read setting items for device and install */
+  prvSetConfig (device);
+}
+
+// -----------------------------------------------------------------------------
+// message handler
+static void
+prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) {
+
+  printf ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
+          gxPLMessageSourceVendorIdGet (msg),
+          gxPLMessageSourceDeviceIdGet (msg),
+          gxPLMessageSourceInstanceIdGet (msg),
+          gxPLMessageTypeGet (msg),
+          gxPLMessageSchemaClassGet (msg),
+          gxPLMessageSchemaTypeGet (msg));
+}
+
+// -----------------------------------------------------------------------------
+// signal handler
+static void
+prvSignalHandler (int s) {
+  int ret;
+
+  // all devices will be deactivated and destroyed before closing
+  ret = gxPLClose (net);
+  assert (ret == 0);
+  gxPLMessageDelete (message);
+
+  printf ("\neverything was closed.\nHave a nice day !\n");
+  exit (EXIT_SUCCESS);
+}
+
+
+// -----------------------------------------------------------------------------
+static void
+prvSendTick (void) {
   
-  /* Read config items for service and install */
-  parseConfig (service);
-}
+  if ((tick_rate > 0) && (started))  {
+    static time_t last;
+    time_t now = time (NULL);
 
-/* ----------------------------------------------------------------------------- 
- * When the user hits ^C, logically shutdown (including telling 
- * the network the service is ending) */                         
-static void
-shutdownHandler (int onSignal) {
-  gxPLDeviceEnabledSet (clockService, FALSE);
-  gxPLDelete (clockService);
-  gxPLClose();
-  exit (0);
-}
+    // Skip unless the delay has passed
+    if ( (last == 0) || ( (now - last) >= tick_rate)) {
+      struct tm * t;
+      char str[24];
 
-/* ----------------------------------------------------------------------------- 
- * Build up a message with the current time in it and send it along.  An 
- * important detail is that we use gxPLDeviceMessageSend() to send the  
- * message (vs gxPLMessageSend) because this is a configurable service   
- * and since we created the message early on, it could have the wrong    
- * source identifiers after a reconfig. */                                 
-static void
-sendClockTick (void) {
-  time_t rightNow = time (NULL);
-  struct tm * decodedTime;
-  char theDateTime[24];
+      // Format the date/time
+      t = localtime (&now);
+      strftime (str, 24, "%Y%m%d%H%M%S", t);
 
-  /* Skip unless a minute has passed (or this is our first time */
-  if ( (lastTimeSent != 0) && ( (rightNow - lastTimeSent) < tickRate)) {
-    return;
-  }
+      // Install the value and send the message
+      gxPLMessagePairSet (message, "time", str);
 
-  /* Format the date/time */
-  decodedTime = localtime (&rightNow);
-  strftime (theDateTime, 24, "%Y%m%d%H%M%S", decodedTime);
+      // Broadcast the message
+      gxPLDeviceMessageSend (device, message);
 
-  /* Install the value and send the message */
-  gxPLMessagePairValueSet (clockTickMessage, "time", theDateTime);
-
-  /* Broadcast the message */
-  gxPLDeviceMessageSend (clockService, clockTickMessage);
-
-  /* And reset when we last sent the clock update */
-  lastTimeSent = rightNow;
-}
-
-/* main ===================================================================== */
-int
-main (int argc, char * argv[]) {
-
-  /* Parse command line parms */
-  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
-
-    exit (1);
-  }
-
-  /* Start xPL up */
-  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
-
-    fprintf (stderr, "Unable to start xPL");
-    exit (1);
-  }
-
-  /* Initialze clock service */
-
-  /* Create a configurable service and ser our applications version */
-  clockService = gxPLcreateConfigurableService ("cdp1802", "clock", "clock.xpl");
-  gxPLDeviceVersionSet (clockService, CLOCK_VERSION);
-
-  /* If the configuration was not reloaded, then this is our first time and   */
-  /* we need to define what the configurables are and what the default values */
-  /* should be.                                                               */
-  if (!gxPLIsServiceConfigured (clockService)) {
-
-    /* Define a configurable item and give it a default */
-    gxPLaddServiceConfigurable (clockService, TICK_RATE_CFG_NAME, gxPLConfigReconf, 1);
-    gxPLsetServiceConfigValue (clockService, TICK_RATE_CFG_NAME, intToStr (DEFAULT_TICK_RATE));
-  }
-
-  /* Parse the service configurables into a form this program */
-  /* can use (whether we read a config or not)                */
-  parseConfig (clockService);
-
-  /* Add a service change listener we'll use to pick up a new tick rate */
-  gxPLaddServiceConfigChangedListener (clockService, configChangedHandler, NULL);
-
-  /* Create a message to send.  We don't have to do it here -- you can */
-  /* create a message anytime and release it later.  But since we know */
-  /* we're going to use this over and over, create one for our life    */
-  clockTickMessage = gxPLDeviceMessageNewBroadcast (clockService, gxPLMessageStatus);
-  gxPLMessageSchemaSet (clockTickMessage, "clock", "update");
-
-  /* Install signal traps for proper shutdown */
-  signal (SIGTERM, shutdownHandler);
-  signal (SIGINT, shutdownHandler);
-
-  /* Enable the service */
-  gxPLDeviceEnabledSet (clockService, TRUE);
-
-  /** Main Loop of Clock Action **/
-
-  for (;;) {
-    /* Let XPL run for a while, returning after it hasn't seen any */
-    /* activity in 100ms or so                                     */
-    gxPLprocessMessages (100);
-
-    /* Process clock tick update checking */
-    sendClockTick();
+      // And reset when we last sent the clock update
+      last = now;
+    }
   }
 }
+
 /* ========================================================================== */

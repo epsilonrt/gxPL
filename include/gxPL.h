@@ -1,6 +1,6 @@
 /**
- * @file gxPL.h
- * Top level API
+ * @file include/gxPL.h
+ * Top level API (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -23,17 +23,17 @@ __BEGIN_C_DECLS
 
 /* api functions ============================================================ */
 /**
- * @brief Returns a new gxPL config from parameters
+ * @brief Returns a new gxPL setting from parameters
  *
  * @param iface network interface name o, the system
  * @param iolayer network access layer name
  * @param type network connection type
- * @return the config or NULL if error occurs
+ * @return the setting or NULL if error occurs
  */
-gxPLConfig * gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnectType type);
+gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type);
 
 /**
- * @brief Returns a new gxPL config from command line parameters
+ * @brief Returns a new gxPL setting from command line parameters
  *
  * This will parse the passed command array for options and parameters
  * It supports the following options:
@@ -44,17 +44,17 @@ gxPLConfig * gxPLConfigNew (const char * iface, const char * iolayer, gxPLConnec
  * @param argc number of parameters from main
  * @param argv list of parameters from main
  * @param type network connection type
- * @return the config or NULL if error occurs
+ * @return the setting or NULL if error occurs
  */
-gxPLConfig * gxPLConfigNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
+gxPLSetting * gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
 
 /**
  * @brief Opens a new gxPL object
- * @param config pointer to a configuration, this configuration can be modified
+ * @param setting pointer to a configuration, this configuration can be modified
  * by the function to return the actual configuration.
  * @return the object or NULL if error occurs
  */
-gxPL * gxPLOpen (gxPLConfig * config);
+gxPL * gxPLOpen (gxPLSetting * setting);
 
 /**
  * @brief Close a gxPL object and release all ressources
@@ -142,6 +142,17 @@ int gxPLDeviceDisableAll (gxPL * gxpl);
  */
 gxPLDevice * gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
                             const char * device_id, const char * instance_id);
+
+/**
+ * @brief Adds a new configurabledevice on the network
+ * @param gxpl pointer to a gxPL object
+ * @param vendor_id pointer to the vendor id
+ * @param device_id pointer to the device id
+ * @param filename pointer to the config filename
+ * @return pointer on the device, NULL if error occurs
+ */
+gxPLDevice * gxPLDeviceConfigAdd (gxPL * gxpl, const char * vendor_id,
+                            const char * device_id, const char * filename);
                             
 /**
  * @brief 
@@ -184,7 +195,7 @@ int gxPLGenerateUniqueId (const gxPL * gxpl, char * id, int len);
 /**
  * @brief Function that will be called each valid message reception
  */
-typedef void (* gxPLMessageListener) (gxPL * gxpl, const gxPLMessage *, void *);
+typedef void (* gxPLMessageListener) (gxPL * gxpl, gxPLMessage *, void *);
 
 /* internal public functions ================================================ */
 
@@ -340,10 +351,71 @@ int gxPLIoCtl (gxPL * gxpl, int req, ...);
 
 
 # ifndef __DOXYGEN__
+// -----------------------------------------------------------------------------
+
 /*
- * __DOXYGEN__ not defined
- * =============================================================================
+ * @brief Create a new xPL device
+ * @param gxpl
+ * @param vendor_id
+ * @param device_id
+ * @param instance_id
+ * @return 
  */
+gxPLDevice * gxPLDeviceNew (gxPL * gxpl,
+                            const char * vendor_id,
+                            const char * device_id,
+                            const char * instance_id);
+/**
+ * @brief Create a new device and prepare it for configuration
+ *
+ * Like other devices, this will still require being enabled to start.
+ * Before it's started, you need to define and attach the configurable items
+ * for the device.   When the device is enabled, if there is a non-null
+ * configFile, it's values are read.  The devices instance value will be
+ * created in a fairly unique method for devices that have not yet been
+ * configured.
+ *
+ * @param vendor_id
+ * @param device_id
+ * @param filename
+ * @return
+ */
+gxPLDevice * gxPLDeviceConfigNew (gxPL * gxpl, const char * vendor_id,
+    const char * device_id,
+    const char * filename);
+                            
+/*
+ * @brief Release an xPL device
+ * @param device
+ */
+void gxPLDeviceDelete (gxPLDevice * device);
+
+/*
+ * @brief Messages handler
+ * @param device
+ * @param message
+ * @param udata
+ */
+void gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
+                               void * udata);
+
+/*
+ * @brief Sends an heartbeat immediately
+ * @param device pointer on the device
+ * @param type
+ * @return 0, -1 if an error occurs
+ */
+int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
+
+/*
+ * @brief 
+ * @param config
+ * @param argc
+ * @param argv
+ */
+void gxPLParseCommonArgs (gxPLSetting * config, int argc, char *argv[]);
+
+// -----------------------------------------------------------------------------
 # endif /* __DOXYGEN__ not defined */
 
 /* ========================================================================== */

@@ -1,6 +1,6 @@
 /**
- * @file unix/gxpl.c
- * Top Layer of API, Unix code
+ * @file src/sys/unix/gxpl.c
+ * Top Layer of API (unix source code)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
+#include <stdlib.h>
+#include <time.h>
 #include <sys/time.h>
 #include <gxPL/util.h>
 #include "gxpl_p.h"
@@ -29,7 +31,7 @@
  *    -d / --debug         : enable debugging
  */
 void
-gxPLParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
+gxPLParseCommonArgs (gxPLSetting * config, int argc, char *argv[]) {
   int c;
   static const char short_options[] = "i:h:d";
   static struct option long_options[] = {
@@ -69,6 +71,12 @@ gxPLParseCommonArgs (gxPLConfig * config, int argc, char *argv[]) {
   optind = 1; // rewinds to allow the user to analyze again the parameters
 }
 
+// -----------------------------------------------------------------------------
+int 
+gxPLRandomSeed (gxPL * gxpl) {
+  
+  return time (NULL);
+}
 
 #endif /* __unix__ defined */
 /* ========================================================================== */

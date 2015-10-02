@@ -1,6 +1,6 @@
 /**
- * @file unix/util.c
- * Top Layer of API, Unix code
+ * @file src/sys/unix/util.c
+ * Utilities, (unix source code)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

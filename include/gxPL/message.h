@@ -1,6 +1,6 @@
 /**
- * @file gxPL/message.h
- * High level interface for manage xPL messages
+ * @file include/gxPL/message.h
+ * High level interface to manage xPL messages (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -69,6 +69,14 @@ char * gxPLMessageToString (const gxPLMessage * message);
 gxPLMessage * gxPLMessageFromString (gxPLMessage * message, char * line);
 
 /**
+ * @brief Check if the passed message matches the passed filter
+ * @param message pointer to the message
+ * @param filter pointer to the filter
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLMessageFilterMatch (const gxPLMessage * message, const gxPLFilter * filter);
+
+/**
  * @brief Gets message type
  * @param message pointer to the message
  * @return message type, -1 if an error occurs
@@ -82,6 +90,21 @@ gxPLMessageType gxPLMessageTypeGet (const gxPLMessage * message);
  * @return 0, -1 if an error occurs
  */
 int gxPLMessageTypeSet (gxPLMessage * message, gxPLMessageType type);
+
+/**
+ * @brief string from a message type
+ * @param type message type
+ * @return the string (xpl-cmnd, ...) or NULL if error occurs
+ */
+const char * gxPLMessageTypeToString (gxPLMessageType type);
+
+/**
+ * @brief message type from a string
+ * @param str string that starts with 8 characters corresponding to xpl-cmnd, 
+ * xpl gold xpl-stat-trig
+ * @return the type, -1 if unknown
+ */
+gxPLMessageType gxPLMessageTypeFromString (const char * str);
 
 /**
  * @brief Gets hop count
@@ -343,7 +366,7 @@ int gxPLMessageBodyClear (gxPLMessage * message);
  * @param name the name
  * @return pointer to the schema type, must not be released. NULL if an error occurs
  */
-const char * gxPLMessagePairValueGet (const gxPLMessage * message, const char * name);
+const char * gxPLMessagePairGet (const gxPLMessage * message, const char * name);
 
 /**
  * @brief Check if a pair exist
@@ -357,7 +380,7 @@ int gxPLMessagePairExist (const gxPLMessage * message, const char * name);
  * @brief Adds a pair to the body
  * @param message pointer to the message
  * @param name the name
- * @param value the value
+ * @param value the value, If NULL is supplied, a zero-length string is assigned ("")
  * @return pointer to the schema type, must not be released. NULL if an error occurs
  */
 int gxPLMessagePairAdd (gxPLMessage * message, const char * name, const char * value);
@@ -366,10 +389,10 @@ int gxPLMessagePairAdd (gxPLMessage * message, const char * name, const char * v
  * @brief Sets the value of a name/value pair
  * @param message pointer to the message
  * @param name the name
- * @param value the value
+ * @param value the value, If NULL is supplied, a zero-length string is assigned ("")
  * @return 0, -1 if an error occurs
  */
-int gxPLMessagePairValueSet (gxPLMessage * message, const char * name, const char * value);
+int gxPLMessagePairSet (gxPLMessage * message, const char * name, const char * value);
 
 /**
  * @brief Produce value according to a format 
@@ -378,7 +401,7 @@ int gxPLMessagePairValueSet (gxPLMessage * message, const char * name, const cha
  * @param format format as described in the sprintf() function man page
  * @return 0, -1 if an error occurs
  */
-int gxPLMessagePairValuePrintf (gxPLMessage * message, const char * name, const char * format, ...);
+int gxPLMessagePairAddFormat (gxPLMessage * message, const char * name, const char * format, ...);
 
 /**
  * @brief Set a series of NameValue pairs for a message
@@ -420,14 +443,7 @@ int gxPLMessageFlagClear (gxPLMessage * message);
  * @param message pointer to the message
  * @return true if received, false if not, -1 if an error occurs
  */
-int gxPLMessageReceivedGet (const gxPLMessage * message);
-
-/**
- * @brief Check if a message is received
- * @param message pointer to the message
- * @return true if received, false if not, -1 if an error occurs
- */
-int gxPLMessageReceivedGet (const gxPLMessage * message);
+int gxPLMessageIsReceived (const gxPLMessage * message);
 
 /**
  * @brief Sets if a message is received
@@ -442,7 +458,29 @@ int gxPLMessageReceivedSet (gxPLMessage * message, bool isReceived);
  * @param message pointer to the message
  * @return true if broadcast, false if not, -1 if an error occurs
  */
-int gxPLMessageBroadcastGet (const gxPLMessage * message);
+int gxPLMessageIsBroadcast (const gxPLMessage * message);
+
+/**
+ * @brief Sets if a message is grouped
+ * @param message pointer to the message
+ * @param isGrouped the value
+ * @return 0, -1 if an error occurs
+ */
+int gxPLMessageGroupedSet (gxPLMessage * message, bool isGrouped);
+
+/**
+ * @brief Check if a message is for a group.
+ * @param message pointer to the message
+ * @return true, false, -1 if an error occurs
+ */
+int gxPLMessageIsGrouped (const gxPLMessage * message);
+
+/**
+ * @brief Check if a message is broadcast
+ * @param message pointer to the message
+ * @return true if broadcast, false if not, -1 if an error occurs
+ */
+int gxPLMessageIsBroadcast (const gxPLMessage * message);
 
 /**
  * @brief Sets if a message is broadcast

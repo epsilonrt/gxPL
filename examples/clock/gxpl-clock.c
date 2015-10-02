@@ -28,27 +28,27 @@ static gxPLMessage * message;
 /* private functions ======================================================== */
 static void prvSignalHandler (int s);
 static void prvSendTick (void);
-static void prvMessageListener (gxPLDevice * device, const gxPLMessage * msg, void * udata) ;
+static void prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) ;
 
 /* main ===================================================================== */
 int
 main (int argc, char * argv[]) {
   int ret;
-  gxPLConfig * config;
+  gxPLSetting * setting;
 
-  config = gxPLConfigNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
-  assert (config);
+  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  assert (setting);
 
   // opens the xPL network
-  net = gxPLOpen (config);
+  net = gxPLOpen (setting);
   if (net == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (EXIT_FAILURE);
   }
 
-  // Initialize clock service
-  // Create  a service for us
+  // Initialize clock device
+  // Create  a device for us
   clk = gxPLDeviceAdd (net, "epsirt", "clock", NULL);
   assert (clk);
 
@@ -76,7 +76,7 @@ main (int argc, char * argv[]) {
   signal (SIGTERM, prvSignalHandler);
   signal (SIGINT, prvSignalHandler);
 
-  // Enable the service
+  // Enable the device
   ret = gxPLDeviceEnabledSet (clk, true);
   assert (ret == 0);
 
@@ -108,7 +108,7 @@ prvSendTick (void) {
     strftime (str, 24, "%Y%m%d%H%M%S", t);
 
     // Install the value and send the message
-    gxPLMessagePairValueSet (message, "time", str);
+    gxPLMessagePairSet (message, "time", str);
 
     // Broadcast the message
     gxPLDeviceMessageSend (clk, message);
@@ -121,7 +121,7 @@ prvSendTick (void) {
 // -----------------------------------------------------------------------------
 // message handler
 static void
-prvMessageListener (gxPLDevice * device, const gxPLMessage * msg, void * udata) {
+prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) {
 
   printf ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
           gxPLMessageSourceVendorIdGet (msg),

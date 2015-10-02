@@ -69,6 +69,35 @@ typedef struct _gxPLPair {
 gxPLPair * gxPLPairFromString (char *str);
 
 /**
+ * @brief Sets a name/value form a string
+ * @param line string name=value\n
+ * @return the pair, NULL if error occurs
+ */
+gxPLPair * gxPLPairFromLine (char * line);
+
+/**
+ * @brief Release a pair allocte on the heap
+ * Used by sysio vector and dlist
+ * @param pair
+ */
+void gxPLPairDelete (void * pair);
+
+/**
+ * @brief Compares name of 2 pair s
+ * @param key1
+ * @param key2
+ * @return 0 equal, -1 less than, 1 more than
+ */
+int gxPLPairMatch (const void *key1, const void *key2);
+
+/**
+ * @brief Returns the name of a pair as a const void * pointer
+ * Used by sysio vector
+ * @param pair
+ */
+const void * gxPLPairKey (const void * pair);
+
+/**
  * @}
  */
 

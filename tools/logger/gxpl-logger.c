@@ -24,7 +24,7 @@
 /* private variables ======================================================== */
 static FILE * logFile = NULL;
 static char * logFileName = "";
-static bool appendToLog = FALSE;
+static bool appendToLog = false;
 static gxPLDevice * loggerService = NULL;
 
 /* private functions ======================================================== */
@@ -32,7 +32,7 @@ static gxPLDevice * loggerService = NULL;
 // -----------------------------------------------------------------------------
 void
 shutdownHandler (int onSignal) {
-  gxPLDeviceEnabledSet (loggerService, FALSE);
+  gxPLDeviceEnabledSet (loggerService, false);
   gxPLDelete (loggerService);
   gxPLClose();
   exit (0);
@@ -112,7 +112,7 @@ void printTimestamp (void) {
 
 /* --------------------------------------------------------------------------
  * Print info on incoming messages */
-void printXPLMessage (gxPLMessage * message, void * userValue) {
+void printXPLMessage (gxPLMessage * message, void * udata) {
 
   printTimestamp();
   fprintf (logFile, "[gxPLMSG] TYPE=");
@@ -144,7 +144,7 @@ void printXPLMessage (gxPLMessage * message, void * userValue) {
            gxPLMessageSourceInstanceIdGet (message));
 
   /* Handle various target types */
-  if (gxPLMessageBroadcastGet (message)) {
+  if (gxPLMessageIsBroadcast (message)) {
     fprintf (logFile, "*");
   }
   else {
@@ -168,12 +168,12 @@ void printXPLMessage (gxPLMessage * message, void * userValue) {
 int
 main (int argc, char * argv[]) {
   /* Parse the command line */
-  if (!gxPLparseCommonArgs (&argc, argv, FALSE)) {
+  if (!gxPLparseCommonArgs (&argc, argv, false)) {
     exit (1);
   }
 
   /* Start gxPLib */
-  if (!gxPLConfigNew (gxPLConnectionTypeGet())) {
+  if (!gxPLSettingNew (gxPLConnectionTypeGet())) {
     fprintf (stderr, "Unable to start gxPLib\n");
     exit (1);
   }
@@ -207,7 +207,7 @@ main (int argc, char * argv[]) {
   gxPLaddServiceConfigChangedListener (loggerService, configChangedHandler, NULL);
 
   /* Enable the service */
-  gxPLDeviceEnabledSet (loggerService, TRUE);
+  gxPLDeviceEnabledSet (loggerService, true);
 
   /* Install signal traps for proper shutdown */
   signal (SIGTERM, shutdownHandler);
