@@ -64,6 +64,7 @@
     <File Name="src/device_configurable.c"/>
     <File Name="src/device_group.c"/>
     <File Name="src/device_filter.c"/>
+    <File Name="src/device.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">

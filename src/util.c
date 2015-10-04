@@ -43,7 +43,7 @@ gxPLPairFromString (char * str) {
       return p;
     }
     else {
-      PERROR("Unable to find '=' in %s", str);
+      PERROR ("Unable to find '=' in %s", str);
     }
   }
   return NULL;
@@ -241,23 +241,25 @@ gxPLIdCmp (const gxPLId * n1, const gxPLId * n2) {
 // vendor-device.instance\0
 int
 gxPLIdFromString (gxPLId * id, char * str) {
-  char *p, *n;
+  if ( (str) && (id)) {
+    char *p, *n;
 
-  n = str;
-  p = strsep (&n, "-");
-  if (n) {
-    if (gxPLIdVendorIdSet (id, p) == 0) {
+    n = str;
+    p = strsep (&n, "-");
+    if (n) {
+      if (gxPLIdVendorIdSet (id, p) == 0) {
 
-      p = strsep (&n, ".");
-      if (n) {
+        p = strsep (&n, ".");
+        if (n) {
 
-        if (gxPLIdDeviceIdSet (id, p) == 0) {
+          if (gxPLIdDeviceIdSet (id, p) == 0) {
 
-          return gxPLIdInstanceIdSet (id, n);
+            return gxPLIdInstanceIdSet (id, n);
+          }
         }
       }
-    }
 
+    }
   }
   errno = EINVAL;
   return -1;

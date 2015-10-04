@@ -31,7 +31,6 @@
   <VirtualDirectory Name="gxpl-logger">
     <File Name="Makefile"/>
     <File Name="gxpl-logger.c"/>
-    <File Name="../../src/device.c"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

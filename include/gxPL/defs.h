@@ -81,6 +81,11 @@ typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
 #define GXPL_HOP_MAX   9
 
 /**
+ * @brief getopt short options used by gxPLSettingNewFromCommandArgs()
+ */
+#define GXPL_GETOPT "i:n:d"
+
+/**
  * @brief xPL Connection mode
  */
 typedef enum {

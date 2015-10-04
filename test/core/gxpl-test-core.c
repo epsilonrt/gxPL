@@ -49,7 +49,7 @@ int
 main (int argc, char **argv) {
   int ret = 0;
   xVector * iolist;
-  gxPLSetting * config;
+  gxPLSetting * setting;
   char hello[] = ".";
 
   // Gets the available io layer list
@@ -63,18 +63,18 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_count++;
-  config = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
-  test (config);
+  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  test (setting);
 
   // verify that the requested io layer is available
   test_count++;
-  ret = iVectorFindFirstIndex (iolist, config->iolayer);
+  ret = iVectorFindFirstIndex (iolist, setting->iolayer);
   test (ret >= 0);
 
   // opens the xPL network
   test_count++;
   vVectorDestroy (iolist);
-  gxpl = gxPLOpen (config);
+  gxpl = gxPLOpen (setting);
   test (gxpl);
 
   // adds a message listener

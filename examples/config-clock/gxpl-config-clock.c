@@ -21,14 +21,14 @@
 #define DEFAULT_TICK_RATE 60
 #define TICK_RATE_CFG_NAME "tickrate"
 #define STARTED_CFG_NAME "started"
-
 #define REPORT_OWN_MESSAGE    true
 
 /* private variables ======================================================== */
-
 static gxPL * net;
 static gxPLDevice * device;
 static gxPLMessage * message;
+
+/* configurable items ======================================================= */
 static int tick_rate;  // Second between ticks */
 static bool started;
 
@@ -117,17 +117,19 @@ main (int argc, char * argv[]) {
     // Let XPL run for a while, returning after it hasn't seen any
     // activity in 100ms or so
     ret = gxPLPoll (net, 100);
-
+    assert(ret == 0);
+    
     // Process clock tick update checking
     prvSendTick();
   }
+  return 0;
 }
 
 
 /* private functions ======================================================== */
 
-/* --------------------------------------------------------------------------
- * Quickly to convert an integer to string */
+// --------------------------------------------------------------------------
+//  Quickly to convert an integer to string */
 static const char *
 prvIntToStr (int value) {
   static char numBuffer[10];
@@ -136,11 +138,11 @@ prvIntToStr (int value) {
   return numBuffer;
 }
 
-/* --------------------------------------------------------------------------
- * It's best to put the logic for reading the device configuration
- * and parsing it into your code in a seperate function so it can
- * be used by your prvConfigChanged and your startup code that
- * will want to parse the same data after a setting file is loaded */
+// --------------------------------------------------------------------------
+//  It's best to put the logic for reading the device configuration
+//  and parsing it into your code in a seperate function so it can
+//  be used by your prvConfigChanged and your startup code that
+//  will want to parse the same data after a setting file is loaded */
 static void
 prvSetConfig (gxPLDevice * device) {
   
@@ -176,8 +178,8 @@ prvSetConfig (gxPLDevice * device) {
   tick_rate = new_rate;
 }
 
-/* --------------------------------------------------------------------------
- * Handle a change to the device device configuration */
+// --------------------------------------------------------------------------
+//  Handle a change to the device device configuration */
 static void
 prvConfigChanged (gxPLDevice * device, void * udata) {
 

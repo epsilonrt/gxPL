@@ -44,7 +44,7 @@ typedef struct _gxPLIoOps {
 typedef struct _gxPLIo {
   void * pdata; /**< Private data used internally by layer io */
   gxPLIoOps * ops;
-  gxPLSetting * config; /**< pointer to the top-level configuration */
+  gxPLSetting * setting; /**< pointer to the top-level configuration */
 } gxPLIo;
 
 /* internal private functions (low level service) =========================== */

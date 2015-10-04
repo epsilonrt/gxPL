@@ -73,18 +73,18 @@ prvGetOps (const char * iolayer) {
 
 // -----------------------------------------------------------------------------
 gxPLIo *
-gxPLIoOpen (gxPLSetting * config) {
+gxPLIoOpen (gxPLSetting * setting) {
   gxPLIo * io = calloc (1, sizeof (gxPLIo));
   assert (io);
 
-  if (strlen (config->iolayer) == 0) {
+  if (strlen (setting->iolayer) == 0) {
 
-    strcpy (config->iolayer, DEFAULT_IO_LAYER);
-    PDEBUG ("set iolayer to default (%s)", config->iolayer);
+    strcpy (setting->iolayer, DEFAULT_IO_LAYER);
+    PDEBUG ("set iolayer to default (%s)", setting->iolayer);
   }
 
-  io->ops = prvGetOps (config->iolayer);
-  io->config = config;
+  io->ops = prvGetOps (setting->iolayer);
+  io->setting = setting;
   if (io->ops) {
 
     if (io->ops->open (io) == 0) {

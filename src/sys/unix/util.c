@@ -42,7 +42,11 @@ gxPLTimeMs (unsigned long * ms) {
 // -----------------------------------------------------------------------------
 char *
 gxPLTimeStr (unsigned long time) {
-  return ctime ( (time_t *) &time);
+  static char buf[41];
+
+  strftime (buf, sizeof(buf) - 1, "%y/%m/%d %H:%M:%S", localtime ((time_t *) &time));
+
+  return buf;
 }
 
 // -----------------------------------------------------------------------------

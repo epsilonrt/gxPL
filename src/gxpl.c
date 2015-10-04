@@ -202,58 +202,58 @@ prvEncodeLong (unsigned long value, char * str, int size) {
 // -----------------------------------------------------------------------------
 gxPLSetting *
 gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) {
-  gxPLSetting * config = calloc (1, sizeof (gxPLSetting));
-  assert (config);
+  gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
+  assert (setting);
 
-  strcpy (config->iface, iface);
-  strcpy (config->iolayer, iolayer);
-  config->connecttype = type;
-  config->malloc = 1;
+  strcpy (setting->iface, iface);
+  strcpy (setting->iolayer, iolayer);
+  setting->connecttype = type;
+  setting->malloc = 1;
 
-  return config;
+  return setting;
 }
 
 // -----------------------------------------------------------------------------
 gxPLSetting *
 gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
-  gxPLSetting * config = calloc (1, sizeof (gxPLSetting));
-  assert (config);
+  gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
+  assert (setting);
 
-  gxPLParseCommonArgs (config, argc, argv);
-  if (strlen (config->iolayer) == 0) {
+  gxPLParseCommonArgs (setting, argc, argv);
+  if (strlen (setting->iolayer) == 0) {
 
-    strcpy (config->iolayer, DEFAULT_IO_LAYER);
+    strcpy (setting->iolayer, DEFAULT_IO_LAYER);
   }
-  config->connecttype = type;
-  config->malloc = 1;
+  setting->connecttype = type;
+  setting->malloc = 1;
 
-  return config;
+  return setting;
 }
 
 // -----------------------------------------------------------------------------
 gxPL *
-gxPLOpen (gxPLSetting * config) {
+gxPLOpen (gxPLSetting * setting) {
   gxPL * gxpl = calloc (1, sizeof (gxPL));
   assert (gxpl);
 
-  if (config->debug) {
+  if (setting->debug) {
 
     vLogSetMask (LOG_UPTO (GXPL_LOG_DEBUG_LEVEL));
   }
 
-  gxpl->io = gxPLIoOpen (config);
+  gxpl->io = gxPLIoOpen (setting);
 
   if (gxpl->io) {
 
-    if (config->malloc == 0) {
+    if (setting->malloc == 0) {
 
-      gxpl->config = malloc (sizeof (gxPLSetting));
-      memcpy (gxpl->config, config, sizeof (gxPLSetting));
-      gxpl->config->malloc = 1;
+      gxpl->setting = malloc (sizeof (gxPLSetting));
+      memcpy (gxpl->setting, setting, sizeof (gxPLSetting));
+      gxpl->setting->malloc = 1;
     }
     else {
 
-      gxpl->config = config;
+      gxpl->setting = setting;
     }
 
     if (iVectorInit (&gxpl->msg_listener, 2, NULL, free) == 0) {
@@ -296,9 +296,9 @@ gxPLClose (gxPL * gxpl) {
     vVectorDestroy (&gxpl->msg_listener);
     // an close !
     ret = gxPLIoClose (gxpl->io);
-    if (gxpl->config->malloc) {
+    if (gxpl->setting->malloc) {
 
-      free (gxpl->config);
+      free (gxpl->setting);
     }
     free (gxpl);
     return ret;
@@ -605,21 +605,21 @@ gxPLIoInfoGet (const gxPL * gxpl) {
 gxPLConnectType
 gxPLConnectionTypeGet (const gxPL * gxpl) {
 
-  return gxpl->config->connecttype;
+  return gxpl->setting->connecttype;
 }
 
 // -----------------------------------------------------------------------------
 const char *
 gxPLIoInterfaceGet (const gxPL * gxpl) {
 
-  return gxpl->config->iface;
+  return gxpl->setting->iface;
 }
 
 // -----------------------------------------------------------------------------
 const char *
 gxPLIoLayerGet (const gxPL * gxpl) {
 
-  return gxpl->config->iolayer;
+  return gxpl->setting->iolayer;
 }
 
 // -----------------------------------------------------------------------------

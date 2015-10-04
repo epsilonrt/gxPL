@@ -64,7 +64,7 @@ ADEFS +=
 CPPDEFS +=
 
 # Enable gcc warning (without -W)
-WARNINGS = all strict-prototypes
+WARNINGS = all strict-prototypes no-unused-but-set-variable
 
 # List any extra directories to look for include files here.
 #     Each directory must be seperated by a space.

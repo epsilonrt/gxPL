@@ -180,9 +180,9 @@ find_default_iface (int fd, gxPLIo * io) {
     }
 
     // If successful, use this interface
-    strcpy (io->config->iface, ifr[i].ifr_name);
+    strcpy (io->setting->iface, ifr[i].ifr_name);
     PDEBUG ("Choose interface %s as default interface",
-          io->config->iface);
+          io->setting->iface);
     return 0;
   }
 
@@ -227,7 +227,7 @@ make_broadcast_connection (gxPLIo * io) {
   }
 
   // See if we need to find a default interface
-  if (strlen (io->config->iface) == 0) {
+  if (strlen (io->setting->iface) == 0) {
 
     if (find_default_iface (fd, io)) {
 
@@ -240,12 +240,12 @@ make_broadcast_connection (gxPLIo * io) {
   // Init the interface info request
   memset (&ifinfo, 0, sizeof (struct ifreq));
   ifinfo.ifr_addr.sa_family = AF_INET;
-  strcpy (ifinfo.ifr_name, io->config->iface);
+  strcpy (ifinfo.ifr_name, io->setting->iface);
 
   // Get our interface address
   if (ioctl (fd, SIOCGIFADDR, &ifinfo) != 0) {
 
-    PERROR ("Unable to get IP addr for interface %s", io->config->iface);
+    PERROR ("Unable to get IP addr for interface %s", io->setting->iface);
     close (fd);
     return -1;
   }
@@ -257,7 +257,7 @@ make_broadcast_connection (gxPLIo * io) {
   memset (&ifinfo, 0, sizeof (struct ifreq));
   ifinfo.ifr_addr.sa_family = AF_INET;
   ifinfo.ifr_broadaddr.sa_family = AF_INET;
-  strcpy (ifinfo.ifr_name, io->config->iface);
+  strcpy (ifinfo.ifr_name, io->setting->iface);
   if (ioctl (fd, SIOCGIFNETMASK, &ifinfo) != 0) {
 
     PERROR ("Unable to extract the interface net mask");
@@ -297,7 +297,7 @@ make_connection (gxPLIo * io) {
   memset (&socket_info, 0, sizeof (socket_info));
   socket_info.sin_family = AF_INET;
   socket_info.sin_addr.s_addr = INADDR_ANY;
-  if (io->config->connecttype == gxPLConnectViaHub) {
+  if (io->setting->connecttype == gxPLConnectViaHub) {
 
     socket_info.sin_port = htons (0);
   }
@@ -319,7 +319,7 @@ make_connection (gxPLIo * io) {
     return -1;
   }
 
-  if (io->config->connecttype != gxPLConnectViaHub) {
+  if (io->setting->connecttype != gxPLConnectViaHub) {
 
     if (setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &flag,
                     sizeof (flag)) < 0) {
@@ -351,7 +351,7 @@ make_connection (gxPLIo * io) {
     return -1;
   }
 
-  if (io->config->connecttype == gxPLConnectViaHub) {
+  if (io->setting->connecttype == gxPLConnectViaHub) {
 
     /* Fetch the actual socket port # */
     if (getsockname (fd, (struct sockaddr *) &socket_info,
@@ -369,7 +369,7 @@ make_connection (gxPLIo * io) {
   dp->iport = ntohs (socket_info.sin_port);
   if (dp->iport == XPL_PORT) {
 
-    io->config->connecttype = gxPLConnectStandAlone;
+    io->setting->connecttype = gxPLConnectStandAlone;
   }
   set_nonblock (dp->ifd);
   maximize_rxbuffer_size (dp->ifd);
@@ -382,8 +382,8 @@ static int
 make_bind_connection (gxPLIo * io) {
 
   /* Try an stand along connection */
-  if ( (io->config->connecttype == gxPLConnectStandAlone) ||
-       (io->config->connecttype == gxPLConnectAuto)) {
+  if ( (io->setting->connecttype == gxPLConnectStandAlone) ||
+       (io->setting->connecttype == gxPLConnectAuto)) {
 
 
     /* Attempt the connection */
@@ -392,7 +392,7 @@ make_bind_connection (gxPLIo * io) {
 
       /* If we failed and this what we want, bomb out */
       PERROR ("Standalone connect failed - %d %d",
-            io->config->connecttype, gxPLConnectStandAlone);
+            io->setting->connecttype, gxPLConnectStandAlone);
       return -1;
     }
 

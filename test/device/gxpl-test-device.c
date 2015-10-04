@@ -52,19 +52,19 @@ static void prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p);
 int
 main (int argc, char **argv) {
   int ret = 0;
-  gxPLSetting * config;
+  gxPLSetting * setting;
   char hello1[] = "hello1";
   char hello2[] = "hello2";
   char str[GXPL_INSTANCEID_MAX + 1];
 
   // retrieved the requested configuration from the command line
   test_new ("retrieved the requested configuration from the command line");
-  config = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
-  test_ok (config);
+  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  test_ok (setting);
 
   // opens the xPL network
   test_new ("opens the xPL network");
-  gxpl = gxPLOpen (config);
+  gxpl = gxPLOpen (setting);
   test_ok (gxpl);
 
 

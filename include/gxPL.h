@@ -38,7 +38,7 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  * This will parse the passed command array for options and parameters
  * It supports the following options:
  *    -i / --interface xxx : interface or device used to access the network
- *    -h / --hal       xxx : hardware abstraction layer to access the network
+ *    -n / --net       xxx : hardware abstraction layer to access the network
  *    -d / --debug         : enable debugging
  *
  * @param argc number of parameters from main
@@ -409,11 +409,11 @@ int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
 
 /*
  * @brief 
- * @param config
+ * @param setting
  * @param argc
  * @param argv
  */
-void gxPLParseCommonArgs (gxPLSetting * config, int argc, char *argv[]);
+void gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]);
 
 // -----------------------------------------------------------------------------
 # endif /* __DOXYGEN__ not defined */

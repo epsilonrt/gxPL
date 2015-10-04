@@ -38,10 +38,10 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 /**
  * @brief 
- * @param config
+ * @param setting
  * @return 
  */
-gxPLIo * gxPLIoOpen (gxPLSetting * config);
+gxPLIo * gxPLIoOpen (gxPLSetting * setting);
 
 /**
  * @brief  Receive a message from the network

@@ -19,16 +19,11 @@
  */
 typedef struct _gxPL {
 
-  gxPLSetting * config;
+  gxPLSetting * setting;
   gxPLIo * io;  /**< abstract structure can not be used directly on top level */
   xVector msg_listener;
   xVector device;
   gxPLIoAddr net_info;
-  union {
-    unsigned int flag;
-    struct {
-    };
-  };
 } gxPL;
 
 /* constants ================================================================ */
