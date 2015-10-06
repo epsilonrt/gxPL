@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sysio/log.h>
+#include <getopt.h>
 
 #include <gxPL.h>
 #include "version-git.h"
@@ -36,6 +37,7 @@ static void prvSupervisorSignalHandler (int sig);
 static void prvHubSignalHandler (int sig);
 static void prvSuperviseHub (gxPLSetting * setting);
 static int prvRunHub (gxPLSetting * setting);
+static void prvParseAdditionnalOptions (int argc, char *argv[]);
 
 /* main ===================================================================== */
 int
@@ -51,7 +53,8 @@ main (int argc, char * argv[]) {
     prvPrintUsage();
     exit (EXIT_FAILURE);
   }
-
+  prvParseAdditionnalOptions (argc, argv);
+  
   // Now we detach (daemonize ourself)
   if (setting->nodaemon == 0) {
 
@@ -222,10 +225,11 @@ static void
 prvPrintUsage (void) {
   printf ("%s - xPL Hub\n", __progname);
   printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
-  printf ("Usage: %s [-i interface] [-d] [-D]\n", __progname);
+  printf ("Usage: %s [-i interface] [-d] [-D] [-h]\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0) as network interface\n");
   printf ("  -d           - enable hub and gxPLib debugging messages\n");
-  printf ("  -D           - do not daemonize -- run from the console\n\n");
+  printf ("  -D           - do not daemonize -- run from the console\n");
+  printf ("  -h           - print this message\n\n");
 }
 
 // -----------------------------------------------------------------------------
@@ -282,4 +286,32 @@ prvSupervisorSignalHandler (int sig) {
   }
 }
 
+// -----------------------------------------------------------------------------
+static void
+prvParseAdditionnalOptions (int argc, char *argv[]) {
+  int c;
+
+  static const char short_options[] = "h" GXPL_GETOPT;
+  static struct option long_options[] = {
+    {"help",     no_argument,        NULL, 'h' },
+    {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
+  };
+
+  do  {
+
+    c = getopt_long (argc, argv, short_options, long_options, NULL);
+
+    switch (c) {
+
+      case 'h':
+        prvPrintUsage();
+        exit (EXIT_SUCCESS);
+        break;
+
+      default:
+        break;
+    }
+  }
+  while (c != -1);
+}
 /* ========================================================================== */

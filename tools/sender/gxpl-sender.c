@@ -56,9 +56,9 @@ main (int argc, char * argv[]) {
 
   // Create device so we can create messages
   if ( (device = gxPLAppAddDevice (app,
-                                gxPLMessageSourceVendorIdGet (message),
-                                gxPLMessageSourceDeviceIdGet (message),
-                                gxPLMessageSourceInstanceIdGet (message))) == NULL) {
+                                   gxPLMessageSourceVendorIdGet (message),
+                                   gxPLMessageSourceDeviceIdGet (message),
+                                   gxPLMessageSourceInstanceIdGet (message))) == NULL) {
 
     fprintf (stderr, "Unable to create xPL device\n");
     return false;
@@ -66,24 +66,24 @@ main (int argc, char * argv[]) {
 
   // Send the message
   if (setting->debug) {
-    char * str = gxPLMessageToString(message);
-    printf("<<< Transmitted message >>>\n%s>>> ", str);
-    free(str);
+    char * str = gxPLMessageToString (message);
+    printf ("<<< Transmitted message >>>\n%s>>> ", str);
+    free (str);
   }
-  if ((ret = gxPLDeviceMessageSend (device, message)) < 0) {
+  if ( (ret = gxPLDeviceMessageSend (device, message)) < 0) {
 
     fprintf (stderr, "Unable to send xPL message\n");
     exit (EXIT_FAILURE);
   }
   if (setting->debug) {
-    printf("Success, %d bytes transmitted\n ", ret);
+    printf ("Success, %d bytes transmitted\n ", ret);
   }
 
   if (gxPLAppClose (app) != 0) {
 
     fprintf (stderr, "Unable to close xPL network\n");
   }
-  
+
   gxPLMessageDelete (message);
   return 0;
 }
@@ -227,9 +227,9 @@ prvCreateMessage (int argc, char *argv[]) {
 
       value = argv[optind++];
       name = strsep (&value, "=");
-      
+
       if (value != NULL) {
-        
+
         gxPLMessagePairAdd (message, name, value);
       }
     }
@@ -244,11 +244,19 @@ static void
 prvPrintUsage (void) {
   printf ("%s - xPL Message Sender\n", __progname);
   printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
-  printf ("Usage: %s [-s source] [-b] [-t target] [-m message_type] -c schema  name=value name=value ...\n", __progname);
-  printf ("  -s source - source of message in vendor-device.instance (default: " DEFAULT_SOURCE ")\n");
-  printf ("  -t target - target of message in vendor-device.instance format.  (default: broadcast)\n");
-  printf ("  -m message type: cmnd, trig or stat (default: cmnd)\n");
-  printf ("  -c schema class and type formatted as class.type - REQUIRED\n\n");
+  printf ("Usage: %s [-i interface] [-d] [-s source] [-b] [-h] [-t target] "
+          "[-m message_type] -c schema  name=value name=value ...\n", __progname);
+  printf ("  -i interface - use interface named interface (i.e. eth0)"
+          " as network interface\n");
+  printf ("  -d           - enable hub and gxPLib debugging messages\n");
+  printf ("  -h           - print this message\n");
+  printf ("  -s source    - source of message in vendor-device.instance"
+          " (default: " DEFAULT_SOURCE ")\n");
+  printf ("  -t target    - target of message in vendor-device.instance format."
+          "  (default: broadcast)\n");
+  printf ("  -m type      - message type: cmnd, trig or stat (default: cmnd)\n");
+  printf ("  -c schema    - schema class and type formatted as class.type"
+          " - REQUIRED\n\n");
 }
 
 /* ========================================================================== */

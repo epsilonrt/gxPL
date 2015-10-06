@@ -5,7 +5,7 @@
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
   <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
-  <Project Name="doc" Path="doc/doc.project" Active="Yes"/>
+  <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
@@ -16,7 +16,7 @@
   <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
   <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
