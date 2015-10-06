@@ -19,18 +19,18 @@ all:
 
 install: uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) in $(prefix)"
-	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl
-	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template
-	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template/c
-	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template/cpp
-	@-install -m 0644 $(CURDIR)/template/c/* $(INSTALL_DATDIR)/gxpl/template/c
-	@-install -m 0644 $(CURDIR)/template/cpp/* $(INSTALL_DATDIR)/gxpl/template/cpp
-	@-install -m 0755 $(CURDIR)/gxpl-prj $(INSTALL_BINDIR)
-	@sed -i -e "s#INSTALLED_TEMPLATE_DIR#$(INSTALL_DATDIR)/gxpl/template#g" $(INSTALL_BINDIR)/gxpl-prj
+	@-install -d -m 0755 $(INSTALL_DATDIR)/app
+	@-install -d -m 0755 $(INSTALL_DATDIR)/app/template
+	@-install -d -m 0755 $(INSTALL_DATDIR)/app/template/c
+	@-install -d -m 0755 $(INSTALL_DATDIR)/app/template/cpp
+	@-install -m 0644 $(CURDIR)/template/c/* $(INSTALL_DATDIR)/app/template/c
+	@-install -m 0644 $(CURDIR)/template/cpp/* $(INSTALL_DATDIR)/app/template/cpp
+	@-install -m 0755 $(CURDIR)/app-prj $(INSTALL_BINDIR)
+	@sed -i -e "s#INSTALLED_TEMPLATE_DIR#$(INSTALL_DATDIR)/app/template#g" $(INSTALL_BINDIR)/app-prj
 
 uninstall:
 	@echo "$(MSG_UNINSTALL) $(TARGET) from $(prefix)"
-	@-rm -fr $(INSTALL_DATDIR)/gxpl
-	@-rm -f  $(INSTALL_BINDIR)/gxpl-prj
+	@-rm -fr $(INSTALL_DATDIR)/app
+	@-rm -f  $(INSTALL_BINDIR)/app-prj
 
 .PHONY: all install uninstall

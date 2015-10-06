@@ -360,13 +360,13 @@ prvConfigHandler (gxPLDevice * device, gxPLMessage * message, void * udata) {
 /* internal public functions ================================================ */
 // -----------------------------------------------------------------------------
 gxPLDevice *
-gxPLDeviceConfigNew (gxPL * gxpl, const char * vendor_id,
+gxPLDeviceConfigNew (gxPLApplication * app, const char * vendor_id,
                      const char * device_id,
                      const char * filename) {
   int ret = 0;
 
   // Create the device
-  gxPLDevice * device = gxPLDeviceNew (gxpl, vendor_id, device_id, NULL);
+  gxPLDevice * device = gxPLDeviceNew (app, vendor_id, device_id, NULL);
   assert (device);
   // adds a config block
   device->config = calloc (1, sizeof (gxPLDeviceConfig));

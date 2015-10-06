@@ -10,7 +10,7 @@ GXPL_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
 if [ ! -d ${GXPL_TEMPLATE_DIR} ]; then
 cat << EOF
 <<ERREUR>> Le répertoire racine n'a pas été localisé.
-Vous devez installer correctement gxPL (sudo make install)
+Vous devez installer correctement gxPLApplication (sudo make install)
 EOF
 exit 1
 fi

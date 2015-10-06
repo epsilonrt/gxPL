@@ -48,6 +48,7 @@ typedef struct _gxPLIo {
 } gxPLIo;
 
 /* internal private functions (low level service) =========================== */
+
 /*
  * @brief Register an io layer
  * 

@@ -1,6 +1,6 @@
 /**
- * @file gxpl-hub.c
- * Implementation of an gxPL Hub using gxPLib
+ * @file app-hub.c
+ * Implementation of an gxPLApplication Hub using gxPLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -178,7 +178,7 @@ parseCmdLine (int *argc, char *argv[]) {
  * Print command usage info out */
 static void 
 printUsage (char * ourName) {
-  fprintf (stderr, "%s - gxPL Hub\n", ourName);
+  fprintf (stderr, "%s - gxPLApplication Hub\n", ourName);
   fprintf (stderr, "Copyright (c) 2005, Gerald Duprey\n\n");
   fprintf (stderr, "Usage: %s [-debug] [-xpldebug] [-nodaemon] [-ip x] [-interface x]\n", ourName);
   fprintf (stderr, "  -debug -- enable hub debug messages\n");
@@ -194,7 +194,7 @@ printUsage (char * ourName) {
 static void 
 hubShutdownHandler (int onSignal) {
   gxPLstopHub();
-  gxPLClose();
+  gxPLAppClose();
   exit (0);
 }
 
@@ -209,7 +209,7 @@ runHub (void) {
   }
   PERROR ("gxPLib started");
 
-  /* Start gxPL Hub */
+  /* Start gxPLApplication Hub */
   gxPLstartHub();
 
   /* Install signal traps for proper shutdown */
@@ -217,7 +217,7 @@ runHub (void) {
   signal (SIGINT, hubShutdownHandler);
 
   /* Hand control over to gxPLib */
-  writeInfo ("gxPL Hub now running");
+  writeInfo ("gxPLApplication Hub now running");
   gxPLprocessMessages (-1);
   exit (0);
 }
@@ -258,7 +258,7 @@ superviseHub (void) {
   for (;;) {
     /* See if we can still do this */
     if (hubRestartCount == MAX_HUB_RESTARTS) {
-      writeError ("gxpl-hub has died %d times -- something may be wrong -- terminating supervisor", MAX_HUB_RESTARTS);
+      writeError ("app-hub has died %d times -- something may be wrong -- terminating supervisor", MAX_HUB_RESTARTS);
       exit (1);
     }
 
@@ -282,10 +282,10 @@ superviseHub (void) {
 
         break;
       default:           /* parent */
-        writeDebug ("Spawned gxpl-hub process, PID=%d, Spawn count=%d", hubPid, hubRestartCount);
+        writeDebug ("Spawned app-hub process, PID=%d, Spawn count=%d", hubPid, hubRestartCount);
         break;
       case -1:           /* error */
-        writeError ("Unable to spawn gxpl-hub supervisor, %s (%d)", strerror (errno), errno);
+        writeError ("Unable to spawn app-hub supervisor, %s (%d)", strerror (errno), errno);
         exit (1);
     }
 
@@ -293,14 +293,14 @@ superviseHub (void) {
     /* Now we just wait for something bad to happen to our hub */
     waitpid (hubPid, &childStatus, 0);
     if (WIFEXITED (childStatus)) {
-      writeInfo ("gxpl-hub exited normally with status %d -- restarting...", WEXITSTATUS (childStatus));
+      writeInfo ("app-hub exited normally with status %d -- restarting...", WEXITSTATUS (childStatus));
       continue;
     }
     if (WIFSIGNALED (childStatus)) {
-      writeInfo ("gxpl-hub died from by receiving unexpected signal %d -- restarting...", WTERMSIG (childStatus));
+      writeInfo ("app-hub died from by receiving unexpected signal %d -- restarting...", WTERMSIG (childStatus));
       continue;
     }
-    writeInfo ("gxpl-hub died from unknown causes -- restarting...");
+    writeInfo ("app-hub died from unknown causes -- restarting...");
     continue;
   }
 }
@@ -339,7 +339,7 @@ main (int argc, char * argv[]) {
         exit (0);
         break;
       case -1:           /* error */
-        writeError ("Unable to spawn gxpl-hub supervisor, %s (%d)", strerror (errno), errno);
+        writeError ("Unable to spawn app-hub supervisor, %s (%d)", strerror (errno), errno);
         exit (1);
     }
   }

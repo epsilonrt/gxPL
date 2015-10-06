@@ -35,21 +35,6 @@
         <File Name="src/sys/unix/device_configurable.c"/>
       </VirtualDirectory>
     </VirtualDirectory>
-    <VirtualDirectory Name="old">
-      <File Name="src/old/utils_p.h"/>
-      <File Name="src/old/listeners.c"/>
-      <File Name="src/old/io_p.h"/>
-      <File Name="src/old/xpl_p.h"/>
-      <File Name="src/old/message.c"/>
-      <File Name="src/old/hub.c"/>
-      <File Name="src/old/message_p.h"/>
-      <File Name="src/old/utils.c"/>
-      <File Name="src/old/service.c"/>
-      <File Name="src/old/service_p.h"/>
-      <File Name="src/old/io.c"/>
-      <File Name="src/old/alloc.c"/>
-      <File Name="src/old/config.c"/>
-    </VirtualDirectory>
     <File Name="src/io_p.h"/>
     <File Name="src/gxpl.c"/>
     <File Name="src/io.c"/>
@@ -65,26 +50,23 @@
     <File Name="src/device_group.c"/>
     <File Name="src/device_filter.c"/>
     <File Name="src/device.c"/>
+    <VirtualDirectory Name="old">
+      <File Name="src/old/hub.c"/>
+    </VirtualDirectory>
+    <File Name="src/hub_p.h"/>
+    <File Name="src/hub.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">
-      <VirtualDirectory Name="old">
-        <File Name="include/gxPL/old/service.h"/>
-        <File Name="include/gxPL/old/defs.h"/>
-        <File Name="include/gxPL/old/hub.h"/>
-        <File Name="include/gxPL/old/io.h"/>
-        <File Name="include/gxPL/old/utils.h"/>
-        <File Name="include/gxPL/old/message.h"/>
-        <File Name="include/gxPL/old/compat.h"/>
-      </VirtualDirectory>
       <File Name="include/gxPL/defs.h"/>
       <File Name="include/gxPL/io.h"/>
       <File Name="include/gxPL/message.h"/>
       <File Name="include/gxPL/util.h"/>
       <File Name="include/gxPL/device.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="old">
-      <File Name="include/old/gxPL.h"/>
+      <VirtualDirectory Name="old">
+        <File Name="include/gxPL/old/hub.h"/>
+      </VirtualDirectory>
+      <File Name="include/gxPL/hub.h"/>
     </VirtualDirectory>
     <File Name="include/gxPL.h"/>
   </VirtualDirectory>
@@ -101,6 +83,7 @@
     <File Name="NOTICE"/>
     <File Name="README.md"/>
     <File Name="config.h"/>
+    <File Name="gxpl.mk"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

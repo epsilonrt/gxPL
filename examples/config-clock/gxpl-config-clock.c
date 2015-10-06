@@ -1,5 +1,5 @@
 /**
- * @file gxpl-setting-device.c
+ * @file app-setting-device.c
  * Simple configurable xPL device device that sends a time update periodically
  *
  * Copyright 2005 (c), Gerald R Duprey Jr
@@ -24,7 +24,7 @@
 #define REPORT_OWN_MESSAGE    true
 
 /* private variables ======================================================== */
-static gxPL * net;
+static gxPLApplication * app;
 static gxPLDevice * device;
 static gxPLMessage * message;
 
@@ -46,19 +46,19 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
 
   // opens the xPL network
-  net = gxPLOpen (setting);
-  if (net == NULL) {
+  app = gxPLAppOpen (setting);
+  if (app == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (EXIT_FAILURE);
   }
 
   // Create a configurable device and set our application version
-  device = gxPLDeviceConfigAdd (net, "epsirt", "clock", "clock.xpl");
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock", "clock.xpl");
   assert (device);
   
   ret = gxPLDeviceVersionSet (device, CLOCK_VERSION);
@@ -116,7 +116,7 @@ main (int argc, char * argv[]) {
   for (;;) {
     // Let XPL run for a while, returning after it hasn't seen any
     // activity in 100ms or so
-    ret = gxPLPoll (net, 100);
+    ret = gxPLAppPoll (app, 100);
     assert(ret == 0);
     
     // Process clock tick update checking
@@ -208,7 +208,7 @@ prvSignalHandler (int s) {
   int ret;
 
   // all devices will be deactivated and destroyed before closing
-  ret = gxPLClose (net);
+  ret = gxPLAppClose (app);
   assert (ret == 0);
   gxPLMessageDelete (message);
 

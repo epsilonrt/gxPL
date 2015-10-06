@@ -1,6 +1,6 @@
 /**
  * @file include/gxPL/defs.h
- * gxPL library definitions
+ * gxPLApplication library definitions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -16,11 +16,12 @@ __BEGIN_C_DECLS
 #include <sysio/log.h>
 
 /* forward struct defined */
-typedef struct _gxPL gxPL;
+typedef struct _gxPLApplication gxPLApplication;
 typedef struct _gxPLIo gxPLIo;
 typedef struct _gxPLMessage gxPLMessage;
 typedef struct _gxPLDevice gxPLDevice;
 typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
+typedef struct _gxPLHub gxPLHub;
 
 #if defined(SYSIO_OS_UNIX)
 #include <limits.h>
@@ -81,7 +82,7 @@ typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
 #define GXPL_HOP_MAX   9
 
 /**
- * @brief getopt short options used by gxPLSettingNewFromCommandArgs()
+ * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
 #define GXPL_GETOPT "i:n:d"
 
@@ -115,8 +116,10 @@ typedef enum {
   gxPLIoFuncPoll,
   gxPLIoFuncGetIface,
   gxPLIoFuncGetBcastAddr,
-  gxPLIoFuncGetLocalAddr,
+  gxPLIoFuncGetNetInfo,
+  gxPLIoFuncGetLocalAddrList,
   gxPLIoFuncNetAddrToString,
+  gxPLIoFuncNetAddrFromString,
   gxPLIoFuncError = -1
 } gxPLIoFunc;
 
@@ -171,9 +174,9 @@ typedef enum {
 
 /* structures =============================================================== */
 /**
- * @brief Describe a gxPL configuration
+ * @brief Describe a gxPLApplication configuration
  */
-typedef struct _gxPLConfig {
+typedef struct _gxPLSetting {
 
   char iface[NAME_MAX]; /**< interface name */
   char iolayer[NAME_MAX]; /**< io layer name */

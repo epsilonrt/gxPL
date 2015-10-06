@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright © 2015 Pascal JEAN aka epsilonRT <pascal.jean--AT--btssn.net>     #
+# Copyright © 2015 Pascal JEAN aka epsilonRT                                  #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
@@ -29,7 +29,7 @@ DEBUG_FORMAT = dwarf-2
 DEBUG_OPT = 0
 
 # Enabling Debug information (ON / OFF)
-DEBUG = ON
+#DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
 #VIEW_GCC_LINE = ON
@@ -105,7 +105,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-GXPL_DEBUG_TEST = ON
+#GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)
@@ -330,12 +330,12 @@ $(DEPDIRS):
 
 version-git.h:
 ifeq ($(GIT_VERSION),ON)
-	@sysio-ver $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 endif
 
 version-git.mk:
 ifeq ($(GIT_VERSION),ON)
-	@sysio-ver $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 endif
 
 sizebefore:

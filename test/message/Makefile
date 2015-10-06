@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright © 2015 Pascal JEAN aka epsilonRT <pascal.jean--AT--btssn.net>     #
+# Copyright © 2015 Pascal JEAN aka epsilonRT                                  #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
@@ -333,12 +333,12 @@ $(DEPDIRS):
 
 version-git.h:
 ifeq ($(GIT_VERSION),ON)
-	@sysio-ver $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 endif
 
 version-git.mk:
 ifeq ($(GIT_VERSION),ON)
-	@sysio-ver $@
+	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
 endif
 
 sizebefore:

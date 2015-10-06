@@ -5,7 +5,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 ### BEGIN INIT INFO
-# Provides:          gxpl-hub
+# Provides:          app-hub
 # Required-Start:    $all
 # Required-Stop:
 # Default-Start:     2 3 4 5
@@ -15,7 +15,7 @@
 ### END INIT INFO
 # Version: 0.1.0
 
-NAME=gxpl-hub
+NAME=app-hub
 CONFIGFILE=/etc/$NAME.conf
 DAEMON=/usr/local/bin/$NAME
 
@@ -61,7 +61,7 @@ set_args () {
 daemon_start () {
 
   set_args
-  log_daemon_msg "Starting xPL Hub" "gxpl-hub"
+  log_daemon_msg "Starting xPL Hub" "app-hub"
   start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- -interface $XPL_IF $XPL_DEBUG $XPL_XPLDEBUG
   log_end_msg $?
   return $?
@@ -69,7 +69,7 @@ daemon_start () {
 
 daemon_stop () {
   
-  log_daemon_msg "Stopping xPL Hub" "gxpl-hub"
+  log_daemon_msg "Stopping xPL Hub" "app-hub"
   start-stop-daemon --stop  $pgm_args --retry 5 --exec $DAEMON
   log_end_msg $?
   return $?
@@ -91,7 +91,7 @@ case "$1" in
     status_of_proc $DAEMON "xPL Hub" && exit 0 || exit $?
     ;;
   *)
-     echo "Usage: /etc/init.d/gxpl-hub {start|stop|restart|force-reload|status}"
+     echo "Usage: /etc/init.d/app-hub {start|stop|restart|force-reload|status}"
      exit 1
 esac
 

@@ -21,7 +21,7 @@
 #define REPORT_OWN_MESSAGE    true
 
 /* private variables ======================================================== */
-static gxPL * net;
+static gxPLApplication * app;
 static gxPLDevice * clk;
 static gxPLMessage * message;
 
@@ -36,12 +36,12 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
 
   // opens the xPL network
-  net = gxPLOpen (setting);
-  if (net == NULL) {
+  app = gxPLAppOpen (setting);
+  if (app == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (EXIT_FAILURE);
@@ -49,7 +49,7 @@ main (int argc, char * argv[]) {
 
   // Initialize clock device
   // Create  a device for us
-  clk = gxPLDeviceAdd (net, "epsirt", "clock", NULL);
+  clk = gxPLAppAddDevice (app, "epsirt", "clock", NULL);
   assert (clk);
 
   ret = gxPLDeviceVersionSet (clk, CLOCK_VERSION);
@@ -85,7 +85,7 @@ main (int argc, char * argv[]) {
 
     // Let XPL run for a while, returning after it hasn't seen any
     // activity in 100ms or so
-    ret = gxPLPoll (net, 100);
+    ret = gxPLAppPoll (app, 100);
 
     // Process clock tick update checking
     prvSendTick();
@@ -139,7 +139,7 @@ prvSignalHandler (int s) {
   int ret;
 
   // all devices will be deactivated and destroyed before closing
-  ret = gxPLClose (net);
+  ret = gxPLAppClose (app);
   assert (ret == 0);
   gxPLMessageDelete (message);
 

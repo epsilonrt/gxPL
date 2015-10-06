@@ -78,12 +78,12 @@ prvDeviceDelete (void * d) {
 // Public
 // Stop (disable) all services, usually in preparation for shutdown, but
 // that isn't the only possible reason
-int gxPLDeviceDisableAll (gxPL * gxpl) {
+int gxPLAppDisableAllDevice (gxPLApplication * app) {
   gxPLDevice * device;
 
-  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+  for (int i = 0; i < iVectorSize (&app->device); i++) {
 
-    device = pvVectorGet (&gxpl->device, i);
+    device = pvVectorGet (&app->device, i);
     if (gxPLDeviceEnabledSet (device, false) != 0) {
       return -1;
     }
@@ -96,14 +96,14 @@ int gxPLDeviceDisableAll (gxPL * gxpl) {
  * Check each known device for when it last sent a heart
  * beat and if it's time to send another, do it. */
 static void
-prvHeartbeatPoll (gxPL * gxpl) {
+prvHeartbeatPoll (gxPLApplication * app) {
   gxPLDevice * device;
   long now = gxPLTime();
   long elapsed;
 
-  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+  for (int i = 0; i < iVectorSize (&app->device); i++) {
 
-    device = pvVectorGet (&gxpl->device, i);
+    device = pvVectorGet (&app->device, i);
 
     if (gxPLDeviceIsEnabled (device)) {
       int interval = gxPLDeviceHeartbeatInterval (device);
@@ -151,13 +151,13 @@ prvHeartbeatPoll (gxPL * gxpl) {
 // -----------------------------------------------------------------------------
 // Run the passed message by each device and see who is interested
 static void
-prvDeviceMessageDispatcher (gxPL * gxpl, gxPLMessage * message,
+prvDeviceMessageDispatcher (gxPLApplication * app, gxPLMessage * message,
                             void * udata) {
   gxPLDevice * device;
 
-  for (int i = 0; i < iVectorSize (&gxpl->device); i++) {
+  for (int i = 0; i < iVectorSize (&app->device); i++) {
 
-    device = pvVectorGet (&gxpl->device, i);
+    device = pvVectorGet (&app->device, i);
     gxPLDeviceMessageHandler (device, message, udata);
   }
 }
@@ -215,7 +215,7 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
 
 // -----------------------------------------------------------------------------
 gxPLSetting *
-gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
+gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
   assert (setting);
 
@@ -231,76 +231,76 @@ gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
 }
 
 // -----------------------------------------------------------------------------
-gxPL *
-gxPLOpen (gxPLSetting * setting) {
-  gxPL * gxpl = calloc (1, sizeof (gxPL));
-  assert (gxpl);
+gxPLApplication *
+gxPLAppOpen (gxPLSetting * setting) {
+  gxPLApplication * app = calloc (1, sizeof (gxPLApplication));
+  assert (app);
 
   if (setting->debug) {
 
     vLogSetMask (LOG_UPTO (GXPL_LOG_DEBUG_LEVEL));
   }
 
-  gxpl->io = gxPLIoOpen (setting);
+  app->io = gxPLIoOpen (setting);
 
-  if (gxpl->io) {
+  if (app->io) {
 
     if (setting->malloc == 0) {
 
-      gxpl->setting = malloc (sizeof (gxPLSetting));
-      memcpy (gxpl->setting, setting, sizeof (gxPLSetting));
-      gxpl->setting->malloc = 1;
+      app->setting = malloc (sizeof (gxPLSetting));
+      memcpy (app->setting, setting, sizeof (gxPLSetting));
+      app->setting->malloc = 1;
     }
     else {
 
-      gxpl->setting = setting;
+      app->setting = setting;
     }
 
-    if (iVectorInit (&gxpl->msg_listener, 2, NULL, free) == 0) {
+    if (iVectorInit (&app->msg_listener, 2, NULL, free) == 0) {
 
-      if (iVectorInitSearch (&gxpl->msg_listener, prvListenerKey,
+      if (iVectorInitSearch (&app->msg_listener, prvListenerKey,
                              prvListenerMatch) == 0) {
 
-        if (iVectorInit (&gxpl->device, 2, NULL, prvDeviceDelete) == 0) {
+        if (iVectorInit (&app->device, 2, NULL, prvDeviceDelete) == 0) {
 
-          if (iVectorInitSearch (&gxpl->device, prvDeviceKey,
+          if (iVectorInitSearch (&app->device, prvDeviceKey,
                                  prvDeviceMatch) == 0) {
 
             // everything was done, we copy the network information and returns.
-            (void) gxPLIoCtl (gxpl, gxPLIoFuncGetLocalAddr, &gxpl->net_info);
-            if (gxPLMessageListenerAdd (gxpl, prvDeviceMessageDispatcher, NULL) == 0) {
-              
-              srand (gxPLRandomSeed (gxpl));
-              return gxpl;
+            (void) gxPLIoCtl (app, gxPLIoFuncGetNetInfo, &app->net_info);
+            if (gxPLMessageListenerAdd (app, prvDeviceMessageDispatcher, NULL) == 0) {
+
+              srand (gxPLRandomSeed (app));
+              return app;
             }
           }
         }
       }
     }
   }
-  PERROR ("Unable to setup gxPL object");
-  free (gxpl);
+  PERROR ("Unable to setting up gxPLApplication object");
+  free (app);
   return NULL;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLClose (gxPL * gxpl) {
+gxPLAppClose (gxPLApplication * app) {
 
-  if (gxpl) {
+  if (app) {
     int ret;
 
     // for each device, sends a goodbye heartbeat and removes all listeners,
-    vVectorDestroy (&gxpl->device);
+    vVectorDestroy (&app->device);
     // then releases all message listeners
-    vVectorDestroy (&gxpl->msg_listener);
+    vVectorDestroy (&app->msg_listener);
     // an close !
-    ret = gxPLIoClose (gxpl->io);
-    if (gxpl->setting->malloc) {
+    ret = gxPLIoClose (app->io);
+    if (app->setting->malloc) {
 
-      free (gxpl->setting);
+      free (app->setting);
     }
-    free (gxpl);
+    free (app);
     return ret;
   }
   return -1;
@@ -308,14 +308,14 @@ gxPLClose (gxPL * gxpl) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata) {
+gxPLMessageListenerAdd (gxPLApplication * app, gxPLMessageListener listener, void * udata) {
   listener_elmt * h = malloc (sizeof (listener_elmt));
   assert (h);
 
   h->func = listener;
   h->data = udata;
 
-  if (iVectorAppend (&gxpl->msg_listener, h) == 0) {
+  if (iVectorAppend (&app->msg_listener, h) == 0) {
     return 0;
   }
   free (h);
@@ -324,19 +324,19 @@ gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata)
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageListenerRemove (gxPL * gxpl, gxPLMessageListener listener) {
-  int i = iVectorFindFirstIndex (&gxpl->msg_listener, &listener);
+gxPLMessageListenerRemove (gxPLApplication * app, gxPLMessageListener listener) {
+  int i = iVectorFindFirstIndex (&app->msg_listener, &listener);
 
 
-  return iVectorRemove (&gxpl->msg_listener, i);
+  return iVectorRemove (&app->msg_listener, i);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLPoll (gxPL * gxpl, int timeout_ms) {
+gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
   int ret, size = 0;
 
-  ret = gxPLIoCtl (gxpl, gxPLIoFuncPoll, &size, timeout_ms);
+  ret = gxPLIoCtl (app, gxPLIoFuncPoll, &size, timeout_ms);
 
   if (ret == 0)  {
 
@@ -344,7 +344,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
       char * buffer = malloc (size + 1);
       assert (buffer);
 
-      ret = gxPLIoRecv (gxpl->io, buffer, size, NULL);
+      ret = gxPLIoRecv (app->io, buffer, size, NULL);
       if (ret == size) {
         static gxPLMessage * msg;
 
@@ -365,12 +365,12 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
             // Dispatch the message
             PDEBUG ("Now dispatching valid message");
 
-            for (int i = 0; i < iVectorSize (&gxpl->msg_listener); i++) {
+            for (int i = 0; i < iVectorSize (&app->msg_listener); i++) {
 
-              listener_elmt * h = pvVectorGet (&gxpl->msg_listener, i);
+              listener_elmt * h = pvVectorGet (&app->msg_listener, i);
               if (h->func) {
 
-                h->func (gxpl, msg, h->data);
+                h->func (app, msg, h->data);
               }
             }
           }
@@ -392,7 +392,7 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
     }
     else {
 
-      prvHeartbeatPoll (gxpl);
+      prvHeartbeatPoll (app);
     }
   }
   else {
@@ -404,7 +404,8 @@ gxPLPoll (gxPL * gxpl, int timeout_ms) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageSend (gxPL * gxpl, gxPLMessage * message) {
+gxPLAppSendMessage (gxPLApplication * app, const gxPLMessage * message,
+                            const gxPLIoAddr * client) {
   int ret = -1;
   int count;
   char * str = gxPLMessageToString (message);
@@ -412,7 +413,7 @@ gxPLMessageSend (gxPL * gxpl, gxPLMessage * message) {
   if (str) {
 
     count = strlen (str);
-    ret = gxPLIoSend (gxpl->io, str, count, NULL);
+    ret = gxPLIoSend (app->io, str, count, client);
     if (ret < 0) {
       PERROR ("Unable to send message: [%10s...]", str);
     }
@@ -422,11 +423,18 @@ gxPLMessageSend (gxPL * gxpl, gxPLMessage * message) {
   return ret;
 }
 
+// -----------------------------------------------------------------------------
+int
+gxPLAppBroadcastMessage (gxPLApplication * app, const gxPLMessage * message) {
+
+  return gxPLAppSendMessage (app, message, NULL);
+}
+
 
 // -----------------------------------------------------------------------------
 int
-gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * msg,
-                      const gxPLId * my_id) {
+gxPLAppIsHubEchoMessage (const gxPLApplication * app, const gxPLMessage * msg,
+                         const gxPLId * my_id) {
 
   if ( (strcmp (gxPLMessageSchemaClassGet (msg), "hbeat") == 0) ||
        (strcmp (gxPLMessageSchemaClassGet (msg), "config") == 0)) {
@@ -442,8 +450,8 @@ gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * msg,
           uint16_t port = strtol (str_port, &endptr, 10);
 
           if (*endptr == '\0') {
-            if ( (port == gxpl->net_info.port) &&
-                 (strcmp (gxPLIoLocalAddrGet (gxpl), remote_ip) == 0)) {
+            if ( (port == app->net_info.port) &&
+                 (strcmp (gxPLIoLocalAddrGet (app), remote_ip) == 0)) {
 
               return true;
             }
@@ -466,17 +474,17 @@ gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * msg,
 
 // -----------------------------------------------------------------------------
 gxPLDevice *
-gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
-               const char * device_id, const char * instance_id) {
+gxPLAppAddDevice (gxPLApplication * app, const char * vendor_id,
+                  const char * device_id, const char * instance_id) {
 
-  gxPLDevice * device = gxPLDeviceNew (gxpl, vendor_id, device_id, instance_id);
+  gxPLDevice * device = gxPLDeviceNew (app, vendor_id, device_id, instance_id);
   if (device) {
 
     // verifies that the device does not exist
-    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceId (device)) == NULL) {
+    if (pvVectorFindFirst (&app->device, gxPLDeviceId (device)) == NULL) {
 
       // if not, add it to the list
-      if (iVectorAppend (&gxpl->device, device) == 0) {
+      if (iVectorAppend (&app->device, device) == 0) {
 
         return device;
       }
@@ -489,17 +497,17 @@ gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
 
 // -----------------------------------------------------------------------------
 gxPLDevice *
-gxPLDeviceConfigAdd (gxPL * gxpl, const char * vendor_id,
-                     const char * device_id, const char * filename) {
-  gxPLDevice * device = gxPLDeviceConfigNew (gxpl,
+gxPLAppAddConfigurableDevice (gxPLApplication * app, const char * vendor_id,
+                              const char * device_id, const char * filename) {
+  gxPLDevice * device = gxPLDeviceConfigNew (app,
                         vendor_id, device_id, filename);
   if (device) {
 
     // verifies that the device does not exist
-    if (pvVectorFindFirst (&gxpl->device, gxPLDeviceId (device)) == NULL) {
+    if (pvVectorFindFirst (&app->device, gxPLDeviceId (device)) == NULL) {
 
       // if not, add it to the list
-      if (iVectorAppend (&gxpl->device, device) == 0) {
+      if (iVectorAppend (&app->device, device) == 0) {
 
         return device;
       }
@@ -512,39 +520,39 @@ gxPLDeviceConfigAdd (gxPL * gxpl, const char * vendor_id,
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceRemove (gxPL * gxpl, gxPLDevice * device) {
+gxPLAppRemoveDevice (gxPLApplication * app, gxPLDevice * device) {
 
-  int index = iVectorFindFirstIndex (&gxpl->device, device);
+  int index = iVectorFindFirstIndex (&app->device, device);
   if (index >= 0) {
-    return iVectorRemove (&gxpl->device, index);
+    return iVectorRemove (&app->device, index);
   }
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceCount (gxPL * gxpl) {
+gxPLAppDeviceCount (gxPLApplication * app) {
 
-  return iVectorSize (&gxpl->device);
+  return iVectorSize (&app->device);
 }
 
 // -----------------------------------------------------------------------------
 gxPLDevice *
-gxPLDeviceAt (gxPL * gxpl, int index) {
+gxPLAppDeviceAt (gxPLApplication * app, int index) {
 
-  return (gxPLDevice *) pvVectorGet (&gxpl->device, index);
+  return (gxPLDevice *) pvVectorGet (&app->device, index);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceIndex (gxPL * gxpl, const gxPLDevice * device) {
+gxPLAppDeviceIndex (gxPLApplication * app, const gxPLDevice * device) {
 
-  return iVectorFindFirstIndex (&gxpl->device, device);
+  return iVectorFindFirstIndex (&app->device, device);
 }
 
 // -----------------------------------------------------------------------------
 int
-gxPLIoCtl (gxPL * gxpl, int c, ...) {
+gxPLIoCtl (gxPLApplication * app, int c, ...) {
   int ret = 0;
   va_list ap;
 
@@ -555,7 +563,7 @@ gxPLIoCtl (gxPL * gxpl, int c, ...) {
       // case ...
 
     default:
-      ret = gxPLIoIoCtl (gxpl->io, c, ap);
+      ret = gxPLIoIoCtl (app->io, c, ap);
       if ( (ret == -1) && (errno == EINVAL)) {
         PERROR ("gxPLIoCtl function not supported: %d", c);
       }
@@ -568,10 +576,10 @@ gxPLIoCtl (gxPL * gxpl, int c, ...) {
 
 // -----------------------------------------------------------------------------
 const char *
-gxPLIoLocalAddrGet (const gxPL * gxpl) {
+gxPLIoLocalAddrGet (const gxPLApplication * app) {
   static char * str;
 
-  if (gxPLIoCtl ( (gxPL *) gxpl, gxPLIoFuncNetAddrToString, &gxpl->net_info, &str) == 0) {
+  if (gxPLIoCtl ( (gxPLApplication *) app, gxPLIoFuncNetAddrToString, &app->net_info, &str) == 0) {
 
     return str;
   }
@@ -579,14 +587,26 @@ gxPLIoLocalAddrGet (const gxPL * gxpl) {
 }
 
 // -----------------------------------------------------------------------------
+const xVector *
+gxPLIoLocalAddrList (const gxPLApplication * app) {
+  const xVector * v;
+
+  if (gxPLIoCtl ( (gxPLApplication *) app, gxPLIoFuncGetLocalAddrList, &v) == 0) {
+
+    return v;
+  }
+  return NULL;
+}
+
+// -----------------------------------------------------------------------------
 const char *
-gxPLIoBcastAddrGet (const gxPL * gxpl) {
+gxPLIoBcastAddrGet (const gxPLApplication * app) {
   gxPLIoAddr addr;
   static char * str;
 
-  if (gxPLIoCtl ( (gxPL *) gxpl, gxPLIoFuncGetBcastAddr, &addr) == 0) {
+  if (gxPLIoCtl ( (gxPLApplication *) app, gxPLIoFuncGetBcastAddr, &addr) == 0) {
 
-    if (gxPLIoCtl ( (gxPL *) gxpl, gxPLIoFuncNetAddrToString, &addr, &str) == 0) {
+    if (gxPLIoCtl ( (gxPLApplication *) app, gxPLIoFuncNetAddrToString, &addr, &str) == 0) {
 
       return str;
     }
@@ -596,30 +616,30 @@ gxPLIoBcastAddrGet (const gxPL * gxpl) {
 
 // -----------------------------------------------------------------------------
 const gxPLIoAddr *
-gxPLIoInfoGet (const gxPL * gxpl) {
+gxPLIoInfoGet (const gxPLApplication * app) {
 
-  return &gxpl->net_info;
+  return &app->net_info;
 }
 
 // -----------------------------------------------------------------------------
 gxPLConnectType
-gxPLConnectionTypeGet (const gxPL * gxpl) {
+gxPLAppConnectionType (const gxPLApplication * app) {
 
-  return gxpl->setting->connecttype;
+  return app->setting->connecttype;
 }
 
 // -----------------------------------------------------------------------------
 const char *
-gxPLIoInterfaceGet (const gxPL * gxpl) {
+gxPLIoInterfaceGet (const gxPLApplication * app) {
 
-  return gxpl->setting->iface;
+  return app->setting->iface;
 }
 
 // -----------------------------------------------------------------------------
 const char *
-gxPLIoLayerGet (const gxPL * gxpl) {
+gxPLIoLayerGet (const gxPLApplication * app) {
 
-  return gxpl->setting->iolayer;
+  return app->setting->iolayer;
 }
 
 // -----------------------------------------------------------------------------
@@ -659,15 +679,15 @@ gxPLVersionSha1 (void) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLGenerateUniqueId (const gxPL * gxpl, char * s, int size) {
+gxPLGenerateUniqueId (const gxPLApplication * app, char * s, int size) {
   int max, len = 0;
 
-  if (gxpl->net_info.addrlen > 0) {
+  if (app->net_info.addrlen > 0) {
 
-    for (int i = 0; (i < gxpl->net_info.addrlen) && (len < size); i++) {
+    for (int i = 0; (i < app->net_info.addrlen) && (len < size); i++) {
 
       max = size - len + 1;
-      len += snprintf (&s[len], max, "%02x", gxpl->net_info.addr[i]);
+      len += snprintf (&s[len], max, "%02x", app->net_info.addr[i]);
     }
     if (len > size) {
 

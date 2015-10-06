@@ -52,8 +52,8 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
 
   gxPLMessage * message = gxPLDeviceMessageNew (device, gxPLMessageStatus);
   assert (message);
-  gxPL * gxpl = gxPLDeviceParentGet (device);
-  assert (gxpl);
+  gxPLApplication * app = gxPLDeviceParentGet (device);
+  assert (app);
 
   gxPLMessageBroadcastSet (message, true);
 
@@ -72,7 +72,7 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
   }
   else {
 
-    if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
+    if (gxPLIoInfoGet (app)->family & gxPLNetFamilyInet)  {
 
       gxPLMessageSchemaTypeSet (message, "app");
     }
@@ -85,10 +85,10 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
   gxPLMessagePairAddFormat (message, "interval", "%d",
                             device->hbeat_interval / 60);
 
-  if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
+  if (gxPLIoInfoGet (app)->family & gxPLNetFamilyInet)  {
 
-    gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
-    gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (gxpl));
+    gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (app)->port);
+    gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (app));
   }
   if (device->version) {
 
@@ -195,7 +195,7 @@ gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
                           void * udata) {
 
   if ( (device->ishubconfirmed == 0) &&
-       (gxPLMessageIsHubEcho (device->parent, message, &device->id) == true)) {
+       (gxPLAppIsHubEchoMessage (device->parent, message, &device->id) == true)) {
 
     device->ishubconfirmed = 1;
     PDEBUG ("Hub detected and confirmed existing");
@@ -311,14 +311,14 @@ gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
 
 // -----------------------------------------------------------------------------
 gxPLDevice *
-gxPLDeviceNew (gxPL * gxpl,
+gxPLDeviceNew (gxPLApplication * app,
                const char * vendor_id,
                const char * device_id,
                const char * instance_id) {
   gxPLDevice * device = calloc (1, sizeof (gxPLDevice));
   assert (device);
 
-  device->parent = gxpl;
+  device->parent = app;
   device->hbeat_interval = DEFAULT_HEARTBEAT_INTERVAL;
 
   // init listener vector
@@ -359,7 +359,7 @@ gxPLDeviceNew (gxPL * gxpl,
   else {
     // instance id not provided, generates fairly unique id
 
-    if (gxPLGenerateUniqueId (gxpl, device->id.instance,
+    if (gxPLGenerateUniqueId (app, device->id.instance,
                               GXPL_INSTANCEID_MAX) == GXPL_INSTANCEID_MAX) {
 
       // setting up successful
@@ -424,7 +424,7 @@ gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type) {
 int
 gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message) {
 
-  return gxPLMessageSend (gxPLDeviceParentGet (device), message);
+  return gxPLAppBroadcastMessage (gxPLDeviceParentGet (device), message);
 }
 
 // -----------------------------------------------------------------------------
@@ -615,7 +615,7 @@ gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
 }
 
 // -----------------------------------------------------------------------------
-gxPL *
+gxPLApplication *
 gxPLDeviceParentGet (gxPLDevice * device) {
 
   return device->parent;

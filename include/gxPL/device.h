@@ -100,12 +100,12 @@ int gxPLDeviceListenerRemove (gxPLDevice * device,
                               gxPLDeviceListener listener);
 
 /**
- * @brief Gets the parent gxPL object
+ * @brief Gets the parent gxPLApplication object
  *
  * @param device pointer on the device
- * @return pointer to an gxPL object that is the parent of the device, NULL if error occurs
+ * @return pointer to an gxPLApplication object that is the parent of the device, NULL if error occurs
  */
-gxPL * gxPLDeviceParentGet (gxPLDevice * device);
+gxPLApplication * gxPLDeviceParentGet (gxPLDevice * device);
 
 /**
  * @brief Gets the identifier

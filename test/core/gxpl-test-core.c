@@ -1,6 +1,6 @@
 /*
- * gxpl-test-core.c
- * @brief gxPL Core test
+ * app-test-core.c
+ * @brief gxPLApplication Core test
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -33,7 +33,7 @@ static const gxPLId source = {
   } while (0)
 
 /* private variables ======================================================== */
-static gxPL * gxpl;
+static gxPLApplication * app;
 static gxPLMessage * message;
 static bool hasHub;
 static int test_count;
@@ -41,7 +41,7 @@ static int msg_count;
 
 /* private functions ======================================================== */
 static void prvSignalHandler (int sig) ;
-static void prvMessageHandler (gxPL * gxpl, gxPLMessage * msg, void * p);
+static void prvMessageHandler (gxPLApplication * app, gxPLMessage * msg, void * p);
 static void prvHeartbeatMessageNew (void);
 
 /* main ===================================================================== */
@@ -63,7 +63,7 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_count++;
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   test (setting);
 
   // verify that the requested io layer is available
@@ -74,19 +74,19 @@ main (int argc, char **argv) {
   // opens the xPL network
   test_count++;
   vVectorDestroy (iolist);
-  gxpl = gxPLOpen (setting);
-  test (gxpl);
+  app = gxPLAppOpen (setting);
+  test (app);
 
   // adds a message listener
   test_count++;
-  ret = gxPLMessageListenerAdd (gxpl, prvMessageHandler, hello);
+  ret = gxPLMessageListenerAdd (app, prvMessageHandler, hello);
   prvHeartbeatMessageNew();
 
   // View network information
-  printf ("Starting test service on %s...\n", gxPLIoInterfaceGet (gxpl));
-  printf ("  listen on  %s:%d\n", gxPLIoLocalAddrGet (gxpl),
-          gxPLIoInfoGet (gxpl)->port);
-  printf ("  broadcast on  %s\n", gxPLIoBcastAddrGet (gxpl));
+  printf ("Starting test service on %s...\n", gxPLIoInterfaceGet (app));
+  printf ("  listen on  %s:%d\n", gxPLIoLocalAddrGet (app),
+          gxPLIoInfoGet (app)->port);
+  printf ("  broadcast on  %s\n", gxPLIoBcastAddrGet (app));
   printf ("Press Ctrl+C to abort ...\n");
 
   signal (SIGTERM, prvSignalHandler);
@@ -99,7 +99,7 @@ main (int argc, char **argv) {
   for (;;) {
 
     // Main loop
-    ret = gxPLPoll (gxpl, 100);
+    ret = gxPLAppPoll (app, 100);
     test (ret == 0);
     fflush (stdout);
   }
@@ -120,7 +120,7 @@ prvSignalHandler (int sig) {
     case SIGALRM:
       msg_count++;
       printf ("\n\n******** Sending message[%d] ********\n", msg_count);
-      ret = gxPLMessageSend (gxpl, message);
+      ret = gxPLAppBroadcastMessage (app, message);
       test (ret > 0);
       if (hasHub) {
 
@@ -138,7 +138,7 @@ prvSignalHandler (int sig) {
       gxPLMessageDelete (message);
 
       test_count++;
-      ret = gxPLClose (gxpl);
+      ret = gxPLAppClose (app);
       test (ret == 0);
 
       printf ("\neverything was closed.\nHave a nice day !\n");
@@ -151,10 +151,10 @@ prvSignalHandler (int sig) {
 // -----------------------------------------------------------------------------
 // message handler
 static void
-prvMessageHandler (gxPL * gxpl, gxPLMessage * msg, void * p) {
+prvMessageHandler (gxPLApplication * app, gxPLMessage * msg, void * p) {
 
   // See if we need to check the message for hub detection
-  if ( (hasHub == false) && (gxPLMessageIsHubEcho (gxpl, msg, NULL) == true)) {
+  if ( (hasHub == false) && (gxPLAppIsHubEchoMessage (app, msg, NULL) == true)) {
 
     hasHub = true;
     printf ("\n******** Hub detected and confirmed existing ********\n");
@@ -183,7 +183,7 @@ prvHeartbeatMessageNew (void) {
   ret = gxPLMessageSchemaClassSet (message, "hbeat");
   test (ret == 0);
 
-  if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
+  if (gxPLIoInfoGet (app)->family & gxPLNetFamilyInet)  {
 
     ret = gxPLMessageSchemaTypeSet (message, "app");
   }
@@ -196,14 +196,14 @@ prvHeartbeatMessageNew (void) {
   ret = gxPLMessagePairAddFormat (message, "interval", "%d", HBEAT_INTERVAL);
   test (ret == 0);
 
-  if (gxPLIoInfoGet (gxpl)->family & gxPLNetFamilyInet)  {
+  if (gxPLIoInfoGet (app)->family & gxPLNetFamilyInet)  {
 
     test_count++;
-    ret = gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (gxpl)->port);
+    ret = gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (app)->port);
     test (ret == 0);
 
     test_count++;
-    ret = gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (gxpl));
+    ret = gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (app));
     test (ret == 0);
   }
 

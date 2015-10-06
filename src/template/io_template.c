@@ -95,8 +95,8 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLIoAddr * local_addr)
-    case gxPLIoFuncGetLocalAddr: {
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetNetInfo, gxPLIoAddr * local_addr)
+    case gxPLIoFuncGetNetInfo: {
       gxPLIoAddr * local_addr = va_arg (ap, gxPLIoAddr*);
       // TODO
       // local_addr->size = ? ;

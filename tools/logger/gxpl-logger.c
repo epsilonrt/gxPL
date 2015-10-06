@@ -1,5 +1,5 @@
 /**
- * @file gxpl-logger.c
+ * @file app-logger.c
  * Simple program to monitor for any message and any device changes and print them
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
@@ -22,7 +22,7 @@
 #define LOG_APPEND_CFG_NAME "append"
 
 /* private variables ======================================================== */
-static gxPL * net;
+static gxPLApplication * app;
 static gxPLDevice * device;
 
 /* configurable items ======================================================= */
@@ -34,7 +34,7 @@ static bool append_log = false;
 static void prvSignalHandler (int s);
 static void prvSetConfig (gxPLDevice * device);
 static void prvConfigChanged (gxPLDevice * device, void * udata);
-static void prvPrintMessage (gxPL * net, gxPLMessage * message, void * udata);
+static void prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata);
 
 /* main ===================================================================== */
 int
@@ -42,23 +42,23 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
 
   // opens the xPL network
-  net = gxPLOpen (setting);
-  if (net == NULL) {
+  app = gxPLAppOpen (setting);
+  if (app == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (EXIT_FAILURE);
   }
 
-  // And a listener for all xPL messages
-  ret = gxPLMessageListenerAdd (net, prvPrintMessage, NULL);
+  // Add a listener for all xPL messages
+  ret = gxPLMessageListenerAdd (app, prvPrintMessage, NULL);
   assert (ret == 0);
 
   // Create a configurable device and set our application version
-  device = gxPLDeviceConfigAdd (net, "epsirt", "logger", "logger.xpl");
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "logger", "logger.xpl");
   assert (device);
 
   ret = gxPLDeviceVersionSet (device, LOGGER_VERSION);
@@ -100,7 +100,7 @@ main (int argc, char * argv[]) {
   for (;;) {
     // Let XPL run for a while, returning after it hasn't seen any
     // activity in 100ms or so
-    ret = gxPLPoll (net, 100);
+    ret = gxPLAppPoll (app, 100);
     assert (ret == 0);
   }
   return 0;
@@ -168,7 +168,7 @@ prvSetConfig (gxPLDevice * device) {
 // --------------------------------------------------------------------------
 // Print info on incoming messages
 static void
-prvPrintMessage (gxPL * net, gxPLMessage * message, void * udata) {
+prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
 
   fprintf (logfile, "%s [xpl-message] type=%s",
             gxPLTimeStr (gxPLTime()), 
@@ -229,7 +229,7 @@ prvSignalHandler (int s) {
   }
   
   // all devices will be deactivated and destroyed before closing
-  ret = gxPLClose (net);
+  ret = gxPLAppClose (app);
   assert (ret == 0);
 
   printf ("\neverything was closed.\nHave a nice day !\n");

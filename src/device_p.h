@@ -10,7 +10,6 @@
 #define _GXPL_SERVICE_PRIVATE_HEADER_
 
 #include <sysio/vector.h>
-#include <sysio/dlist.h>
 #include <gxPL/defs.h>
 
 /* types ==================================================================== */
@@ -34,7 +33,7 @@ typedef struct _gxPLDevice {
   
   gxPLId id;
   char * version;
-  gxPL * parent;
+  gxPLApplication * parent;
   xVector listener; /**< vector of listener_elmt (message received) */
   
   int hbeat_interval; /**< heartbeat interval in seconds */
@@ -73,6 +72,13 @@ typedef struct _gxPLDevice {
 } gxPLDevice;
 
 /* internal public functions ================================================ */
+
+/**
+ * -----------------------------------------------------------------------------
+ * @addtogroup xPLDeviceConfig
+ * @{
+ */
+
 /**
  * @brief Load config from file
  *
@@ -93,19 +99,95 @@ xVector * gxPLDeviceConfigLoad (gxPLDevice * device);
  */
 int gxPLDeviceConfigSave (const gxPLDevice * device);
 
+/**
+ * @brief 
+ * @param device
+ */
 void gxPLDeviceConfigDelete (gxPLDevice * device);
 
+/**
+ * @}
+ * -----------------------------------------------------------------------------
+ */
 
+/**
+ * -----------------------------------------------------------------------------
+ * @addtogroup xPLDeviceGroup
+ * @{
+ */
+/**
+ * @brief 
+ * @param device
+ * @return 
+ */
 int gxPLDeviceGroupInit (gxPLDevice * device);
+
+/**
+ * @brief 
+ * @param device
+ */
 void gxPLDeviceGroupDelete (gxPLDevice * device);
+
+/**
+ * @brief 
+ * @param device
+ * @param message
+ * @return 
+ */
 int  gxPLDeviceGroupAddListOfItems (gxPLDevice * device, gxPLMessage * message);
+
+/**
+ * @brief 
+ * @param device
+ * @param message
+ * @return 
+ */
 int  gxPLDeviceGroupAddCurrentValues (gxPLDevice * device, gxPLMessage * message);
 
+/**
+ * @}
+ * -----------------------------------------------------------------------------
+ */
+
+/**
+ * -----------------------------------------------------------------------------
+ * @addtogroup xPLDeviceFilter
+ * @{
+ */
+
+/**
+ * @brief 
+ * @param device
+ * @return 
+ */
 int gxPLDeviceFilterInit (gxPLDevice * device);
+
+/**
+ * @brief 
+ * @param device
+ */
 void gxPLDeviceFilterDelete (gxPLDevice * device);
+
+/**
+ * @brief 
+ * @param device
+ * @param message
+ * @return 
+ */
 int  gxPLDeviceFilterAddListOfItems (gxPLDevice * device, gxPLMessage * message);
+
+/**
+ * @brief 
+ * @param device
+ * @param message
+ * @return 
+ */
 int  gxPLDeviceFilterAddCurrentValues (gxPLDevice * device, gxPLMessage * message);
 
+/**
+ * @}
+ * -----------------------------------------------------------------------------
+ */
 
 /* ========================================================================== */
 #endif /* _GXPL_SERVICE_PRIVATE_HEADER_ defined */

@@ -15,21 +15,25 @@
 /* structures =============================================================== */
 
 /*
- * @brief
+ * @brief xPL Application
  */
-typedef struct _gxPL {
+typedef struct _gxPLApplication {
 
   gxPLSetting * setting;
   gxPLIo * io;  /**< abstract structure can not be used directly on top level */
   xVector msg_listener;
   xVector device;
   gxPLIoAddr net_info;
-} gxPL;
+} gxPLApplication;
 
-/* constants ================================================================ */
-/* macros =================================================================== */
 
 /* private api functions ==================================================== */
-int gxPLRandomSeed (gxPL * gxpl);
+/*
+ * @brief Gets the random seed for the application
+ * @param app
+ * @return 
+ */
+int gxPLRandomSeed (gxPLApplication * app);
+
 /* ========================================================================== */
 #endif /* _GXPL_PRIVATE_HEADER_ defined */

@@ -1,0 +1,2 @@
+#!/bin/sh
+cat /proc/cmdline | awk -v RS=" " -F. '/boardrev/ { print $1 }' | grep -i bcm270

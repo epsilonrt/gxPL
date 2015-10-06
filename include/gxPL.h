@@ -1,5 +1,5 @@
 /**
- * @file include/gxPL.h
+ * @file include/gxPLApplication.h
  * Top level API (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -13,6 +13,7 @@
 #include <gxPL/message.h>
 #include <gxPL/util.h>
 #include <gxPL/device.h>
+#include <gxPL/hub.h>
 
 __BEGIN_C_DECLS
 /* ========================================================================== */
@@ -23,7 +24,7 @@ __BEGIN_C_DECLS
 
 /* api functions ============================================================ */
 /**
- * @brief Returns a new gxPL setting from parameters
+ * @brief Returns a new gxPLApplication setting from parameters
  *
  * @param iface network interface name o, the system
  * @param iolayer network access layer name
@@ -33,7 +34,7 @@ __BEGIN_C_DECLS
 gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type);
 
 /**
- * @brief Returns a new gxPL setting from command line parameters
+ * @brief Returns a new gxPLApplication setting from command line parameters
  *
  * This will parse the passed command array for options and parameters
  * It supports the following options:
@@ -46,65 +47,75 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  * @param type network connection type
  * @return the setting or NULL if error occurs
  */
-gxPLSetting * gxPLSettingNewFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
+gxPLSetting * gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
 
 /**
- * @brief Opens a new gxPL object
+ * @brief Opens a new gxPLApplication object
  * @param setting pointer to a configuration, this configuration can be modified
  * by the function to return the actual configuration.
  * @return the object or NULL if error occurs
  */
-gxPL * gxPLOpen (gxPLSetting * setting);
+gxPLApplication * gxPLAppOpen (gxPLSetting * setting);
 
 /**
- * @brief Close a gxPL object and release all ressources
- * @param gxpl pointer to a gxPL object
+ * @brief Close a gxPLApplication object and release all ressources
+ * @param app pointer to a gxPLApplication object
  * @return 0, -1 if an error occurs
  */
-int gxPLClose (gxPL * gxpl);
+int gxPLAppClose (gxPLApplication * app);
 
 /**
- * @brief
- * @param gxpl pointer to a gxPL object
- * @param timeout_ms
+ * @brief Polling event of an application
+ * @param app pointer to a gxPLApplication object
+ * @param timeout_ms waiting period in ms before output if no event occurs
  * @return 0, -1 if an error occurs
  */
-int gxPLPoll (gxPL * gxpl, int timeout_ms);
+int gxPLAppPoll (gxPLApplication * app, int timeout_ms);
 
 /**
  * @brief Send an xPL message
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param message pointer to the message
  * @return number of bytes send, -1 if error occurs
  */
-int gxPLMessageSend (gxPL * gxpl, gxPLMessage * message);
+int gxPLAppBroadcastMessage (gxPLApplication * app, const gxPLMessage * message);
 
+/**
+ * @brief Send an xPL message
+ *
+ * @param app pointer to a gxPLApplication object
+ * @param message pointer to the message
+ * @return number of bytes send, -1 if error occurs
+ */
+int gxPLAppSendMessage (gxPLApplication * app, const gxPLMessage * message,
+                                const gxPLIoAddr * target);
 /**
  * @brief Check if a message is an echo hub
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param message pointer to the message
  * @param my_id identifier of the request source. Necessary if the underlying
  * network is not udp (hbeat.basic), may be NULL otherwise (hbeat.app).
  * @return true, false, -1 if an error occurs
  */
-int gxPLMessageIsHubEcho (const gxPL * gxpl, const gxPLMessage * message, const gxPLId * my_id);
+int gxPLAppIsHubEchoMessage (const gxPLApplication * app,
+                             const gxPLMessage * message, const gxPLId * my_id);
 
 /**
  * @brief Connection type
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @return the type
  */
-gxPLConnectType gxPLConnectionTypeGet (const gxPL * gxpl);
+gxPLConnectType gxPLAppConnectionType (const gxPLApplication * app);
 
 /**
  * @brief Return number of devices
  *
  * @return
  */
-int gxPLDeviceCount (gxPL * gxpl);
+int gxPLAppDeviceCount (gxPLApplication * app);
 
 /**
  * @brief Return a device at a given index.
@@ -112,7 +123,7 @@ int gxPLDeviceCount (gxPL * gxpl);
  * @param index
  * @return If the index is out of range, return NULL
  */
-gxPLDevice * gxPLDeviceAt (gxPL * gxpl, int index);
+gxPLDevice * gxPLAppDeviceAt (gxPLApplication * app, int index);
 
 /**
  * @brief Return index for a given device
@@ -120,47 +131,47 @@ gxPLDevice * gxPLDeviceAt (gxPL * gxpl, int index);
  * @param index
  * @return the index, -1 if not found
  */
-int gxPLDeviceIndex (gxPL * gxpl, const gxPLDevice * device);
+int gxPLAppDeviceIndex (gxPLApplication * app, const gxPLDevice * device);
 
 /**
  * @brief Stop all devices
- * 
+ *
  * Usually in preparation for shutdown, but that isn't the only possible reason.
- * It is not necessary to call this function before calling gxPLClose()
- * @param gxpl
- * @return 
+ * It is not necessary to call this function before calling gxPLAppClose()
+ * @param app
+ * @return
  */
-int gxPLDeviceDisableAll (gxPL * gxpl);
+int gxPLAppDisableAllDevice (gxPLApplication * app);
 
 /**
  * @brief Adds a new device on the network
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param vendor_id pointer to the vendor id
  * @param device_id pointer to the device id
  * @param instance_id pointer to the instance id
  * @return pointer on the device, NULL if error occurs
  */
-gxPLDevice * gxPLDeviceAdd (gxPL * gxpl, const char * vendor_id,
-                            const char * device_id, const char * instance_id);
+gxPLDevice * gxPLAppAddDevice (gxPLApplication * app, const char * vendor_id,
+                               const char * device_id, const char * instance_id);
 
 /**
  * @brief Adds a new configurabledevice on the network
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param vendor_id pointer to the vendor id
  * @param device_id pointer to the device id
  * @param filename pointer to the config filename
  * @return pointer on the device, NULL if error occurs
  */
-gxPLDevice * gxPLDeviceConfigAdd (gxPL * gxpl, const char * vendor_id,
-                            const char * device_id, const char * filename);
-                            
+gxPLDevice * gxPLAppAddConfigurableDevice (gxPLApplication * app, const char * vendor_id,
+    const char * device_id, const char * filename);
+
 /**
- * @brief 
- * @param gxpl
+ * @brief
+ * @param app
  * @param device
- * @return 
+ * @return
  */
-int gxPLDeviceRemove (gxPL * gxpl, gxPLDevice * device);
+int gxPLAppRemoveDevice (gxPLApplication * app, gxPLDevice * device);
 
 /**
  * @addtogroup xPLUtil
@@ -174,12 +185,12 @@ int gxPLDeviceRemove (gxPL * gxpl, gxPLDevice * device);
  * The algorithm uses the hardware address of the host and the time of day.
  * Two spaced successive calls of less than one millisecond give the same result.
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param id the generated id string
  * @param len length of the generated string not including the terminating null character
  * @return length of the generated string, -1 if error occurs
  */
-int gxPLGenerateUniqueId (const gxPL * gxpl, char * id, int len);
+int gxPLGenerateUniqueId (const gxPLApplication * app, char * id, int len);
 
 /**
  * @}
@@ -195,27 +206,27 @@ int gxPLGenerateUniqueId (const gxPL * gxpl, char * id, int len);
 /**
  * @brief Function that will be called each valid message reception
  */
-typedef void (* gxPLMessageListener) (gxPL * gxpl, gxPLMessage *, void *);
+typedef void (* gxPLMessageListener) (gxPLApplication * app, gxPLMessage *, void *);
 
 /* internal public functions ================================================ */
 
 /**
  * @brief Add a message listener
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param listener function that will be called each message reception.
  * @param udata pointer to the data passed to the listener
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageListenerAdd (gxPL * gxpl, gxPLMessageListener listener, void * udata);
+int gxPLMessageListenerAdd (gxPLApplication * app, gxPLMessageListener listener, void * udata);
 
 /**
  * @brief Remove a message listener
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param listener the listener to remove
  * @return 0, -1 if an error occurs
  */
-int gxPLMessageListenerRemove (gxPL * gxpl, gxPLMessageListener listener);
+int gxPLMessageListenerRemove (gxPLApplication * app, gxPLMessageListener listener);
 
 /**
  * @}
@@ -282,42 +293,50 @@ xVector * gxPLIoLayerList (void);
 /**
  * @brief Local network address as a string
  *
- * @param gxpl pointer to a gxPL object
- * @return the address as a string, NULL if an error occurs
+ * @param app pointer to a gxPLApplication object
+ * @return network address as a string, NULL if an error occurs
  */
-const char * gxPLIoLocalAddrGet (const gxPL * gxpl);
+const char * gxPLIoLocalAddrGet (const gxPLApplication * app);
+
+/**
+ * @brief Local network address list as a vector of strings
+ *
+ * @param app pointer to a gxPLApplication object
+ * @return the vector of strings, NULL if an error occurs
+ */
+const xVector * gxPLIoLocalAddrList (const gxPLApplication * app);
 
 /**
  * @brief Broadcast network address as a string
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @return the address as a string, NULL if an error occurs
  */
-const char * gxPLIoBcastAddrGet (const gxPL * gxpl);
+const char * gxPLIoBcastAddrGet (const gxPLApplication * app);
 
 /**
  * @brief Local Network informations
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @return network infos, NULL if an error occurs
  */
-const gxPLIoAddr * gxPLIoInfoGet (const gxPL * gxpl);
+const gxPLIoAddr * gxPLIoInfoGet (const gxPLApplication * app);
 
 /**
  * @brief Name of the network interface on the system
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @return the name, NULL if an error occurs
  */
-const char * gxPLIoInterfaceGet (const gxPL * gxpl);
+const char * gxPLIoInterfaceGet (const gxPLApplication * app);
 
 /**
  * @brief Name of the underlying layer of the network
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @return the name, NULL if an error occurs
  */
-const char * gxPLIoLayerGet (const gxPL * gxpl);
+const char * gxPLIoLayerGet (const gxPLApplication * app);
 
 /**
  * @brief System call for device-specific input/output operations
@@ -328,22 +347,22 @@ const char * gxPLIoLayerGet (const gxPL * gxpl);
  * completely on the request code. Request codes are often device-specific.
  *
  * -  \b gxPLIoFuncGetBcastAddr
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
+ *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
  *    Broadcast address on the network.
- * -  \b gxPLIoFuncGetLocalAddr
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncGetLocalAddr, gxPLIoAddr * local_addr)
+ * -  \b gxPLIoFuncGetNetInfo
+ *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetNetInfo, gxPLIoAddr * local_addr)
  *    Local address associated with this machine on the network.
  * -  \b gxPLIoFuncNetAddrToString
- *    \code int gxPLIoCtl (gxPL * gxpl, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
+ *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
  *    Converts a network address to a corresponding character string
  * .
  *
- * @param gxpl pointer to a gxPL object
+ * @param app pointer to a gxPLApplication object
  * @param req request code
  * @param ... optional parameters
  * @return 0, -1 if an error occurs
  */
-int gxPLIoCtl (gxPL * gxpl, int req, ...);
+int gxPLIoCtl (gxPLApplication * app, int req, ...);
 
 /**
  * @}
@@ -355,13 +374,13 @@ int gxPLIoCtl (gxPL * gxpl, int req, ...);
 
 /*
  * @brief Create a new xPL device
- * @param gxpl
+ * @param app
  * @param vendor_id
  * @param device_id
  * @param instance_id
- * @return 
+ * @return
  */
-gxPLDevice * gxPLDeviceNew (gxPL * gxpl,
+gxPLDevice * gxPLDeviceNew (gxPLApplication * app,
                             const char * vendor_id,
                             const char * device_id,
                             const char * instance_id);
@@ -380,10 +399,10 @@ gxPLDevice * gxPLDeviceNew (gxPL * gxpl,
  * @param filename
  * @return
  */
-gxPLDevice * gxPLDeviceConfigNew (gxPL * gxpl, const char * vendor_id,
-    const char * device_id,
-    const char * filename);
-                            
+gxPLDevice * gxPLDeviceConfigNew (gxPLApplication * app, const char * vendor_id,
+                                  const char * device_id,
+                                  const char * filename);
+
 /*
  * @brief Release an xPL device
  * @param device
@@ -408,7 +427,7 @@ void gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
 int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
 
 /*
- * @brief 
+ * @brief
  * @param setting
  * @param argc
  * @param argv

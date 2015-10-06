@@ -4,22 +4,22 @@ Using Configurable services
 
 ## Introduction 
 
-gxPL fully supports the xPL device configuration
+gxPLApplication fully supports the xPL device configuration
 protocol.  The protocol allows your xPL program to be configured remotely by
 applications like DCM or xPLHAL and preserve those settings locally,
 automatically reloading the settings/configuration the next time your
 application starts.
 
 Ideally, you would want to expose all configurable elements of your
-application to gxPL.  Doing so grants you customization and persistance
+application to gxPLApplication.  Doing so grants you customization and persistance
 with no additional effort on your behalf and provides a means for users to
 configure your program without having to have a seperate configuration program
 or confusing command startup options.
 
 
-## Integrating configuration into gxPL applications
+## Integrating configuration into gxPLApplication applications
 
-If you have an existing gxPL application, you can get automatic support
+If you have an existing gxPLApplication application, you can get automatic support
 for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
@@ -63,9 +63,9 @@ this service is sent with the
 gxPLDeviceMessageSend(myDevice, myMessage);
 </pre>
 
-instead of the more generic *gxPLMessageSend()*.  The reason is that if the
+instead of the more generic *gxPLAppBroadcastMessage()*.  The reason is that if the
 services instance ID is changed by the user and you continue to use the
-simpler *gxPLMessageSend()* on *gxPLMessage* instances you created earlier, your
+simpler *gxPLAppBroadcastMessage()* on *gxPLMessage* instances you created earlier, your
 messages source fields may no longer match what the services identifiers are
 now.  *gxPLDeviceMessageSend()* makes sure (and corrects, if needed) they
 always match.
@@ -256,7 +256,7 @@ frustrated that what they expect doesn't work.
 ## Overview of the xPL device configuration process
 
 This is an overview of how configuration works in xPL.  For the most part,
-gxPL does this all for you, so this is mostly to understand what is going
+gxPLApplication does this all for you, so this is mostly to understand what is going
 on under the hood.  
 
 The general xPL configuration process goes like this:

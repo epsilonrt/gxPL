@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sysio/vector.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
@@ -41,6 +42,7 @@ typedef struct udp_data {
   int ifd;
   int iport;
   struct in_addr local_addr;
+  xVector addr_list;
 } udp_data;
 
 /* macros =================================================================== */
@@ -49,11 +51,24 @@ typedef struct udp_data {
 /* types ==================================================================== */
 /* private variables ======================================================== */
 /* private functions ======================================================== */
+// -----------------------------------------------------------------------------
+int
+prvIpMatch (const void *key1, const void *key2) {
+
+  return strcmp ( (const char *) key1, (const char *) key2);
+}
+
+// -----------------------------------------------------------------------------
+const void *
+prvIpKey (const void * ip) {
+
+  return ip;
+}
 
 /* -----------------------------------------------------------------------------
  * Make a fd non-blocking */
 static int
-set_nonblock (int fd) {
+prvSetSocketNonblock (int fd) {
   int status;
 
   if ( (status = fcntl (fd, F_GETFL, 0)) != -1) {
@@ -63,14 +78,13 @@ set_nonblock (int fd) {
   return -1;
 }
 
-
 /* -----------------------------------------------------------------------------
  * Try to increase the receive buffer as big as possible.
  * if we make it bigger, return 0.
  * Otherwise, if no change, -1
  */
 static int
-maximize_rxbuffer_size (int fd) {
+prvMaximizeRxbufferSize (int fd) {
   int initial_size, ideal_size, final_size;
   socklen_t size_len = sizeof (int);
 
@@ -78,12 +92,12 @@ maximize_rxbuffer_size (int fd) {
   if (getsockopt (fd, SOL_SOCKET, SO_RCVBUF, &initial_size, &size_len) != 0) {
 
     PERROR ("Unable to read receive socket buffer size - %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
   }
   else {
 
     PDEBUG ("Initial receive socket buffer size is %d bytes",
-          initial_size);
+            initial_size);
   }
 
   /* Try to increase the buffer (maybe multiple times) */
@@ -93,7 +107,7 @@ maximize_rxbuffer_size (int fd) {
     if (setsockopt (fd, SOL_SOCKET, SO_RCVBUF, &ideal_size, sizeof (int)) != 0) {
 
       PDEBUG ("Not able to set receive buffer to %d bytes - retrying",
-            ideal_size);
+              ideal_size);
       ideal_size -= 64000;
       continue;
     }
@@ -103,12 +117,12 @@ maximize_rxbuffer_size (int fd) {
     if (getsockopt (fd, SOL_SOCKET, SO_RCVBUF, &final_size, &size_len) != 0) {
 
       PERROR ("Unable to read receive socket buffer size - %s (%d)",
-            strerror (errno), errno);
+              strerror (errno), errno);
     }
     else {
 
       PDEBUG ("Actual receive socket buffer size is %d bytes",
-            final_size);
+              final_size);
     }
 
     return (final_size > initial_size) ? 0 : -1;
@@ -126,7 +140,7 @@ maximize_rxbuffer_size (int fd) {
  * Otherwise, install the name as the interface and return 0
  */
 static int
-find_default_iface (int fd, gxPLIo * io) {
+prvFindDefaultIface (int fd, gxPLIo * io) {
   struct ifconf iflist;
   struct ifreq * ifr;
   struct ifreq ifinfo;
@@ -164,7 +178,7 @@ find_default_iface (int fd, gxPLIo * io) {
     }
 
     PDEBUG ("Checking if interface %s is valid w/flags 0x%x",
-          ifinfo.ifr_name, ifinfo.ifr_flags);
+            ifinfo.ifr_name, ifinfo.ifr_flags);
 
     // Insure this interface is active and not loopback
     if ( (ifinfo.ifr_flags & IFF_UP) == 0) {
@@ -182,7 +196,7 @@ find_default_iface (int fd, gxPLIo * io) {
     // If successful, use this interface
     strcpy (io->setting->iface, ifr[i].ifr_name);
     PDEBUG ("Choose interface %s as default interface",
-          io->setting->iface);
+            io->setting->iface);
     return 0;
   }
 
@@ -194,7 +208,7 @@ find_default_iface (int fd, gxPLIo * io) {
  * Create a socket for broadcasting messages
  */
 static int
-make_broadcast_connection (gxPLIo * io) {
+prvMakeBroadcastConnection (gxPLIo * io) {
   int fd;
   int flag = 1;
   struct protoent *ppe;
@@ -212,7 +226,7 @@ make_broadcast_connection (gxPLIo * io) {
   if ( (fd = socket (AF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
 
     PERROR ("Unable to create broadcast socket %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
     return -1;
   }
 
@@ -221,7 +235,7 @@ make_broadcast_connection (gxPLIo * io) {
                   sizeof (flag)) < 0) {
 
     PERROR ("Unable to set SO_BROADCAST on socket %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
     close (fd);
     return -1;
   }
@@ -229,7 +243,7 @@ make_broadcast_connection (gxPLIo * io) {
   // See if we need to find a default interface
   if (strlen (io->setting->iface) == 0) {
 
-    if (find_default_iface (fd, io)) {
+    if (prvFindDefaultIface (fd, io)) {
 
       PERROR ("Could not find a working, non-loopback network interface");
       close (fd);
@@ -273,19 +287,19 @@ make_broadcast_connection (gxPLIo * io) {
   dp->bcast_addr.sin_port = htons (XPL_PORT);
 
   dp->ofd = fd;
-  set_nonblock (fd);
+  prvSetSocketNonblock (fd);
 
   // And we are done
   PDEBUG ("Assigned broadcast address to %s:%d",
-        inet_ntoa (dp->bcast_addr.sin_addr),
-        XPL_PORT);
+          inet_ntoa (dp->bcast_addr.sin_addr),
+          XPL_PORT);
   return 0;
 }
 
 /* -----------------------------------------------------------------------------
  * make a bind connection */
 static int
-make_connection (gxPLIo * io) {
+prvMakeConnection (gxPLIo * io) {
   int fd;
   int flag = 1;
   struct protoent *ppe;
@@ -315,7 +329,7 @@ make_connection (gxPLIo * io) {
   /* Attempt to creat the socket */
   if ( (fd = socket (PF_INET, SOCK_DGRAM, ppe->p_proto)) < 0) {
     PERROR ("Unable to create listener socket %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
     return -1;
   }
 
@@ -325,7 +339,7 @@ make_connection (gxPLIo * io) {
                     sizeof (flag)) < 0) {
 
       PERROR ("Unable to set SO_REUSEADDR on socket %s (%d)",
-            strerror (errno), errno);
+              strerror (errno), errno);
       close (fd);
       return -1;
     }
@@ -336,7 +350,7 @@ make_connection (gxPLIo * io) {
                   sizeof (flag)) < 0) {
 
     PERROR ("Unable to set SO_BROADCAST on socket %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
     close (fd);
     return -1;
   }
@@ -346,7 +360,7 @@ make_connection (gxPLIo * io) {
               socket_size)) < 0) {
 
     PERROR ("Unable to bind listener socket to port %d, %s (%d)",
-          ntohs (socket_info.sin_port), strerror (errno), errno);
+            ntohs (socket_info.sin_port), strerror (errno), errno);
     close (fd);
     return -1;
   }
@@ -358,7 +372,7 @@ make_connection (gxPLIo * io) {
                      (socklen_t *) &socket_size)) {
 
       PERROR ("Unable to fetch socket info for bound listener, %s (%d)",
-            strerror (errno), errno);
+              strerror (errno), errno);
       close (fd);
       return -1;
     }
@@ -371,15 +385,15 @@ make_connection (gxPLIo * io) {
 
     io->setting->connecttype = gxPLConnectStandAlone;
   }
-  set_nonblock (dp->ifd);
-  maximize_rxbuffer_size (dp->ifd);
+  prvSetSocketNonblock (dp->ifd);
+  prvMaximizeRxbufferSize (dp->ifd);
   return 0;
 }
 
 /* -----------------------------------------------------------------------------
  * Figure out what sort of connection to make and do it */
 static int
-make_bind_connection (gxPLIo * io) {
+prvMakeBindConnection (gxPLIo * io) {
 
   /* Try an stand along connection */
   if ( (io->setting->connecttype == gxPLConnectStandAlone) ||
@@ -388,34 +402,90 @@ make_bind_connection (gxPLIo * io) {
 
     /* Attempt the connection */
     PDEBUG ("Attemping standalone xPL connection");
-    if (make_connection (io) < 0) {
+    if (prvMakeConnection (io) < 0) {
 
       /* If we failed and this what we want, bomb out */
       PERROR ("Standalone connect failed - %d %d",
-            io->setting->connecttype, gxPLConnectStandAlone);
+              io->setting->connecttype, gxPLConnectStandAlone);
       return -1;
     }
 
     PDEBUG ("xPL Starting in standalone mode on port %d",
-          dp->iport);
+            dp->iport);
     return 0;
   }
 
   /* Try a hub based connection */
   PDEBUG ("Attempting via hub xPL connection");
-  if (make_connection (io) < 0) {
+  if (prvMakeConnection (io) < 0) {
 
     return -1;
   }
 
   PDEBUG ("xPL Starting in Hub mode on port %d",
-        dp->iport);
+          dp->iport);
+  return 0;
+}
+
+
+/* -----------------------------------------------------------------------------
+ */
+static int
+prvBuildLocalIpList (gxPLIo * io) {
+  struct ifconf iface_list;
+  struct ifreq * iface;
+  int len = 5;
+
+  char * buf = calloc (len, sizeof (struct ifreq));
+  assert (buf);
+  len *= sizeof (struct ifreq);
+
+  /* Get our interfaces */
+  iface_list.ifc_len = len;
+
+  while (iface_list.ifc_len >= len) {
+
+    iface_list.ifc_buf = buf;
+
+    if (ioctl (dp->ifd, SIOCGIFCONF, &iface_list) != 0) {
+
+      free (buf);
+      PERROR ("Unable to get IP addr list");
+      return -1;
+    }
+    
+    if (iface_list.ifc_len == len) {
+      
+      len *= 2;
+      buf = realloc (buf, len);
+      iface_list.ifc_len = len;
+    }
+  }
+
+  for (int i = 0; i < (iface_list.ifc_len / sizeof (struct ifreq)); i++) {
+
+    iface = & (iface_list.ifc_req[i]);
+    if (iface->ifr_addr.sa_family == AF_INET) {
+
+      char * src = inet_ntoa ( ( (struct sockaddr_in *) & (iface->ifr_addr))->sin_addr);
+      char * dst = malloc (strlen (src) + 1);
+      assert (dst);
+      strcpy (dst, src);
+      if (iVectorAppend (&dp->addr_list, dst) != 0) {
+
+        free (buf);
+        PERROR ("Unable to append ip addr to list");
+        return -1;
+      }
+    }
+  }
+  free (buf);
   return 0;
 }
 
 // -----------------------------------------------------------------------------
 static int
-iopoll (gxPLIo * io, int * available_data, int timeout_ms) {
+prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
   int ret;
   fd_set set;
   struct timeval timeout;
@@ -459,14 +529,14 @@ gxPLUdpOpen (gxPLIo * io) {
     dp->ofd = -1;
 
     // Setup the broadcasting interface
-    if (make_broadcast_connection (io) < 0) {
+    if (prvMakeBroadcastConnection (io) < 0) {
 
       free (io->pdata);
       return -1;
     }
 
     // Attempt to make bind connection
-    if (make_bind_connection (io) < 0) {
+    if (prvMakeBindConnection (io) < 0) {
       int ret;
 
       ret = close (dp->ofd);
@@ -476,8 +546,11 @@ gxPLUdpOpen (gxPLIo * io) {
       free (io->pdata);
       return -1;
     }
+    
+    iVectorInit (&dp->addr_list, 1, NULL, free);
+    iVectorInitSearch(&dp->addr_list, prvIpKey, prvIpMatch);
 
-    return 0;
+    return prvBuildLocalIpList (io);
   }
 
   return -1;
@@ -513,7 +586,7 @@ gxPLUdpRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 
     // Note the error and bail
     PERROR ("Error reading xPL message from network - %s (%d)",
-          strerror (errno), errno);
+            strerror (errno), errno);
     return -1;
   }
 
@@ -528,21 +601,23 @@ gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * tar
   struct sockaddr * addrdst = (struct sockaddr *) &dp->bcast_addr;
 
   if (target) {
+    
     if ( (target->isbroadcast == 0) && (target->family == gxPLNetFamilyInet4)) {
+      
       a.sin_family = AF_INET;
       memcpy (&a.sin_addr.s_addr, target->addr,  sizeof (a.sin_addr.s_addr));
-      a.sin_port = htons (XPL_PORT);
+      a.sin_port = htons (target->port);
       addrdst = (struct sockaddr *) &a;
     }
   }
 
   // Try to send the message
   if ( (bytes_sent = sendto (dp->ofd, buffer, count, 0, addrdst, addrlen)) != count) {
-    PERROR ("Unable to broadcast message, %s (%d)",
-          strerror (errno), errno);
+    PERROR ("Unable to deliver the message, %s (%d)",
+            strerror (errno), errno);
     return -1;
   }
-  PDEBUG ("Send broadcast %d bytes (of %d attempted)", bytes_sent, count);
+  PDEBUG ("Send %d bytes (of %d attempted)", bytes_sent, count);
 
   return bytes_sent;
 }
@@ -567,7 +642,7 @@ gxPLUdpClose (gxPLIo * io) {
   if (ret != 0) {
     PERROR ("failed to close bind socket: %s", strerror (errno));
   }
-
+  vVectorDestroy (&dp->addr_list);
   free (io->pdata);
   io->pdata = NULL;
   return ret;
@@ -584,7 +659,7 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
     case gxPLIoFuncPoll: {
       int * available_bytes = va_arg (ap, int*);
       int timeout_ms = va_arg (ap, int);
-      ret = iopoll (io, available_bytes, timeout_ms);
+      ret = prvIoPoll (io, available_bytes, timeout_ms);
     }
     break;
 
@@ -601,8 +676,8 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddr, gxPLIoAddr * local_addr)
-    case gxPLIoFuncGetLocalAddr: {
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetNetInfo, gxPLIoAddr * local_addr)
+    case gxPLIoFuncGetNetInfo: {
       gxPLIoAddr * local_addr = va_arg (ap, gxPLIoAddr*);
       local_addr->family = gxPLNetFamilyInet4;
       local_addr->addrlen = sizeof (dp->local_addr.s_addr);
@@ -631,6 +706,36 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrFromString, gxPLIoAddr * net_addr, const char * str_addr)
+    case gxPLIoFuncNetAddrFromString: {
+      gxPLIoAddr * addr = va_arg (ap, gxPLIoAddr*);
+      const char * str_addr = va_arg (ap, char*);
+      struct in_addr net_addr;
+
+      addr->family = gxPLNetFamilyInet4;
+      addr->addrlen = sizeof (net_addr.s_addr);
+      ret = inet_aton (str_addr, &net_addr);
+
+      if (ret != 0) {
+
+        memcpy (addr->addr, &net_addr.s_addr, addr->addrlen);
+        ret = 0;
+      }
+      else {
+
+        ret = -1;
+      }
+    }
+    break;
+
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddrList, const xVector ** addr_list)
+    case gxPLIoFuncGetLocalAddrList: {
+      const xVector ** addr_list = va_arg (ap, xVector**);
+      *addr_list = &dp->addr_list;
+      return 0;
+    }
+    break;
+    
     default:
       errno = EINVAL;
       ret = -1;

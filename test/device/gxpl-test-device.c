@@ -1,6 +1,6 @@
 /*
- * gxpl-test-core.c
- * @brief gxPL Core test
+ * app-test-core.c
+ * @brief gxPLApplication Core test
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -40,7 +40,7 @@
 #define test_new(fmt,...) printf("\nTest %d: " fmt "\n", ++test_count, ##__VA_ARGS__)
 
 /* private variables ======================================================== */
-static gxPL * gxpl;
+static gxPLApplication * app;
 static gxPLDevice * device1, * device2;
 static int test_count;
 
@@ -59,36 +59,36 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_new ("retrieved the requested configuration from the command line");
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   test_ok (setting);
 
   // opens the xPL network
   test_new ("opens the xPL network");
-  gxpl = gxPLOpen (setting);
-  test_ok (gxpl);
+  app = gxPLAppOpen (setting);
+  test_ok (app);
 
 
   // View network information
-  printf ("\nStarting test on %s...\n", gxPLIoInterfaceGet (gxpl));
-  printf ("  listen on  %s:%d\n", gxPLIoLocalAddrGet (gxpl),
-          gxPLIoInfoGet (gxpl)->port);
-  printf ("  broadcast on  %s\n", gxPLIoBcastAddrGet (gxpl));
+  printf ("\nStarting test on %s...\n", gxPLIoInterfaceGet (app));
+  printf ("  listen on  %s:%d\n", gxPLIoLocalAddrGet (app),
+          gxPLIoInfoGet (app)->port);
+  printf ("  broadcast on  %s\n", gxPLIoBcastAddrGet (app));
 
   // gxPLGenerateUniqueId() Test
   test_new ("generates a fairly unique identifier");
   for (int i = 0; i < 32; i++) {
 
-    ret = gxPLGenerateUniqueId (gxpl, str, GXPL_INSTANCEID_MAX);
+    ret = gxPLGenerateUniqueId (app, str, GXPL_INSTANCEID_MAX);
     test_ok (ret == GXPL_INSTANCEID_MAX);
     printf ("Unique id: %s\n", str);
     gxPLTimeDelayMs (1);
   }
 
   test_new ("adds a new device on the network");
-  device1 = gxPLDeviceAdd (gxpl, "epsirt", "test", NULL);
+  device1 = gxPLAppAddDevice (app, "epsirt", "test", NULL);
   test_ok (device1);
-  test_ok (gxPLDeviceCount (gxpl) == 1);
-  test_ok (gxPLDeviceAt (gxpl, 0) == device1);
+  test_ok (gxPLAppDeviceCount (app) == 1);
+  test_ok (gxPLAppDeviceAt (app, 0) == device1);
 
   test_new ("adds a device listener");
   ret = gxPLDeviceListenerAdd (device1, prvDeviceHandler, gxPLMessageAny, NULL, NULL, hello1);
@@ -96,10 +96,10 @@ main (int argc, char **argv) {
 
 
   test_new ("adds a new device on the network");
-  device2 = gxPLDeviceAdd (gxpl, "epsirt", "test", NULL);
+  device2 = gxPLAppAddDevice (app, "epsirt", "test", NULL);
   test_ok (device2);
-  test_ok (gxPLDeviceCount (gxpl) == 2);
-  test_ok (gxPLDeviceAt (gxpl, 1) == device2);
+  test_ok (gxPLAppDeviceCount (app) == 2);
+  test_ok (gxPLAppDeviceAt (app, 1) == device2);
 
   test_new ("adds a device listener");
   ret = gxPLDeviceListenerAdd (device2, prvDeviceHandler, gxPLMessageAny, NULL, NULL, hello2);
@@ -120,7 +120,7 @@ main (int argc, char **argv) {
   for (;;) {
 
     // Main loop
-    ret = gxPLPoll (gxpl, 100);
+    ret = gxPLAppPoll (app, 100);
     test (ret == 0);
 /*    if (gxPLDeviceIsHubConfirmed (device2)) {
       prvSignalHandler (SIGTERM);
@@ -145,7 +145,7 @@ prvSignalHandler (int sig) {
     case SIGINT:
 
       test_new ("close the xPL network");
-      ret = gxPLClose (gxpl);
+      ret = gxPLAppClose (app);
       test_ok (ret == 0);
 
       printf ("\neverything was closed.\nHave a nice day !\n");
@@ -162,7 +162,7 @@ prvSignalHandler (int sig) {
 static void
 prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p) {
   char * str = (char *) p;
-  int i = gxPLDeviceIndex (gxPLDeviceParentGet (device), device) + 1;
+  int i = gxPLAppDeviceIndex (gxPLDeviceParentGet (device), device) + 1;
 
   printf ("\n********* device%d: [%s] *********\n", i, str);
 }

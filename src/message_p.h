@@ -1,6 +1,6 @@
 /**
  * @file message_p.h
- * gxPLib internal include
+ * gxPLMessage internal include
  * 
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

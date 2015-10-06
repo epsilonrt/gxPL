@@ -84,7 +84,7 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLRandomSeed (gxPL * gxpl) {
+gxPLRandomSeed (gxPLApplication * app) {
 
   return time (NULL);
 }

@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = gxpl-test-device
+TARGET = gxpl-test-hub
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..

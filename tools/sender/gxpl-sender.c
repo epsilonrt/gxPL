@@ -1,5 +1,5 @@
 /**
- * @file gxpl-sender.c
+ * @file app-sender.c
  * Command Line xPL message sending tool
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -32,7 +32,7 @@ static gxPLMessage * prvCreateMessage (int argc, char *argv[]);
 int
 main (int argc, char * argv[]) {
   int ret;
-  gxPL * net;
+  gxPLApplication * app;
   gxPLDevice * device;
   gxPLSetting * setting;
   gxPLMessage * message;
@@ -43,21 +43,21 @@ main (int argc, char * argv[]) {
     exit (EXIT_SUCCESS);
   }
 
-  setting = gxPLSettingNewFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
 
   message = prvCreateMessage (argc, argv);
 
   // opens the xPL network
-  net = gxPLOpen (setting);
-  if (net == NULL) {
+  app = gxPLAppOpen (setting);
+  if (app == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
     exit (EXIT_FAILURE);
   }
 
   // Create device so we can create messages
-  if ( (device = gxPLDeviceNew (net,
+  if ( (device = gxPLDeviceNew (app,
                                 gxPLMessageSourceVendorIdGet (message),
                                 gxPLMessageSourceDeviceIdGet (message),
                                 gxPLMessageSourceInstanceIdGet (message))) == NULL) {
@@ -81,7 +81,7 @@ main (int argc, char * argv[]) {
     printf("Success, %d bytes transmitted\n ", ret);
   }
 
-  if (gxPLClose (net) != 0) {
+  if (gxPLAppClose (app) != 0) {
 
     fprintf (stderr, "Unable to close xPL network\n");
   }

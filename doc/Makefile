@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 
-PROJECT_NAME = gxpl
+PROJECT_NAME = app
 
 # Chemin relatif du répertoire racine de xPL4Linux
 PROJECT_TOPDIR = ..
