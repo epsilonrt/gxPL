@@ -1,5 +1,5 @@
 /**
- * @file app-logger.c
+ * @file
  * Simple program to monitor for any message and any device changes and print them
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

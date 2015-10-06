@@ -1,5 +1,5 @@
 /**
- * @file app-sender.c
+ * @file
  * Command Line xPL message sending tool
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -18,8 +18,6 @@
 /* constants ================================================================ */
 #define DEFAULT_SOURCE "epsirt-xplsend.default"
 #define DEFAULT_MSG_TYPE gxPLMessageCommand
-
-/* private variables ======================================================== */
 
 /* public variables ========================================================= */
 extern const char* __progname;
@@ -57,7 +55,7 @@ main (int argc, char * argv[]) {
   }
 
   // Create device so we can create messages
-  if ( (device = gxPLDeviceNew (app,
+  if ( (device = gxPLAppAddDevice (app,
                                 gxPLMessageSourceVendorIdGet (message),
                                 gxPLMessageSourceDeviceIdGet (message),
                                 gxPLMessageSourceInstanceIdGet (message))) == NULL) {

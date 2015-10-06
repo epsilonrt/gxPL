@@ -5,10 +5,10 @@
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
   <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
-  <Project Name="doc" Path="doc/doc.project" Active="No"/>
+  <Project Name="doc" Path="doc/doc.project" Active="Yes"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
-  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="Yes"/>
+  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxpl-xbee" Path="tools/xbee/gxpl-xbee.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
@@ -18,8 +18,11 @@
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
+  <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
+  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
+  <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxpl-hub" ConfigName="Debug"/>
       <Project Name="gxpl-logger" ConfigName="Debug"/>
@@ -39,6 +42,9 @@
       <Project Name="gxpl-test" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test-hub" ConfigName="Debug"/>
+      <Project Name="gxpl-hub-service" ConfigName="Debug"/>
+      <Project Name="gxpl-tools" ConfigName="Debug"/>
+      <Project Name="gxpl-examples" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -60,6 +66,9 @@
       <Project Name="gxpl-test" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test-hub" ConfigName="Release"/>
+      <Project Name="gxpl-hub-service" ConfigName="Release"/>
+      <Project Name="gxpl-tools" ConfigName="Release"/>
+      <Project Name="gxpl-examples" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

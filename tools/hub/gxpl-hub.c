@@ -1,6 +1,6 @@
 /**
- * @file app-hub.c
- * Implementation of an gxPLApplication Hub using gxPLib
+ * @file
+ * Implementation of an xPL Hub using gxPLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -18,337 +18,268 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <syslog.h>
+#include <sysio/log.h>
 
 #include <gxPL.h>
 #include "version-git.h"
 
 /* constants ================================================================ */
 #define MAX_HUB_RESTARTS 10000
-#define LOG_BUFF_MAX 512
 
 /* private variables ======================================================== */
-static bool daemonMode = true;
-static bool debugMode = false;
-/* static buffer to create log messages */
-static char logMessageBuffer[LOG_BUFF_MAX];
-/* Used to track hubs */
-static pid_t hubPid = 0;
+static pid_t hub_pid = 0;
+static gxPLHub * hub;
 
 /* private functions ======================================================== */
+static void prvPrintUsage (void);
+static void prvSupervisorSignalHandler (int sig);
+static void prvHubSignalHandler (int sig);
+static void prvSuperviseHub (gxPLSetting * setting);
+static int prvRunHub (gxPLSetting * setting);
 
-/* -----------------------------------------------------------------------------
- * Private wrapper for messages */
-static void 
-writeMessage (int msgType, char * theFormat, va_list theParms) {
-  time_t rightNow;
+/* main ===================================================================== */
+int
+main (int argc, char * argv[]) {
+  gxPLSetting * setting;
 
-  /* Write a time stamp */
-  if (!daemonMode) {
-    time (&rightNow);
-    strftime (logMessageBuffer, 40, "%y/%m/%d %H:%M:%S ", localtime (&rightNow));
+  vLogInit(LOG_UPTO (LOG_INFO));
+  
+  // retrieved the requested configuration from the command line
+  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectStandAlone);
+  if (setting == NULL) {
 
-    switch (msgType) {
-      case LOG_ERR:
-        strcat (logMessageBuffer, "ERROR");
-        break;
-      case LOG_WARNING:
-        strcat (logMessageBuffer, "WARNING");
-        break;
-      case LOG_INFO:
-        strcat (logMessageBuffer, "INFO");
-        break;
-      case LOG_DEBUG:
-        strcat (logMessageBuffer, "DEBUG");
-        break;
-    }
-
-    strcat (logMessageBuffer, ": ");
-  }
-  else {
-    logMessageBuffer[0] = '\0';
+    prvPrintUsage();
+    exit (EXIT_FAILURE);
   }
 
-  /* Convert formatted message */
-  vsprintf (&logMessageBuffer[strlen (logMessageBuffer)], theFormat, theParms);
+  // Now we detach (daemonize ourself)
+  if (setting->nodaemon == 0) {
 
-  /* Write to the console or system log file */
-  if (daemonMode) {
-    syslog (msgType, logMessageBuffer);
-  }
-  else {
-    strcat (logMessageBuffer, "\n");
-    fprintf (stderr, logMessageBuffer);
-  }
-}
+    vLogDaemonize (true);
 
-/* -----------------------------------------------------------------------------
- * Write an information message out */
-static void 
-writeInfo (char * theFormat, ...) {
-  va_list theParms;
-  va_start (theParms, theFormat);
-  writeMessage (LOG_INFO, theFormat, theParms);
-  va_end (theParms);
-}
-
-/* -----------------------------------------------------------------------------
- * Write an error message out */
-static void 
-writeError (char * theFormat, ...) {
-  va_list theParms;
-  va_start (theParms, theFormat);
-  writeMessage (LOG_ERR, theFormat, theParms);
-  va_end (theParms);
-}
-
-/* -----------------------------------------------------------------------------
- * Write a debug message out */
-static void writeDebug (char * theFormat, ...) {
-  va_list theParms;
-
-  if (debugMode) {
-    va_start (theParms, theFormat);
-    writeMessage (LOG_DEBUG, theFormat, theParms);
-    va_end (theParms);
-  }
-}
-
-/* -----------------------------------------------------------------------------
- * parseCmdLine will handles command line switches.  
- * Valid switches are: 
- *  -interface x - set interface to use 
- *  -debug - set debugging mode 
- *  -xpldebug - set debugging and enable xPL debugging 
- *  -nodaemon - Dosn't disconnect from the console */
-static bool 
-parseCmdLine (int *argc, char *argv[]) {
-  int swptr;
-  int newcnt = 0;
-
-  /* Handle each item of the command line.  If it starts with a '-', then */
-  /* process it as a switch.  If not, then copy it to a new position in   */
-  /* the argv list and up the new parm counter.                           */
-  for (swptr = 0; swptr < *argc; swptr++) {
-    
-    /* If it doesn't begin with a '-', it's not a switch. */
-    if (argv[swptr][0] != '-') {
-      if (swptr != newcnt) {
-        argv[++newcnt] = argv[swptr];
-      }
-    }
-    else {
-      
-      /* Check for debug mode */
-      if (!strcmp (argv[swptr], "-debug")) {
-        debugMode = true;
-        daemonMode = false;
-        writeDebug ("Debuging mode enabled");
-        continue;
-      }
-
-      /* Check for debug mode */
-      if (!strcmp (argv[swptr], "-xpldebug")) {
-        debugMode = true;
-        daemonMode = false;
-        gxPLsetDebugging (true);
-        PERROR ("xPL Debug mode enabled");
-        continue;
-      }
-
-      /* Check for daemon mode */
-      if (!strcmp (argv[swptr], "-nodaemon")) {
-        daemonMode = false;
-        writeInfo ("Running on console");
-        continue;
-      }
-
-      /* Anything left is unknown */
-      writeError ("Unknown switch `%s'", argv[swptr]);
-      return false;
-    }
-  }
-
-  /* Set in place the new argument count and exit */
-  *argc = newcnt + 1;
-  return true;
-}
-
-/* -----------------------------------------------------------------------------
- * Print command usage info out */
-static void 
-printUsage (char * ourName) {
-  fprintf (stderr, "%s - gxPLApplication Hub\n", ourName);
-  fprintf (stderr, "Copyright (c) 2005, Gerald Duprey\n\n");
-  fprintf (stderr, "Usage: %s [-debug] [-xpldebug] [-nodaemon] [-ip x] [-interface x]\n", ourName);
-  fprintf (stderr, "  -debug -- enable hub debug messages\n");
-  fprintf (stderr, "  -xpldebug -- enable hub and gxPLib debugging messagaes\n");
-  fprintf (stderr, "  -nodaemon -- don't detach -- run from the console\n");
-  fprintf (stderr, "  -interface x -- Use interface named x (i.e. eth0) as network interface\n");
-  fprintf (stderr, "  -ip x -- Bind to specified IP address for xPL\n");
-}
-
-
-/* -----------------------------------------------------------------------------
- * Shutdown gracefully if user hits ^C or received TERM signal */
-static void 
-hubShutdownHandler (int onSignal) {
-  gxPLstopHub();
-  gxPLAppClose();
-  exit (0);
-}
-
-/* -----------------------------------------------------------------------------
- * This is the hub code itself.  */
-static void 
-runHub (void) {
-  /* Start gxPLib */
-  if (!gxPLSettingNew (gxPLConnectStandAlone)) {
-    writeError ("Unable to start gxPLib -- an xPL hub appears to already be running");
-    exit (1);
-  }
-  PERROR ("gxPLib started");
-
-  /* Start gxPLApplication Hub */
-  gxPLstartHub();
-
-  /* Install signal traps for proper shutdown */
-  signal (SIGTERM, hubShutdownHandler);
-  signal (SIGINT, hubShutdownHandler);
-
-  /* Hand control over to gxPLib */
-  writeInfo ("gxPLApplication Hub now running");
-  gxPLprocessMessages (-1);
-  exit (0);
-}
-
-/* -----------------------------------------------------------------------------
- * Shutdown gracefully if user hits ^C or received TERM signal */
-static void 
-supervisorShutdownHandler (int onSignal) {
-  int childStatus;
-
-  writeInfo ("Received termination signal -- starting shutdown");
-
-  /* Stop the child and wait for it */
-  if ( (hubPid != 0) && !kill (hubPid, SIGTERM)) {
-    waitpid (hubPid, &childStatus, 0);
-  }
-
-  /* Exit */
-  exit (0);
-}
-
-/* -----------------------------------------------------------------------------
- * Start the hub and monitor it.  If it stops for any reason, restart it */
-static void 
-superviseHub (void) {
-  int hubRestartCount = 0;
-  int childStatus;
-
-  /* Begin hub supervision */
-
-  /* Install signal traps for proper shutdown */
-  signal (SIGTERM, supervisorShutdownHandler);
-  signal (SIGINT, supervisorShutdownHandler);
-
-  /* To supervise the hub, we repeatedly fork ourselves each time we */
-  /* determine the hub is not running.  We maintain a circuit breaker*/
-  /* to prevent an endless spawning if the hub just can't run        */
-  for (;;) {
-    /* See if we can still do this */
-    if (hubRestartCount == MAX_HUB_RESTARTS) {
-      writeError ("app-hub has died %d times -- something may be wrong -- terminating supervisor", MAX_HUB_RESTARTS);
-      exit (1);
-    }
-
-    /* Up the restart count */
-    hubRestartCount++;
-
-    /* Fork off the hub */
-    switch (hubPid = fork()) {
-      case 0:            /* child */
-        /* Close standard I/O and become our own process group */
+    // Fork ourselves
+    switch (fork()) {
+      case 0:            // child
+        // Close standard I/O and become our own process group
         close (fileno (stdin));
         close (fileno (stdout));
         close (fileno (stderr));
         setpgrp();
 
-        /* Run the hub */
-        runHub();
-
-        /* If we come back, something bad likely happened */
-        exit (1);
-
+        // Start he hub and keep it running
+        prvSuperviseHub (setting);
         break;
-      default:           /* parent */
-        writeDebug ("Spawned app-hub process, PID=%d, Spawn count=%d", hubPid, hubRestartCount);
+
+      default:           // parent
         break;
-      case -1:           /* error */
-        writeError ("Unable to spawn app-hub supervisor, %s (%d)", strerror (errno), errno);
-        exit (1);
+
+      case -1:           // error
+        PERROR ("unable to spawn gxpl-hub supervisor, %s (%d)",
+              strerror (errno), errno);
+        exit (EXIT_FAILURE);
+    }
+  }
+  else {
+
+    // When running non-detached, just do the hub work
+    if (prvRunHub (setting) != 0) {
+
+      exit (EXIT_FAILURE);
+    }
+  }
+  return 0;
+}
+
+/* private functions ======================================================== */
+
+// -----------------------------------------------------------------------------
+//  This is the hub code itself.
+static int
+prvRunHub (gxPLSetting * setting) {
+  int ret;
+
+  if ( (hub = gxPLHubOpen (setting)) == NULL) {
+
+    PERROR ("Unable to start the hub");
+    return -1;
+  }
+
+  // Install signal traps for proper shutdown
+  signal (SIGTERM, prvHubSignalHandler);
+  signal (SIGINT, prvHubSignalHandler);
+
+  if (setting->nodaemon) {
+    gxPLApplication * app = gxPLHubApplication (hub);
+    const xVector * ip_list = gxPLIoLocalAddrList (app);
+
+    printf ("Starting hub test on xPL port %d for IP below:\n",
+            gxPLIoInfoGet (app)->port);
+    for (int i = 0; i < iVectorSize (ip_list); i++) {
+      printf ("  %s\n", (const char *) pvVectorGet (ip_list, i));
+    }
+    printf ("Broadcast on  %s - %s\n", gxPLIoInterfaceGet (app),
+            gxPLIoBcastAddrGet (app));
+    printf ("Press Ctrl+C to abort ...\n");
+  }
+  else {
+
+    vLog (LOG_NOTICE, "xPL Hub now running");
+  }
+
+  // Hand control over to gxPLib
+  for (;;) {
+
+    ret = gxPLHubPoll (hub, 100);
+    if (ret != 0) {
+
+      PERROR ("Hub failure, exiting !");
+      return -1;
+    }
+  }
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+//  Start the hub and monitor it.  If it stops for any reason, restart it
+static void
+prvSuperviseHub (gxPLSetting * setting) {
+  int hub_restart_count = 0;
+  int ret;
+
+  // Begin hub supervision
+
+  // Install signal traps for proper shutdown
+  signal (SIGTERM, prvSupervisorSignalHandler);
+  signal (SIGINT, prvSupervisorSignalHandler);
+
+  // To supervise the hub, we repeatedly fork ourselves each time we
+  // determine the hub is not running.  We maintain a circuit breaker
+  // to prevent an endless spawning if the hub just can't run
+  for (;;) {
+
+    // See if we can still do this
+    if (hub_restart_count == MAX_HUB_RESTARTS) {
+      
+      PERROR ("gxpl-hub has died %d times -- something may be wrong "
+            "-- terminating supervisor", MAX_HUB_RESTARTS);
+      exit (EXIT_FAILURE);
     }
 
+    // Up the restart count
+    hub_restart_count++;
 
-    /* Now we just wait for something bad to happen to our hub */
-    waitpid (hubPid, &childStatus, 0);
-    if (WIFEXITED (childStatus)) {
-      writeInfo ("app-hub exited normally with status %d -- restarting...", WEXITSTATUS (childStatus));
+    // Fork off the hub
+    switch (hub_pid = fork()) {
+      case 0:            // child
+        // Close standard I/O and become our own process group
+        close (fileno (stdin));
+        close (fileno (stdout));
+        close (fileno (stderr));
+        setpgrp();
+
+        // Run the hub
+        if (prvRunHub (setting) != 0) {
+
+          // If we come back, something bad likely happened
+          exit (EXIT_FAILURE);
+        }
+        break;
+
+      default:           // parent
+        PDEBUG ("spawned gxpl-hub process, pid=%d, spawn count=%d",
+                hub_pid, hub_restart_count);
+        break;
+
+      case -1:           // error
+        PERROR ("unable to spawn gxpl-hub supervisor, %s (%d)",
+              strerror (errno), errno);
+        exit (EXIT_FAILURE);
+    }
+
+    // Now we just wait for something bad to happen to our hub
+    waitpid (hub_pid, &ret, 0);
+
+    if (WIFEXITED (ret)) {
+      vLog (LOG_NOTICE, "gxpl-hub exited normally with status %d -- restarting...",
+            WEXITSTATUS (ret));
       continue;
     }
-    if (WIFSIGNALED (childStatus)) {
-      writeInfo ("app-hub died from by receiving unexpected signal %d -- restarting...", WTERMSIG (childStatus));
+
+    if (WIFSIGNALED (ret)) {
+      vLog (LOG_NOTICE, "gxpl-hub died from by receiving unexpected signal %d"
+            " -- restarting...", WTERMSIG (ret));
       continue;
     }
-    writeInfo ("app-hub died from unknown causes -- restarting...");
+
+    vLog (LOG_NOTICE, "gxpl-hub died from unknown causes -- restarting...");
     continue;
   }
 }
 
-
-/* main ===================================================================== */
-int 
-main (int argc, char * argv[]) {
-  
-  /* Check for xPL command parameters */
-  gxPLparseCommonArgs (&argc, argv, true);
-
-  /* Parse Hub command arguments */
-  if (!parseCmdLine (&argc, argv)) {
-    
-    printUsage (argv[0]);
-    exit (1);
-  }
-
-  /* Now we detach (daemonize ourself) */
-  if (daemonMode) {
-    /* Fork ourselves */
-    switch (fork()) {
-      case 0:            /* child */
-        /* Close standard I/O and become our own process group */
-        close (fileno (stdin));
-        close (fileno (stdout));
-        close (fileno (stderr));
-        setpgrp();
-
-        /* Start he hub and keep it running */
-        superviseHub();
-
-        break;
-      default:           /* parent */
-        exit (0);
-        break;
-      case -1:           /* error */
-        writeError ("Unable to spawn app-hub supervisor, %s (%d)", strerror (errno), errno);
-        exit (1);
-    }
-  }
-  else {
-    /* When running non-detached, just do the hub work */
-    runHub();
-  }
-
-
-  return 0;
+// -----------------------------------------------------------------------------
+// Print usage info
+static void
+prvPrintUsage (void) {
+  printf ("%s - xPL Hub\n", __progname);
+  printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
+  printf ("Usage: %s [-i interface] [-d] [-D]\n", __progname);
+  printf ("  -i interface - use interface named interface (i.e. eth0) as network interface\n");
+  printf ("  -d           - enable hub and gxPLib debugging messages\n");
+  printf ("  -D           - do not daemonize -- run from the console\n\n");
 }
+
+// -----------------------------------------------------------------------------
+//  Shutdown gracefully if user hits ^C or received TERM signal
+static void
+prvHubSignalHandler (int sig) {
+  int ret;
+  switch (sig) {
+
+    case SIGTERM:
+    case SIGINT:
+      ret = gxPLHubClose (hub);
+      if (ret != 0) {
+
+        PERROR ("unable to close hub");
+        exit (EXIT_FAILURE);
+      }
+
+      vLog (LOG_NOTICE, "everything was closed. Have a nice day !");
+      exit (EXIT_SUCCESS);
+      break;
+
+    default:
+      break;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// signal handler
+static void
+prvSupervisorSignalHandler (int sig) {
+  int ret;
+
+  vLog (LOG_NOTICE, "received termination signal -- starting shutdown");
+
+  switch (sig) {
+
+    case SIGTERM:
+    case SIGINT:
+      // Stop the child and wait for it
+      if ( (hub_pid != 0) && (kill (hub_pid, SIGTERM) == 0)) {
+
+        waitpid (hub_pid, &ret, 0);
+        if (WIFEXITED (ret) == 0) {
+
+          exit (EXIT_FAILURE);
+        }
+      }
+      exit (EXIT_SUCCESS);
+      break;
+
+    default:
+      break;
+  }
+}
+
 /* ========================================================================== */

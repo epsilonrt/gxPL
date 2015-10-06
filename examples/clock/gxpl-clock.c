@@ -1,5 +1,4 @@
 /**
- * @file
  * @brief  Simple xPL clock device that sends a time update out
  *
  * Copyright (c) 2004, Gerald R. Duprey Jr.

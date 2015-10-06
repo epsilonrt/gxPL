@@ -1,5 +1,5 @@
 /**
- * @file gxPL/util.h
+ * @file
  * xPL Utilities functions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -17,12 +17,13 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 
 /**
- * @defgroup xPLUtil Common Utilities and objects
+ * @defgroup gxPLUtil Utilities
+ * Functions for miscellaneous purpose
  * @{
  */
 
 /**
- * @defgroup xPLUtilText Text functions
+ * @defgroup gxPLUtilText Text functions
  * @{
  */
  
@@ -49,7 +50,7 @@ int gxPLStrCpy (char * dst, const char * src);
  */
 
 /**
- * @defgroup xPLUtilPair Name/Value pairs
+ * @defgroup gxPLUtilPair Name/Value pairs
  * @{
  */
 
@@ -102,7 +103,7 @@ const void * gxPLPairKey (const void * pair);
  */
 
 /**
- * @defgroup xPLUtilId Identifiers
+ * @defgroup gxPLUtilId Identifiers
  * @{
  */
 
@@ -171,7 +172,7 @@ int gxPLIdFromString (gxPLId * dest, char * src);
  */
 
 /**
- * @defgroup xPLUtilSchema Schemas
+ * @defgroup gxPLUtilSchema Schemas
  * @{
  */
 
@@ -228,7 +229,7 @@ int gxPLSchemaIsEmpty (const gxPLSchema * schema);
  */
 
 /**
- * @defgroup xPLUtilTime Time
+ * @defgroup gxPLUtilTime Time
  * @{
  */
 /**

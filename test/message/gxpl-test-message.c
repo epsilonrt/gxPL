@@ -1,6 +1,6 @@
-/*
- * app-test-message.c
- * @brief gxPLApplication Message tests
+/**
+ * @file
+ * gxPLMessage test
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

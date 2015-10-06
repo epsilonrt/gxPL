@@ -1,6 +1,6 @@
 /**
- * @file include/gxPLApplication.h
- * Top level API (public header)
+ * @file
+ * End-user API (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -17,12 +17,15 @@
 
 __BEGIN_C_DECLS
 /* ========================================================================== */
+
+/* api functions ============================================================ */
 /**
- * @defgroup gxPLApi Top Level API
+ * @defgroup gxPLSetting Settings
+ * gxPLSetting is used to pass settings to top-level classes. This class can be
+ * instantiated directly or through the parameters of the command line.
  * @{
  */
 
-/* api functions ============================================================ */
 /**
  * @brief Returns a new gxPLApplication setting from parameters
  *
@@ -41,6 +44,7 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  *    -i / --interface xxx : interface or device used to access the network
  *    -n / --net       xxx : hardware abstraction layer to access the network
  *    -d / --debug         : enable debugging
+ *    -D / --nodaemon      : do not daemonize
  *
  * @param argc number of parameters from main
  * @param argv list of parameters from main
@@ -48,6 +52,18 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  * @return the setting or NULL if error occurs
  */
 gxPLSetting * gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup gxPLApplication Applications
+ * gxPLApplication is the central element of a xPL application.
+ * This class performs all operations to open and close the xPL network,
+ * send and receive messages. An application is needed to create devices.
+ * @{
+ */
 
 /**
  * @brief Opens a new gxPLApplication object
@@ -73,7 +89,24 @@ int gxPLAppClose (gxPLApplication * app);
 int gxPLAppPoll (gxPLApplication * app, int timeout_ms);
 
 /**
- * @brief Send an xPL message
+ * @brief Connection type
+ *
+ * @param app pointer to a gxPLApplication object
+ * @return the type
+ */
+gxPLConnectType gxPLAppConnectionType (const gxPLApplication * app);
+
+/**
+ * @}
+ */
+
+/**
+ * @addtogroup gxPLMessage
+ * @{
+ */
+
+/**
+ * @brief Broadcast a message
  *
  * @param app pointer to a gxPLApplication object
  * @param message pointer to the message
@@ -82,14 +115,15 @@ int gxPLAppPoll (gxPLApplication * app, int timeout_ms);
 int gxPLAppBroadcastMessage (gxPLApplication * app, const gxPLMessage * message);
 
 /**
- * @brief Send an xPL message
+ * @brief Send a targeted xPL message
  *
  * @param app pointer to a gxPLApplication object
  * @param message pointer to the message
+ * @param target io adress of the target
  * @return number of bytes send, -1 if error occurs
  */
 int gxPLAppSendMessage (gxPLApplication * app, const gxPLMessage * message,
-                                const gxPLIoAddr * target);
+                        const gxPLIoAddr * target);
 /**
  * @brief Check if a message is an echo hub
  *
@@ -103,48 +137,17 @@ int gxPLAppIsHubEchoMessage (const gxPLApplication * app,
                              const gxPLMessage * message, const gxPLId * my_id);
 
 /**
- * @brief Connection type
- *
- * @param app pointer to a gxPLApplication object
- * @return the type
+ * @}
  */
-gxPLConnectType gxPLAppConnectionType (const gxPLApplication * app);
 
 /**
- * @brief Return number of devices
- *
- * @return
+ * @addtogroup gxPLDevice
+ * @{
  */
-int gxPLAppDeviceCount (gxPLApplication * app);
 
 /**
- * @brief Return a device at a given index.
- *
- * @param index
- * @return If the index is out of range, return NULL
- */
-gxPLDevice * gxPLAppDeviceAt (gxPLApplication * app, int index);
-
-/**
- * @brief Return index for a given device
- *
- * @param index
- * @return the index, -1 if not found
- */
-int gxPLAppDeviceIndex (gxPLApplication * app, const gxPLDevice * device);
-
-/**
- * @brief Stop all devices
- *
- * Usually in preparation for shutdown, but that isn't the only possible reason.
- * It is not necessary to call this function before calling gxPLAppClose()
- * @param app
- * @return
- */
-int gxPLAppDisableAllDevice (gxPLApplication * app);
-
-/**
- * @brief Adds a new device on the network
+ * @brief Adds a new device to an application
+ * 
  * @param app pointer to a gxPLApplication object
  * @param vendor_id pointer to the vendor id
  * @param device_id pointer to the device id
@@ -155,26 +158,60 @@ gxPLDevice * gxPLAppAddDevice (gxPLApplication * app, const char * vendor_id,
                                const char * device_id, const char * instance_id);
 
 /**
- * @brief Adds a new configurabledevice on the network
- * @param app pointer to a gxPLApplication object
- * @param vendor_id pointer to the vendor id
- * @param device_id pointer to the device id
- * @param filename pointer to the config filename
- * @return pointer on the device, NULL if error occurs
+ * @brief Return number of devices
  */
-gxPLDevice * gxPLAppAddConfigurableDevice (gxPLApplication * app, const char * vendor_id,
-    const char * device_id, const char * filename);
+int gxPLAppDeviceCount (gxPLApplication * app);
 
 /**
- * @brief
- * @param app
- * @param device
- * @return
+ * @brief Return a device at a given index
+ *
+ * @param app pointer to a gxPLApplication object
+ * @param index of the device
+ * @return If the index is out of range, return NULL
+ */
+gxPLDevice * gxPLAppDeviceAt (gxPLApplication * app, int index);
+
+/**
+ * @brief Return index for a given device
+ *
+ * @param app pointer to a gxPLApplication object
+ * @param device pointer on the device
+ * @return the index, -1 if not found
+ */
+int gxPLAppDeviceIndex (gxPLApplication * app, const gxPLDevice * device);
+
+/**
+ * @brief Removes a device
+ * @param app pointer to a gxPLApplication object
+ * @param device pointer on the device
+ * @return 0, -1 if an error occurs
  */
 int gxPLAppRemoveDevice (gxPLApplication * app, gxPLDevice * device);
 
 /**
- * @addtogroup xPLUtil
+ * @addtogroup gxPLDeviceConfig
+ * @{
+ */
+
+/**
+ * @brief Adds a new configurable device
+ *
+ * @param app pointer to a gxPLApplication object
+ * @param vendor_id pointer to the vendor id
+ * @param device_id pointer to the device id
+ * @param filename pointer to the config filename
+ * @return pointer on the configurable device, NULL if error occurs
+ */
+gxPLDevice * gxPLAppAddConfigurableDevice (gxPLApplication * app,
+    const char * vendor_id, const char * device_id,
+    const char * filename);
+/**
+ *  @}
+ * @}
+ */
+
+/**
+ * @addtogroup gxPLUtilId
  * @{
  */
 
@@ -197,8 +234,10 @@ int gxPLGenerateUniqueId (const gxPLApplication * app, char * id, int len);
  */
 
 /**
- * @defgroup xPLMessageListener Message Listeners
- * Message Listeners
+ * @addtogroup gxPLMessage
+ * @{
+ * @defgroup gxPLMessageListener Message Listeners
+ * Provides functions to intercept messages received if the devices are not used.
  * @{
  */
 
@@ -229,52 +268,48 @@ int gxPLMessageListenerAdd (gxPLApplication * app, gxPLMessageListener listener,
 int gxPLMessageListenerRemove (gxPLApplication * app, gxPLMessageListener listener);
 
 /**
- * @}
- */
-
-/**
- * @defgroup gxPLibVersion Version
- * @{
- */
-
-/**
- * @brief
- * @return
- */
-const char * gxPLVersion (void);
-
-/**
- * @brief
- * @return
- */
-int gxPLVersionMajor (void);
-
-/**
- * @brief
- * @return
- */
-int gxPLVersionMinor (void);
-
-/**
- * @brief
- * @return
- */
-int gxPLVersionPatch (void);
-
-/**
- * @brief
- * @return
- */
-int gxPLVersionSha1 (void);
-/**
  *  @}
  * @}
  */
 
+/**
+ * @defgroup gxPLVersion Version
+ * Provides information on the version of the library.
+ * @{
+ */
 
 /**
- * @defgroup xPLIoApi Low-level API
- * Allows you to read information and to control the IO layer.
+ * @brief Current version as a static string buffer
+ */
+const char * gxPLVersion (void);
+
+/**
+ * @brief Major number of the current version
+ */
+int gxPLVersionMajor (void);
+
+/**
+ * @brief  Minor number of the current version
+ */
+int gxPLVersionMinor (void);
+
+/**
+ * @brief Patch number of the current version
+ */
+int gxPLVersionPatch (void);
+
+/**
+ * @brief SHA1 signature of the current version
+ */
+int gxPLVersionSha1 (void);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup gxPLIo Io layer
+ * Allows end-user to read information and to control the hardware layer.
  * @{
  */
 
@@ -285,7 +320,7 @@ int gxPLVersionSha1 (void);
  * @return returned list of io layers as a pointeur on an vector of const string,
  * NULL if error occurs
  *
- * @warnig the list returned by the pointer must be freed with vVectorDestroy()
+ * @warning the list returned by the pointer must be freed with vVectorDestroy()
  * after use.
  */
 xVector * gxPLIoLayerList (void);
@@ -348,13 +383,19 @@ const char * gxPLIoLayerGet (const gxPLApplication * app);
  *
  * -  \b gxPLIoFuncGetBcastAddr
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
- *    Broadcast address on the network.
+ *    returns broadcast address used
  * -  \b gxPLIoFuncGetNetInfo
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetNetInfo, gxPLIoAddr * local_addr)
- *    Local address associated with this machine on the network.
+ *    returns network informations
  * -  \b gxPLIoFuncNetAddrToString
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
- *    Converts a network address to a corresponding character string
+ *    converts a network address in a gxPLIoAddr to a dots-and-numbers format string
+ * -  \b gxPLIoFuncNetAddrFromString
+ *    \code int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrFromString, gxPLIoAddr * net_addr, const char * str_addr)
+ *    converts from a dots-and-numbers string into a gxPLIoAddr
+ * -  \b gxPLIoFuncGetLocalAddrList
+ *    \code int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddrList, const xVector ** addr_list)
+ *    returns binded adresses list
  * .
  *
  * @param app pointer to a gxPLApplication object
@@ -367,75 +408,6 @@ int gxPLIoCtl (gxPLApplication * app, int req, ...);
 /**
  * @}
  */
-
-
-# ifndef __DOXYGEN__
-// -----------------------------------------------------------------------------
-
-/*
- * @brief Create a new xPL device
- * @param app
- * @param vendor_id
- * @param device_id
- * @param instance_id
- * @return
- */
-gxPLDevice * gxPLDeviceNew (gxPLApplication * app,
-                            const char * vendor_id,
-                            const char * device_id,
-                            const char * instance_id);
-/**
- * @brief Create a new device and prepare it for configuration
- *
- * Like other devices, this will still require being enabled to start.
- * Before it's started, you need to define and attach the configurable items
- * for the device.   When the device is enabled, if there is a non-null
- * configFile, it's values are read.  The devices instance value will be
- * created in a fairly unique method for devices that have not yet been
- * configured.
- *
- * @param vendor_id
- * @param device_id
- * @param filename
- * @return
- */
-gxPLDevice * gxPLDeviceConfigNew (gxPLApplication * app, const char * vendor_id,
-                                  const char * device_id,
-                                  const char * filename);
-
-/*
- * @brief Release an xPL device
- * @param device
- */
-void gxPLDeviceDelete (gxPLDevice * device);
-
-/*
- * @brief Messages handler
- * @param device
- * @param message
- * @param udata
- */
-void gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
-                               void * udata);
-
-/*
- * @brief Sends an heartbeat immediately
- * @param device pointer on the device
- * @param type
- * @return 0, -1 if an error occurs
- */
-int gxPLDeviceHeartbeatSend (gxPLDevice * device, gxPLHeartbeatType type);
-
-/*
- * @brief
- * @param setting
- * @param argc
- * @param argv
- */
-void gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]);
-
-// -----------------------------------------------------------------------------
-# endif /* __DOXYGEN__ not defined */
 
 /* ========================================================================== */
 __END_C_DECLS

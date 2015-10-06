@@ -1,5 +1,5 @@
 /**
- * @file src/sys/unix/io_udp.c
+ * @file
  * xPL Hardware Layer, POSIX Socket UDP/IP (unix source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

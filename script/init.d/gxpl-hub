@@ -5,7 +5,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 ### BEGIN INIT INFO
-# Provides:          app-hub
+# Provides:          gxpl-hub
 # Required-Start:    $all
 # Required-Stop:
 # Default-Start:     2 3 4 5
@@ -15,13 +15,12 @@
 ### END INIT INFO
 # Version: 0.1.0
 
-NAME=app-hub
+NAME=gxpl-hub
 CONFIGFILE=/etc/$NAME.conf
 DAEMON=/usr/local/bin/$NAME
 
 XPL_IF=eth0
 XPL_DEBUG=
-XPL_XPLDEBUG=
 
 test -x $DAEMON || exit 0
 
@@ -45,14 +44,13 @@ set_args () {
   local var=$(trim "$(grep 'interface' $tmpf | cut -d '=' -f2)")
   ifconfig $var > /dev/null 2>&1 && XPL_IF=$var
   
-  var=$(trim "$(grep 'xpldebug' $tmpf | cut -d '=' -f2)")
-  if [ "$var" = "1" -o "$var" = "true" ]; then
-    XPL_XPLDEBUG=-xpldebug
+  if [ "_$XPL_IF" != "_" ]; then
+    XPL_IF="-i $XPL_IF"
   fi
-
+  
   var=$(trim "$(grep -v 'xpldebug' $tmpf | grep 'debug' | cut -d '=' -f2)")
   if [ "$var" = "1" -o "$var" = "true" ]; then
-    XPL_DEBUG=-debug
+    XPL_DEBUG=-d
   fi
   
   rm -f $tmpf
@@ -61,15 +59,15 @@ set_args () {
 daemon_start () {
 
   set_args
-  log_daemon_msg "Starting xPL Hub" "app-hub"
-  start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- -interface $XPL_IF $XPL_DEBUG $XPL_XPLDEBUG
+  log_daemon_msg "Starting xPL Hub" "gxpl-hub"
+  start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- $XPL_IF $XPL_DEBUG
   log_end_msg $?
   return $?
 }
 
 daemon_stop () {
   
-  log_daemon_msg "Stopping xPL Hub" "app-hub"
+  log_daemon_msg "Stopping xPL Hub" "gxpl-hub"
   start-stop-daemon --stop  $pgm_args --retry 5 --exec $DAEMON
   log_end_msg $?
   return $?
@@ -91,7 +89,7 @@ case "$1" in
     status_of_proc $DAEMON "xPL Hub" && exit 0 || exit $?
     ;;
   *)
-     echo "Usage: /etc/init.d/app-hub {start|stop|restart|force-reload|status}"
+     echo "Usage: /etc/init.d/gxpl-hub {start|stop|restart|force-reload|status}"
      exit 1
 esac
 

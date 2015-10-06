@@ -1,5 +1,5 @@
 /**
- * @file util.c
+ * @file
  * Misc support for gxPLib
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

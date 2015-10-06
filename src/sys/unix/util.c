@@ -1,5 +1,5 @@
 /**
- * @file src/sys/unix/util.c
+ * @file
  * Utilities, (unix source code)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

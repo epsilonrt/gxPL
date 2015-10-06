@@ -1,5 +1,5 @@
 /**
- * @file src/device_filter.c
+ * @file
  * High level interface to manage xPL devices (source code for filters)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

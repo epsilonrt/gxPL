@@ -1,6 +1,6 @@
-/*
- * app-template.c
- * @brief gxPLApplication template project
+/**
+ * @file
+ * gxPL template project
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

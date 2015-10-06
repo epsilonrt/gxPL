@@ -1,5 +1,5 @@
 /**
- * @file include/gxPL/defs.h
+ * @file
  * gxPLApplication library definitions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -84,7 +84,7 @@ typedef struct _gxPLHub gxPLHub;
 /**
  * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
-#define GXPL_GETOPT "i:n:d"
+#define GXPL_GETOPT "i:n:dD"
 
 /**
  * @brief xPL Connection mode
@@ -186,6 +186,7 @@ typedef struct _gxPLSetting {
     struct {
       unsigned int debug: 1;  /**< debug enabled */
       unsigned int malloc: 1; /**< this configuration has been allocated on the heap and should be released. */
+      unsigned int nodaemon: 1; /**< do not daemonize */
     };
   };
 } gxPLSetting;

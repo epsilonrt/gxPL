@@ -4,6 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 SUBDIRS = lib
+CLEANER_SUBDIRS = tools examples test doc
 
 # Chemin relatif du répertoire racine de xPL4Linux
 PROJECT_ROOT = .
@@ -25,8 +26,8 @@ MSG_UNINSTALL = [UNINSTALL]
 
 all: $(SUBDIRS)
 rebuild: $(SUBDIRS)
-clean: $(SUBDIRS)
-distclean: $(SUBDIRS)
+clean: $(SUBDIRS) $(CLEANER_SUBDIRS)
+distclean: $(SUBDIRS) $(CLEANER_SUBDIRS) 
 install: install_utils $(SUBDIRS) install_scripts
 uninstall: uninstall_scripts $(SUBDIRS) uninstall_utils
 
@@ -44,4 +45,8 @@ uninstall_scripts:
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
-.PHONY: all rebuild clean distclean install uninstall $(SUBDIRS)
+$(CLEANER_SUBDIRS):
+	$(MAKE) -w -C $@ $(MAKECMDGOALS)
+
+
+.PHONY: all rebuild clean distclean install uninstall $(SUBDIRS) $(CLEANER_SUBDIRS)

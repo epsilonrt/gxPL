@@ -1,5 +1,5 @@
 /**
- * @file gxpl_p.h
+ * @file
  * gxPLib internal include
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -11,6 +11,7 @@
 
 #include <gxPL.h>
 #include <sysio/vector.h>
+#include "internal_p.h"
 
 /* structures =============================================================== */
 

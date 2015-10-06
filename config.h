@@ -1,5 +1,5 @@
 /**
- * @file config.h
+ * @file
  * gxPLib Configuration file
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

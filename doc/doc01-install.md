@@ -5,13 +5,13 @@ These are installation instructions.
 Clone sources from epsilonrt.com git repos (or untar archive file):
 
 <pre class="fragment">
-git clone http://git.epsilonrt.com/gxPLApplication
+git clone http://git.epsilonrt.com/gxPL
 </pre>
 
 Build and install the library:
 
 <pre class="fragment">
-cd gxPLApplication
+cd gxPL
 make
 sudo make install
 </pre>
@@ -27,7 +27,7 @@ sudo make install
 Run hub tool as daemon:
 
 <pre class="fragment">
-app-hub
+gxpl-hub
 </pre>
 
 Build and run clock example:
@@ -36,7 +36,7 @@ Build and run clock example:
 cd ../examples
 make
 cd clock
-./app-clock -d
+./gxpl-clock -d
 </pre>
 
 **Be sure to open the UDP Port 3865 on your firewall, or your xPL 

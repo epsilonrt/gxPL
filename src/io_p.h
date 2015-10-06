@@ -1,5 +1,5 @@
 /**
- * @file io_p.h
+ * @file
  * gxPLIo internal include
  * 
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

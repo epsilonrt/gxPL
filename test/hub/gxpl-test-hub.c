@@ -1,6 +1,6 @@
-/*
- * hub-test-hub.c
- * @brief gxPLHub test
+/**
+ * @file
+ * gxPLHub test
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.

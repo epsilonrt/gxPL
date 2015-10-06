@@ -1,36 +1,36 @@
-Using Configurable services  
+Using configurable devices  
 > Copyright (c) 2005, Gerald R Duprey Jr.  
 > Copyright (c) 2015, Pascal JEAN aka epsilonRT  
 
 ## Introduction 
 
-gxPLApplication fully supports the xPL device configuration
+gxPL fully supports the xPL device configuration
 protocol.  The protocol allows your xPL program to be configured remotely by
 applications like DCM or xPLHAL and preserve those settings locally,
 automatically reloading the settings/configuration the next time your
 application starts.
 
 Ideally, you would want to expose all configurable elements of your
-application to gxPLApplication.  Doing so grants you customization and persistance
+application to gxPL.  Doing so grants you customization and persistance
 with no additional effort on your behalf and provides a means for users to
 configure your program without having to have a seperate configuration program
 or confusing command startup options.
 
 
-## Integrating configuration into gxPLApplication applications
+## Integrating configuration into gxPL applications
 
-If you have an existing gxPLApplication application, you can get automatic support
+If you have an existing gxPL application, you can get automatic support
 for a configurable instance ID, heartbeat interval, filters and groups with
 only one line of code changed.  Replace an existing:
 
 <pre class="fragment">
-myDevice = gxPLDeviceNew(myVendor, myDevice, myInstance);
+myDevice = gxPLAppAddDevice(myApp, myVendor, myDevice, myInstance);
 </pre>
 
 with
 
 <pre class="fragment">
-myDevice = gxPLcreateConfigurableService(myVendor, myDevice, configFilename);
+myDevice = gxPLAppAddConfigurableDevice(myApp, myVendor, myDevice, configFilename);
 </pre>
 
 That's it! configFileName is the file configuration data it stored in and
@@ -44,20 +44,20 @@ automatically as needed.  If there is no configuration, the a new unique
 identifier is assigned.  This is meant only to be a placeholder until the end
 user first configures your application/device.  Once they do, the newly
 assigned instance ID will be stored along with the other configurables for the
-service and restored when next started.
+device and restored when next started.
 
-It's a VERY good idea to put your programs version number into the service
+It's a VERY good idea to put your programs version number into the device
 your program uses.  This version number will show up in the xPL configuration
 programs and it allows a user to see what version all their apps are from a
 common location.  In general, the version number should be plain (i.e. 1.1 is
 preferred over V1.1), though that does not have to be the rule.  You do want the 
 version number to be connected automatically to your programs version number so 
-you do not have to remember to seek the xPL service version value out and change
+you do not have to remember to seek the xPL device version value out and change
  it (it's easy to forget).  For example
 
 
 You should insure that every message you send that is supposed to come from
-this service is sent with the
+this device is sent with the
 
 <pre class="fragment">
 gxPLDeviceMessageSend(myDevice, myMessage);
@@ -73,9 +73,9 @@ always match.
 
 ## Exposing your own configurables to xPL
 
-While letting the user customize the basic information about your service is a
+While letting the user customize the basic information about your device is a
 very good thing, integrating any configuration elements your program has into
-your xPL configurable service is where the real benefits are.
+your xPL configurable device is where the real benefits are.
 
 First, some background: xPL configuration items are pretty much only text.
 You of course can represent numbers, booleans, etc, but you do need to be
@@ -83,7 +83,7 @@ prepared to shuttle values between text and whatever native format your
 configuration data is in.
 
 An xPL configuration item (all called a "configurable") has a unique name
-within each service.  It can be set as a mandatory configuration item that can
+within each device.  It can be set as a mandatory configuration item that can
 only set set once (rarely used), a mandatory configuration item that can be
 later reconfigured or an optional configuration item that can be filled in or
 left blank and later reconfigured.  
@@ -101,21 +101,23 @@ Now, some details:
 
 1.  Configurable definitions are preserved, along with their settings, in the
     services configuration file.  This means you want to check to see if the
-    service is configured or not before adding the configurable definitions.
+    device is configured or not before adding the configurable definitions.
     If it's already configured, then you do not need to (and should not) add
     your configurables in.  Here's a code sample:
 
     <pre class="fragment">
-    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myDevice) {
-      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
+    myDevice = gxPLAppAddConfigurableDevice(myApp, "myVendor", "myDevice", "test.xpl");
+    
+    if (!gxPLDeviceIsConfigured(myDevice) {
+      
+      gxPLDeviceConfigItemAdd(myDevice, "debugMode", gxPLConfigReconf, 1);
+      gxPLDeviceConfigValueSet(myDevice, "debugMode", "false");
     }
     </pre>
 
-    In this example, after creating the configurable service (which will restore
+    In this example, after creating the configurable device (which will restore
     it's settings, if possible, from the passed configuration file), you test to
-    see if the service is configured.  If so, then the config file was successfully
+    see if the device is configured.  If so, then the config file was successfully
     restored.  If false though, either there was an error or there is no config
     file to restore from.  So in that case, you need to "prime the pump".
 
@@ -129,18 +131,20 @@ Now, some details:
     configured, either from your config file or from your defaults.
 
 2.  In general, it's best to wrap up all the code that extracts configurable
-    values from the service and installs them where your program needs them in
+    values from the device and installs them where your program needs them in
     a single method that can be invoked from anywhere.  Done this way, you'll
     be able to invoke this from both your initialization code and from an event
-    handler that is invoked to alert you when the service has new or changed
+    handler that is invoked to alert you when the device has new or changed
     configuration values.  In this case, it might look like this:
 
     <pre class="fragment">
-    static void parseServiceConfigValues(gxPLDevice * service) {
-     /* Extract the value, if any, for a configurable named "debugMode" */
-     char * debugFlag = gxPLgetServiceConfigValue(service, "debugMode");
+    static void prvParseConfigValues(gxPLDevice * device) {
+      
+     // Extract the value, if any, for a configurable named "debugMode"
+     char * debugFlag = gxPLDeviceConfigValueGet(device, "debugMode");
      if (debugFlag != NULL) {
-       /* Do a case insensitive compare to see if it's true or not */
+       
+       // Do a case insensitive compare to see if it's true or not
        debugMode = (strcasecmp(debugFlag, "true") == 0);
      }
     }
@@ -171,15 +175,17 @@ Now, some details:
     For example:
 
     <pre class="fragment">
-    /** Create the service */
-    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myDevice) {
-      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
+    // Create the device
+    myDevice = gxPLAppAddConfigurableDevice(myApp, "myVendor", "myDevice", "test.xpl");
+    
+    if (!gxPLDeviceIsConfigured(myDevice) {
+      
+      gxPLDeviceConfigItemAdd(myDevice, "debugMode", gxPLConfigReconf, 1);
+      gxPLDeviceConfigValueSet(myDevice, "debugMode", "false");
     }
 
-    /* Parse configuration */
-    parseServiceConfigValues(myDevice);
+    // Parse configuration
+    prvParseConfigValues(myDevice);
     </pre>
 
 
@@ -190,61 +196,64 @@ Now, some details:
     For example:
 
     <pre class="fragment">
-    static void configChangedHandler(gxPLDevice * service, gxPLObject * userData) {
-      parseServiceConfigValues(service);
+    static void prvConfigChanged(gxPLDevice * device, void * userData) {
+      
+      prvParseConfigValues(device);
     }
     </pre>
 
     This handler will just invoke the same parser we used earlier to parse
-    things after the service was created.
+    things after the device was created.
 
     To register that handler, use gxPLaddServiceConfigChangedListener() right after you
     finish the initial parsing of config values.  Like this:
 
     <pre class="fragment">
-    /** Create the service */
-    myDevice = gxPLcreateConfigurableService("myVendor", "myDevice", "test.xpl");
-    if (!gxPLIsServiceConfigured(myDevice) {
-      gxPLaddServiceConfigurable(clockService, "debugMode", gxPLConfigReconf, 1);
-      gxPLsetServiceConfigValue(clockService, "debugMode", "false");
+    // Create the device
+    myDevice = gxPLAppAddConfigurableDevice(myApp, "myVendor", "myDevice", "test.xpl");
+    
+    if (!gxPLDeviceIsConfigured(myDevice) {
+      
+      gxPLDeviceConfigItemAdd(myDevice, "debugMode", gxPLConfigReconf, 1);
+      gxPLDeviceConfigValueSet(myDevice, "debugMode", "false");
     }
 
-    /* Parse configuration */
-    parseServiceConfigValues(myDevice);
+    // Parse configuration
+    prvParseConfigValues(myDevice);
 
-    /* Add a listener for configuration changes */
-    gxPLaddServiceConfigChangedListener(myDevice, configChangedHandler, NULL);
+    // Add a listener for configuration changes
+    gxPLDeviceConfigListenerAdd(myDevice, prvConfigChanged, NULL);
     </pre>
 
 
 4.  At this point, you are fully configuable ready.  You've created a
-    configurable service, reloaded your previous configuration (or setup the
+    configurable device, reloaded your previous configuration (or setup the
     initial configurables with defaults), parsed them so your program can use
     them, writen a handler to pickup changes to the configuration as they
     happen and registered that handler.
 
-    All that is left to do is enable the service (which should not be done
-    until all these steps are complete).  The service will come to life and
+    All that is left to do is enable the device (which should not be done
+    until all these steps are complete).  The device will come to life and
     automatic configuration should be working.
 
     A working example of this is in the examples/ directory called
-    xpl-config-clock.c -- a working xPL time source that allows you to configure
+    gxpl-config-clock.c -- a working xPL time source that allows you to configure
     it's instance ID, heartbeat interval and how often time messages are sent
     out.
 
-    You can also check out the updated xpl-logger.c that supports two
+    You can also check out the updated gxpl-logger.c that supports two
     configurable items and does check to determine if there really is a change
     to a config value before actually applying the change (in this case, that
     the file name the log should go to really has changed before we close the
     old and open the new).
 
 
-NOTE: Once a configurable service is enabled, you cannot change any aspect of
+NOTE: Once a configurable device is enabled, you cannot change any aspect of
 the services configuration.  That includes adding and removing configurables
 or adding/changing/clearing configurable values or changing the config file
-used to store config values.  When the service is disabled, these features can
+used to store config values.  When the device is disabled, these features can
 be used again.  Access to the configurables and their values is always
-allowed.  If you attempt to change these items while the service is enabled,
+allowed.  If you attempt to change these items while the device is enabled,
 the changes will be ignored.
 
 Remember - the configuration process is driven by the end user -- not your
@@ -256,7 +265,7 @@ frustrated that what they expect doesn't work.
 ## Overview of the xPL device configuration process
 
 This is an overview of how configuration works in xPL.  For the most part,
-gxPLApplication does this all for you, so this is mostly to understand what is going
+gxPL does this all for you, so this is mostly to understand what is going
 on under the hood.  
 
 The general xPL configuration process goes like this:

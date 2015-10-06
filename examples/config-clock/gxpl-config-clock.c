@@ -1,5 +1,5 @@
 /**
- * @file app-setting-device.c
+ * @file
  * Simple configurable xPL device device that sends a time update periodically
  *
  * Copyright 2005 (c), Gerald R Duprey Jr

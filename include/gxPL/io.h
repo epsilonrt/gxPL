@@ -1,5 +1,5 @@
 /**
- * @file gxPL/io.h
+ * @file 
  * Low-level API, used by high level to access the hardware
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -18,23 +18,19 @@ __BEGIN_C_DECLS
 #endif
 
 /**
- * @defgroup gxPLIoInternal Internal Io Layer API
+ * @addtogroup gxPLIo
+ * @{
+ * @defgroup gxPLIoInterface Abstract interface
  * 
  * Description of the IO layer to the application layer.
- * The application layer uses functions described here to access the hardware 
+ * The application layer uses functions described here to access the io 
  * layer.
  * 
- * @warning The top user should not access this layer directly.
+ * @warning This part concerns the developers wishing to create a new io 
+ * layer. The end-user should not access this layer directly.
  * @{
  */
 
-/* macros =================================================================== */
-/* constants ================================================================ */
-/* structures =============================================================== */
-/* types ==================================================================== */
-/* private variables ======================================================== */
-/* private functions ======================================================== */
-/* public variables ========================================================= */
 /* internal public functions ================================================ */
 /**
  * @brief 
@@ -85,6 +81,7 @@ int gxPLIoClose (gxPLIo * io);
 int gxPLIoIoCtl (gxPLIo * io, int c, va_list ap);
 
 /**
+ *  @}
  * @}
  */
 

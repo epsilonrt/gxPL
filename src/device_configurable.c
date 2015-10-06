@@ -1,5 +1,5 @@
 /**
- * @file src/device_configurable.c
+ * @file
  * High level interface to manage configurable devices (source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

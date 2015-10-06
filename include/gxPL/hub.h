@@ -1,5 +1,5 @@
 /**
- * @file gxPL/hub.h
+ * @file
  * xPL hub on a system using ethernet networking
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -17,8 +17,8 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 
 /**
- * @defgroup xPLHub xPL hub on a system using ethernet networking
- * 
+ * @defgroup xPLHub Hub
+ * xPL hub on a system using ethernet networking. \n 
  * The primary purpose of a xPL hub is to bind to port 3865, receive xPL 
  * messages from the network at that port and redistribute those messages to all 
  * xPL applications running on the same computer. A hub must perform the 

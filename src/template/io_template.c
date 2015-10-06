@@ -1,5 +1,5 @@
 /**
- * @file io_template.c
+ * @file
  * xPL Hardware Layer, Template
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -137,7 +137,7 @@ static gxPLIoOps
 ops = {
   .open  = gxPLTemplateOpen,
   .recv  = gxPLTemplateRead,
-  .send = gxPLTemplateWrite,
+  .send  = gxPLTemplateWrite,
   .close = gxPLTemplateClose,
   .ctl   = gxPLTemplateCtl
 };

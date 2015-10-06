@@ -1,5 +1,5 @@
 /**
- * @file src/device.c
+ * @file
  * High level interface to manage xPL devices (source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

@@ -1,5 +1,5 @@
 /**
- * @file gxpl.c
+ * @file
  * Top Layer of API (source code)
  *
  * Copyright 2004 (c), Gerald R Duprey Jr

@@ -1,5 +1,5 @@
 /**
- * @file src/sys/unix/gxpl.c
+ * @file
  * Top Layer of API (unix source code)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -28,6 +28,7 @@
  *    -i / --interface xxx : interface or device used to access the network
  *    -n / --net       xxx : hardware abstraction layer to access the network
  *    -d / --debug         : enable debugging
+ *    -D / --nodaemon      : do not daemonize
  */
 void
 gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
@@ -37,6 +38,7 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
     {"interface", required_argument, NULL, 'i'},
     {"net",       required_argument, NULL, 'n'},
     {"debug",     no_argument,       NULL, 'd' },
+    {"nodaemon",     no_argument,    NULL, 'D' },
     {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
   };
 
@@ -65,6 +67,11 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
         vLogSetMask (LOG_UPTO (GXPL_LOG_DEBUG_LEVEL));
         setting->debug = 1;
         PDEBUG ("enable debugging");
+        break;
+        
+      case 'D':
+        setting->nodaemon = 1;
+        PDEBUG ("set nodaemon flag");
         break;
 
       default:

@@ -1,5 +1,5 @@
 /**
- * @file src/sys/unix/device_configurable.c
+ * @file
  * High level interface to manage configurable devices (unix source code)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

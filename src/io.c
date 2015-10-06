@@ -1,5 +1,5 @@
 /**
- * @file io.c
+ * @file
  * xPL I/O handling
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

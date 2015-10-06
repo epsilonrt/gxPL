@@ -29,7 +29,7 @@ complex xPL idioms.
 It's designed to be easy to design a new program around or to 
 integrate into an existing program.  
 It includes some example applications showing how to use various 
-features of the framework, including the source to the app-hub.
+features of the framework, including the source to the gxpl-hub.
 
 You can get the latest development version using git :
 

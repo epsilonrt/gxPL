@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="gxPL" InternalType="">
+<CodeLite_Project Name="gxpl-tools" InternalType="">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -26,59 +26,12 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="src">
-    <VirtualDirectory Name="sys">
-      <VirtualDirectory Name="unix">
-        <File Name="src/sys/unix/gxpl.c"/>
-        <File Name="src/sys/unix/io_udp.c"/>
-        <File Name="src/sys/unix/util.c"/>
-        <File Name="src/sys/unix/device_configurable.c"/>
-      </VirtualDirectory>
-    </VirtualDirectory>
-    <File Name="src/io_p.h"/>
-    <File Name="src/gxpl.c"/>
-    <File Name="src/io.c"/>
-    <File Name="src/gxpl_p.h"/>
-    <File Name="src/message.c"/>
-    <File Name="src/message_p.h"/>
-    <File Name="src/util.c"/>
-    <VirtualDirectory Name="template">
-      <File Name="src/template/io_template.c"/>
-    </VirtualDirectory>
-    <File Name="src/device_p.h"/>
-    <File Name="src/device_configurable.c"/>
-    <File Name="src/device_group.c"/>
-    <File Name="src/device_filter.c"/>
-    <File Name="src/device.c"/>
-    <File Name="src/hub_p.h"/>
-    <File Name="src/hub.c"/>
-    <File Name="src/internal_p.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="include">
-    <VirtualDirectory Name="gxPL">
-      <File Name="include/gxPL/defs.h"/>
-      <File Name="include/gxPL/io.h"/>
-      <File Name="include/gxPL/message.h"/>
-      <File Name="include/gxPL/util.h"/>
-      <File Name="include/gxPL/device.h"/>
-      <File Name="include/gxPL/hub.h"/>
-    </VirtualDirectory>
-    <File Name="include/gxPL.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="script">
-    <VirtualDirectory Name="init.d">
-      <File Name="script/init.d/gxpl-hub"/>
-      <File Name="script/init.d/gxpl-hub.conf"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="gxPL">
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+  <VirtualDirectory Name="gxpl-tools">
     <File Name="Makefile"/>
-    <File Name="NOTICE"/>
-    <File Name="README.md"/>
-    <File Name="config.h"/>
-    <File Name="gxpl.mk"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -96,7 +49,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/gxpl-tools" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-tools" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -135,7 +88,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="gxPL" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxPL" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="gxpl-tools" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-tools" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -169,6 +122,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

@@ -1,5 +1,5 @@
 /**
- * @file src/device_group.c
+ * @file
  * High level interface to manage xPL devices (source code for groups)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

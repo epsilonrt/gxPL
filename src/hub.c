@@ -1,5 +1,5 @@
 /**
- * @file hub.c
+ * @file
  * xPL hub on a system using ethernet networking
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -71,6 +71,7 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
         // remote-ip matches with local address, converts to gxPLIoAddr
         if (gxPLIoCtl (hub->app, gxPLIoFuncNetAddrFromString, &clinfo, str_addr) != 0) {
 
+          PERROR ("unable to convert %s to ip address", str_addr);
           return;
         }
 
@@ -78,6 +79,7 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
         clinfo.port = strtol (str_port, &endptr, 10);
         if (endptr == NULL) {
 
+          PERROR ("unable to convert %s to udp port", str_port);
           return;
         }
 
@@ -90,6 +92,7 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
           interval =  strtol (str_interval, &endptr, 10);
           if (endptr == NULL) {
 
+            PERROR ("unable to convert %s to heartbeat interval", str_interval);
             return;
           }
 
@@ -106,12 +109,13 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
             // then adds to the list
             if (iVectorAppend (&hub->clients, client) != 0) {
 
+              PERROR ("unable to append client");
               free (client);
               return;
             }
-            PINFO ("%s add application %s:%s, processing %d applications",
-                   gxPLTimeStr (now), str_addr, str_port,
-                   iVectorSize (&hub->clients));
+            vLog (LOG_INFO, "add application %s:%s, processing %d applications",
+                  str_addr, str_port,
+                  iVectorSize (&hub->clients));
           }
 
           client->hbeat_period_max = interval * 60 * 2 + 60;
@@ -123,10 +127,10 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
           if (c >= 0) {
 
             iVectorRemove (&hub->clients, c);
-            PINFO ("%s remove application %s:%s after receiving his end "
-                   "heartbeat, processing %d applications",
-                   gxPLTimeStr (now), str_addr, str_port,
-                   iVectorSize (&hub->clients));
+            vLog (LOG_INFO, "remove application %s:%s after receiving his"
+                  " heartbeat end , processing %d applications",
+                  str_addr, str_port,
+                  iVectorSize (&hub->clients));
           }
         }
       }
@@ -169,7 +173,7 @@ gxPLHubOpen (gxPLSetting * setting) {
       }
     }
   }
-
+  PERROR ("unable to open hub");
   free (hub);
   return NULL;
 }
@@ -210,10 +214,10 @@ gxPLHubPoll (gxPLHub * hub, int timeout_ms) {
         char * str;
         if (gxPLIoCtl (hub->app, gxPLIoFuncNetAddrToString, &client->addr, &str) == 0) {
 
-          PINFO ("%s remove application %s:%d after heartbeat timeout, "
-                 "processing %d applications",
-                 gxPLTimeStr (now), str, client->addr.port,
-                 iVectorSize (&hub->clients) - 1);
+          vLog (LOG_INFO, "remove application %s:%d after heartbeat timeout, "
+                "processing %d applications",
+                str, client->addr.port,
+                iVectorSize (&hub->clients) - 1);
         }
         iVectorRemove (&hub->clients, i);
       }

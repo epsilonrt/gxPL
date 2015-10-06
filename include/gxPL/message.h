@@ -1,5 +1,5 @@
 /**
- * @file include/gxPL/message.h
+ * @file 
  * High level interface to manage xPL messages (public header)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -17,6 +17,7 @@ __BEGIN_C_DECLS
 
 /**
  * @defgroup gxPLMessage Messages
+ * gxPLMessage is a message circulating on xPL network.
  * @{
  */
 

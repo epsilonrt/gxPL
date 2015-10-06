@@ -1,5 +1,5 @@
 /**
- * @file message.c
+ * @file
  * xPL Message support functions
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

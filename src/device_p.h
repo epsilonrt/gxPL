@@ -1,5 +1,5 @@
 /**
- * @file src/device_p.h
+ * @file
  * High level interface to manage xPL devices (private header)
  * 
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
@@ -11,6 +11,7 @@
 
 #include <sysio/vector.h>
 #include <gxPL/defs.h>
+#include "internal_p.h"
 
 /* types ==================================================================== */
 

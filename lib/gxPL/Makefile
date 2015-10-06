@@ -47,7 +47,7 @@ DEBUG_OPT = 0
 #DEBUG = ON
 
 # Affiche la ligne de compilation GCC ou non (ON/OFF)
-VIEW_GCC_LINE = ON
+#VIEW_GCC_LINE = ON
 
 # Désactive la suppression des variables et fonctions "inutiles"
 # Le linker vérifie d'une fonction ou une variable est appellée, si ce n'est pas
@@ -182,7 +182,7 @@ else
 include $(GXPL_ROOT)/gxpl.mk
 endif
 
-VERSION = $(shell cat version.mk)
+VERSION = $(shell cat version-git.mk)
 
 ifeq ($(PROJECT_TOPDIR),)
 else
@@ -277,7 +277,7 @@ endif
 LDFLAGS += $(patsubst %,-L%,$(EXTRA_LIBDIRS))
 LDFLAGS += $(patsubst %,-l%,$(EXTRA_LIBS))
 LDFLAGS += $(MATH_LIB)
-LDFLAGS += -Wl,-Map=$(TARGET_PATH).map,--cref
+LDFLAGS += -Wl,-Map=$(TARGET_LIB_PATH).map,--cref
 LDFLAGS += $(EXTMEMOPTS)
 ifeq ($(DISABLE_DELETE_UNUSED_SECTIONS),OFF)
 LDFLAGS += -Wl,--gc-sections
@@ -328,12 +328,12 @@ endif
 
 # Default target.
 all: build
-build: version libstatic libshared
+build: version-git libstatic libshared
 rebuild: clean_list build
 clean: clean_list_lib
 distclean: distclean_list clean_list_lib
 
-version:
+version-git:
 	@$(GXPL_ROOT)/util/git-version/git-version $@.mk
 
 libstatic: $(TARGET_LIB_PATH).a
@@ -368,10 +368,10 @@ uninstall:
 	@-rm -f $(INSTALL_INCDIR)/gxPL.h
 	@-rm -fr $(INSTALL_INCDIR)/gxPL
 
-version.h:
+version-git.h:
 	@$(GXPL_ROOT)/util/git-version/git-version $@
 
-version.mk: version
+version-git.mk: version
 
 # Include the dependency files.
 DEPFILES := $(foreach dep,$(OBJ:.o=.o.d),$(dir $(dep)).dep/$(notdir $(dep)))
@@ -421,12 +421,12 @@ $(TARGET): $(OBJ)
 	$(CC) $(LD_CFLAGS) $^ --output $@ $(LDFLAGS)
 
 # Compile: create object files from C source files.
-$(OBJDIR)/%.o : %.c Makefile version.h
+$(OBJDIR)/%.o : %.c Makefile version-git.h
 	@echo "$(MSG_COMPILING) $<"
 	$(CC) -c $(ALL_CFLAGS) $< -o $@
 
 # Compile: create object files from C++ source files.
-$(OBJDIR)/%.o : %.cpp Makefile version.h
+$(OBJDIR)/%.o : %.cpp Makefile version-git.h
 	@echo "$(MSG_COMPILING_CPP) $<"
 	$(CC) -c $(ALL_CPPFLAGS) $< -o $@
 
@@ -441,7 +441,7 @@ $(OBJDIR)/%.o : %.cpp Makefile version.h
 
 
 # Assemble: create object files from assembler source files.
-$(OBJDIR)/%.o : %.S Makefile version.h
+$(OBJDIR)/%.o : %.S Makefile version-git.h
 	@echo "$(MSG_ASSEMBLING) $<"
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
@@ -454,6 +454,7 @@ clean_list_lib:
 	@echo "$(MSG_CLEANING) $(TARGET)"
 	@$(REMOVE) $(TARGET_LIB_PATH).a
 	@$(REMOVE) $(TARGET_LIB_PATH).so
+	@$(REMOVE) $(TARGET_LIB_PATH).map
 	@$(REMOVEDIR) $(DEPDIRS)
 	@$(REMOVEDIR) $(OBJDIRS)
 
@@ -469,12 +470,12 @@ clean_list :
 distclean_list :
 	@$(REMOVE) *.bak
 	@$(REMOVE) *~
-	@$(REMOVE) version.*
+	@$(REMOVE) version-git.*
 	@$(REMOVEDIR) $(OBJDIR)
 
 # Listing of phony targets.
 .PHONY : all size sizebefore sizeafter build rebuild lib elf \
-lss sym clean distclean cleanlib clean_list clean_list_lib version
+lss sym clean distclean cleanlib clean_list clean_list_lib version-git
 
 # Make docs pictures
 FIG2DEV                 = fig2dev

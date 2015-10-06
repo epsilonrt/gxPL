@@ -1,6 +1,6 @@
-/*
- * app-test-core.c
- * @brief gxPLApplication Core test
+/** 
+ * @file 
+ * gxPLDevice test
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
