@@ -13,10 +13,10 @@
   <Project Name="gxpl-xbee" Path="tools/xbee/gxpl-xbee.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
-  <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
+  <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="Yes"/>
   <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>

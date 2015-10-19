@@ -9,7 +9,6 @@
 #ifndef _GXPL_HUB_PRIVATE_HEADER_
 #define _GXPL_HUB_PRIVATE_HEADER_
 
-#include <sysio/vector.h>
 #include <gxPL/defs.h>
 
 /* structures =============================================================== */

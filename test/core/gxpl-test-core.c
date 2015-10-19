@@ -84,9 +84,16 @@ main (int argc, char **argv) {
 
   // View network information
   printf ("Starting test service on %s...\n", gxPLIoInterfaceGet (app));
-  printf ("  listen on  %s:%d\n", gxPLIoLocalAddrGet (app),
-          gxPLIoInfoGet (app)->port);
-  printf ("  broadcast on  %s\n", gxPLIoBcastAddrGet (app));
+  printf ("  listen on  %s", gxPLIoLocalAddrGet (app));
+  if (gxPLIoInfoGet (app)->port >= 0) {
+    
+    printf (":%d\n", gxPLIoInfoGet (app)->port);
+  }
+  else {
+    
+    putchar ('\n');
+  }
+  printf ("  bcast  on  %s\n", gxPLIoBcastAddrGet (app));
   printf ("Press Ctrl+C to abort ...\n");
 
   signal (SIGTERM, prvSignalHandler);

@@ -10,7 +10,6 @@
 #define _GXPL_PRIVATE_HEADER_
 
 #include <gxPL.h>
-#include <sysio/vector.h>
 #include "internal_p.h"
 
 /* structures =============================================================== */

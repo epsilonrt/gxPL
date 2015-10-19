@@ -53,6 +53,7 @@
     <File Name="src/hub_p.h"/>
     <File Name="src/hub.c"/>
     <File Name="src/internal_p.h"/>
+    <File Name="src/io_xbeezb.c"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="gxPL">

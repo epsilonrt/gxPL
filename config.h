@@ -24,6 +24,9 @@ extern "C" {
 #define DEFAULT_LINE_BUFSIZE              256
 #define DEFAULT_MAX_DEVICE_GROUP          4
 #define DEFAULT_MAX_DEVICE_FILTER         4
+#define DEFAULT_XBEE_BAUDRATE             38400
+#define DEFAULT_XBEE_PORT                 "/dev/ttyUSB0"
+#define DEFAULT_XBEE_FLOW                 SERIAL_FLOW_RTSCTS
 
 /* build options ============================================================ */
 #define CONFIG_DEVICE_CONFIGURABLE    1

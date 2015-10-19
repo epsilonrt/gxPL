@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <sysio/vector.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
@@ -516,6 +515,8 @@ prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
 
   return ret;
 }
+
+/* private API functions ==================================================== */
 
 // -----------------------------------------------------------------------------
 static int

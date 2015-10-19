@@ -9,11 +9,24 @@
 #ifndef _GXPL_DEFS_HEADER_
 #define _GXPL_DEFS_HEADER_
 
+#if defined(__unix__)
+#include <limits.h>
 #include <sysio/defs.h>
+#include <sysio/log.h>
+#include <sysio/vector.h>
+#include <sysio/serial.h>
+#elif defined(__AVR__)
+#include <avrio/defs.h>
+#include <avrio/vector.h>
+#include <avrio/serial.h>
+#define NAME_MAX 16
+#else
+#error This target platform is not supported.
+#endif
+
 __BEGIN_C_DECLS
 /* ========================================================================== */
 #include <errno.h>
-#include <sysio/log.h>
 
 /* forward struct defined */
 typedef struct _gxPLApplication gxPLApplication;
@@ -22,12 +35,6 @@ typedef struct _gxPLMessage gxPLMessage;
 typedef struct _gxPLDevice gxPLDevice;
 typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
 typedef struct _gxPLHub gxPLHub;
-
-#if defined(SYSIO_OS_UNIX)
-#include <limits.h>
-#else
-#define NAME_MAX 255
-#endif
 
 #ifndef EINVAL
 #define EINVAL          22      /* Invalid argument */
@@ -84,7 +91,7 @@ typedef struct _gxPLHub gxPLHub;
 /**
  * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
-#define GXPL_GETOPT "i:n:dD"
+#define GXPL_GETOPT "i:n:b:dD"
 
 /**
  * @brief xPL Connection mode
@@ -128,11 +135,12 @@ typedef enum {
  */
 typedef enum {
   gxPLNetFamilyInet     = 2, /**< family & gxPLNetFamilyInet -> true for two revisions of IP (v4 and v6) */
-  gxPLNetFamilyInet4    = gxPLNetFamilyInet, 
+  gxPLNetFamilyInet4    = gxPLNetFamilyInet,
   gxPLNetFamilyInet6    = gxPLNetFamilyInet | 1,
   gxPLNetFamilyZigbee   = 4,
   gxPLNetFamilyZigbee16 = gxPLNetFamilyZigbee,
-  gxPLNetFamilyZigbee64 = gxPLNetFamilyZigbee | 1
+  gxPLNetFamilyZigbee64 = gxPLNetFamilyZigbee | 1,
+  gxPLNetFamilyUnknown  = -1
 } gxPLNetFamily;
 
 /**
@@ -174,6 +182,20 @@ typedef enum {
 
 /* structures =============================================================== */
 /**
+ * @brief Describe a XBee configuration
+ */
+typedef struct _gxPLIoXBeeSetting {
+  xSerialIos ios; /**< serial port configuration */
+  uint64_t panid; /**< Zigbee PAN ID, host order */
+  union {
+    uint8_t flag;
+    struct {
+      uint8_t coordinator: 1;
+    };
+  };
+} gxPLIoXBeeSetting;
+
+/**
  * @brief Describe a gxPLApplication configuration
  */
 typedef struct _gxPLSetting {
@@ -187,7 +209,11 @@ typedef struct _gxPLSetting {
       unsigned int debug: 1;  /**< debug enabled */
       unsigned int malloc: 1; /**< this configuration has been allocated on the heap and should be released. */
       unsigned int nodaemon: 1; /**< do not daemonize */
+      unsigned int iosflag; /**< true if io setting was configured */
     };
+  };
+  union {
+    gxPLIoXBeeSetting xbee;
   };
 } gxPLSetting;
 
@@ -228,7 +254,7 @@ typedef struct _gxPLSchema {
  * @brief Describe a xPL filter
  */
 typedef struct _gxPLFilter {
-  
+
   gxPLMessageType type;
   gxPLId source;
   gxPLSchema schema;

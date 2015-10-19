@@ -9,7 +9,6 @@
 #ifndef _GXPL_MESSAGE_HEADER_
 #define _GXPL_MESSAGE_HEADER_
 
-#include <sysio/vector.h>
 #include <gxPL/defs.h>
 
 __BEGIN_C_DECLS

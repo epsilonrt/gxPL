@@ -32,24 +32,34 @@ typedef struct template_data {
 
 /* private functions ======================================================== */
 
+/* private API functions ==================================================== */
+
 // -----------------------------------------------------------------------------
 static int
 gxPLTemplateOpen (gxPLIo * io) {
 
+  if (io->pdata == NULL) {
+    io->pdata = calloc (1, sizeof (template_data));
+    assert (io->pdata);
+    // TODO
+    return 0;
+  }
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateRead (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
+gxPLTemplateRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 
+  // TODO
   return -1;
 }
 
 // -----------------------------------------------------------------------------
 static int
-gxPLTemplateWrite (gxPLIo * io, const void * buffer, int count, gxPLIoAddr * target) {
+gxPLTemplateSend (gxPLIo * io, const void * buffer, int count, gxPLIoAddr * target) {
 
+  // TODO
   return -1;
 }
 
@@ -57,6 +67,13 @@ gxPLTemplateWrite (gxPLIo * io, const void * buffer, int count, gxPLIoAddr * tar
 static int
 gxPLTemplateClose (gxPLIo * io) {
 
+  if (io->pdata) {
+
+    // TODO
+    free (io->pdata);
+    io->pdata = NULL;
+    return 0;
+  }
   return -1;
 }
 
@@ -71,14 +88,6 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     case gxPLIoFuncPoll: {
       int * available_bytes = va_arg (ap, int*);
       int timeout_ms = va_arg (ap, int);
-      // TODO
-      ret = -1;
-    }
-    break;
-
-    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetInetPort, int * iport)
-    case gxPLIoFuncGetInetPort: {
-      int * iport = va_arg (ap, int*);
       // TODO
       ret = -1;
     }
@@ -123,6 +132,27 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
     }
     break;
 
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrFromString, gxPLIoAddr * net_addr, const char * str_addr)
+    case gxPLIoFuncNetAddrFromString: {
+      gxPLIoAddr * addr = va_arg (ap, gxPLIoAddr*);
+      const char * str_addr = va_arg (ap, char*);
+
+      // TODO
+      // local_addr->size = ? ;
+      // local_addr->family = ? ;
+      // local_addr->flag = ? ;
+      ret = -1;
+    }
+    break;
+
+    // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddrList, const xVector ** addr_list)
+    case gxPLIoFuncGetLocalAddrList: {
+      const xVector ** addr_list = va_arg (ap, xVector**);
+      // TODO
+      ret = -1;
+    }
+    break;
+
     default:
       errno = EINVAL;
       ret = -1;
@@ -136,8 +166,8 @@ gxPLTemplateCtl (gxPLIo * io, int c, va_list ap) {
 static gxPLIoOps
 ops = {
   .open  = gxPLTemplateOpen,
-  .recv  = gxPLTemplateRead,
-  .send  = gxPLTemplateWrite,
+  .recv  = gxPLTemplateRecv,
+  .send  = gxPLTemplateSend,
   .close = gxPLTemplateClose,
   .ctl   = gxPLTemplateCtl
 };

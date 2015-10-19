@@ -9,7 +9,6 @@
 #ifndef _GXPL_SERVICE_PRIVATE_HEADER_
 #define _GXPL_SERVICE_PRIVATE_HEADER_
 
-#include <sysio/vector.h>
 #include <gxPL/defs.h>
 #include "internal_p.h"
 
