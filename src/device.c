@@ -15,9 +15,6 @@
 #include <gxPL.h>
 #include "device_p.h"
 
-/* constants ================================================================ */
-/* macros =================================================================== */
-/* private variables ======================================================== */
 /* structures =============================================================== */
 typedef struct _listener_elmt {
   gxPLDeviceListener func;
@@ -25,9 +22,6 @@ typedef struct _listener_elmt {
   gxPLSchema schema;
   gxPLMessageType msg_type;
 } listener_elmt;
-
-/* types ==================================================================== */
-/* private variables ======================================================== */
 
 /* private functions ======================================================== */
 // -----------------------------------------------------------------------------
@@ -90,10 +84,22 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
     gxPLMessagePairAddFormat (message, "port", "%d", gxPLIoInfoGet (app)->port);
     gxPLMessagePairAdd (message, "remote-ip", gxPLIoLocalAddrGet (app));
   }
+
   if (device->version) {
 
     gxPLMessagePairAdd (message, "version", device->version);
   }
+
+#if CONFIG_HBEAT_BASIC_EXTENSION != 0
+  // add the "remote-addr" field in hbeat.basic
+  if ((gxPLIoInfoGet (app)->family & gxPLNetFamilyInet) == 0) {
+    const char * local_addr = gxPLIoLocalAddrGet (app);
+    if (strlen (local_addr) > 0) {
+
+      gxPLMessagePairAdd (message, "remote-addr", local_addr);
+    }
+  }
+#endif /* CONFIG_HBEAT_BASIC_EXTENSION != 0 */
   return message;
 }
 
@@ -113,7 +119,13 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 
     // Install a new heartbeat message
     device->hbeat_msg = message;
+#ifdef DEBUG
+    char * str = gxPLMessageToString (message);
+    PDEBUG ("Just allocated a new Heartbeat message:\n%s", str);
+    free (str);
+#else
     PDEBUG ("Just allocated a new Heartbeat message");
+#endif
   }
   else {
 
@@ -137,7 +149,7 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 //  Send an Goodbye heartbeat immediatly
 int
 prvHeartbeatMessageSendGoodbye (gxPLDevice * device) {
-
+  int ret = -1;
   gxPLMessage *  message = prvHeartbeatMessageNew (device, gxPLHeartbeatGoodbye);
 
   // Send the message
@@ -148,7 +160,8 @@ prvHeartbeatMessageSendGoodbye (gxPLDevice * device) {
     device->hbeat_msg = NULL;
     return 0;
   }
-  return -1;
+  gxPLMessageDelete (message);
+  return ret;
 }
 
 // -----------------------------------------------------------------------------

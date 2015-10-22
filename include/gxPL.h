@@ -14,6 +14,7 @@
 #include <gxPL/util.h>
 #include <gxPL/device.h>
 #include <gxPL/hub.h>
+#include <gxPL/bridge.h>
 
 __BEGIN_C_DECLS
 /* ========================================================================== */
@@ -95,6 +96,14 @@ int gxPLAppPoll (gxPLApplication * app, int timeout_ms);
  * @return the type
  */
 gxPLConnectType gxPLAppConnectionType (const gxPLApplication * app);
+
+/**
+ * @brief Returns application setting
+ *
+ * @param app pointer to a gxPLApplication object
+ * @return the setting or NULL if error occurs
+ */
+gxPLSetting * gxPLAppSetting (gxPLApplication * app);
 
 /**
  * @}

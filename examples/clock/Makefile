@@ -85,10 +85,13 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = sysio
+EXTRA_LIBS = 
 
-# Enable link with  mathematics library (ON/OFF)
+# Enable linking with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON
+
+# Enable linking with  sysio library (ON/OFF)
+USE_SYSIO_LIB = OFF
 
 # Compiler flag to set the C Standard level.
 #     c89   = "ANSI" C
@@ -105,7 +108,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-#GXPL_DEBUG_TEST = ON
+GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)
@@ -133,6 +136,8 @@ COPY = cp
 #-------------------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
+3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
+VPATH+=:$(3RDPARTY_ROOT)
 CDEFS += -D_REENTRANT -D$(ARCH)
 CPPDEFS += -D_REENTRANT -D$(ARCH)
 
@@ -148,6 +153,8 @@ endif
 else
 EXTRA_LIBS += gxPL
 endif
+
+include $(GXPL_ROOT)/sysio.mk
 
 ifeq ($(PROJECT_TOPDIR),)
 else

@@ -3,7 +3,7 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
-SUBDIRS = core device message hub
+SUBDIRS = core device message hub bridge
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)

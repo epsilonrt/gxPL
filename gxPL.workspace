@@ -13,14 +13,15 @@
   <Project Name="gxpl-xbee" Path="tools/xbee/gxpl-xbee.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
-  <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="Yes"/>
+  <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
   <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -40,11 +41,12 @@
       <Project Name="gxpl-test-core" ConfigName="Debug"/>
       <Project Name="gxpl-test-device" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
-      <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test-hub" ConfigName="Debug"/>
       <Project Name="gxpl-hub-service" ConfigName="Debug"/>
       <Project Name="gxpl-tools" ConfigName="Debug"/>
       <Project Name="gxpl-examples" ConfigName="Debug"/>
+      <Project Name="gxPL" ConfigName="Debug"/>
+      <Project Name="gxpl-test-bridge" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -64,11 +66,12 @@
       <Project Name="gxpl-test-core" ConfigName="Release"/>
       <Project Name="gxpl-test-device" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
-      <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test-hub" ConfigName="Release"/>
       <Project Name="gxpl-hub-service" ConfigName="Release"/>
       <Project Name="gxpl-tools" ConfigName="Release"/>
       <Project Name="gxpl-examples" ConfigName="Release"/>
+      <Project Name="gxPL" ConfigName="Release"/>
+      <Project Name="gxpl-test-bridge" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

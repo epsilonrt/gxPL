@@ -85,12 +85,16 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = sysio
+EXTRA_LIBS = 
 
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON
 
+# Enable linking with  sysio library (ON/OFF)
+USE_SYSIO_LIB = OFF
+
 # Compiler flag to set the C Standard level.
+
 #     c89   = "ANSI" C
 #     gnu89 = c89 plus GCC extensions
 #     gnu99 = c99 plus GCC extensions
@@ -133,7 +137,10 @@ COPY = cp
 #-------------------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
+3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
+VPATH+=:$(3RDPARTY_ROOT)
 CDEFS += -D_REENTRANT -D$(ARCH)
+
 CPPDEFS += -D_REENTRANT -D$(ARCH)
 
 EXTRA_LIBS += pthread rt
@@ -152,7 +159,10 @@ else
 EXTRA_LIBS += gxPL
 endif
 
+include $(GXPL_ROOT)/sysio.mk
+
 ifeq ($(PROJECT_TOPDIR),)
+
 else
 VPATH+=:$(PROJECT_TOPDIR)
 EXTRA_INCDIRS += $(PROJECT_TOPDIR)

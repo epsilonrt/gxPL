@@ -35,6 +35,7 @@ typedef struct _gxPLMessage gxPLMessage;
 typedef struct _gxPLDevice gxPLDevice;
 typedef struct _gxPLDeviceConfig gxPLDeviceConfig;
 typedef struct _gxPLHub gxPLHub;
+typedef struct _gxPLBridge gxPLBridge;
 
 #ifndef EINVAL
 #define EINVAL          22      /* Invalid argument */
@@ -204,15 +205,17 @@ typedef struct _gxPLSetting {
   char iolayer[NAME_MAX]; /**< io layer name */
   gxPLConnectType connecttype;
   union {
-    unsigned int flag;
+    uint16_t flag;
     struct {
-      unsigned int debug: 1;  /**< debug enabled */
-      unsigned int malloc: 1; /**< this configuration has been allocated on the heap and should be released. */
-      unsigned int nodaemon: 1; /**< do not daemonize */
-      unsigned int iosflag; /**< true if io setting was configured */
+      uint16_t debug: 1;      /**< debug enabled */
+      uint16_t malloc: 1;     /**< this configuration has been allocated on the heap and should be released. */
+      uint16_t nodaemon: 1;   /**< do not daemonize */
+      uint16_t iosflag: 1;    /**< true if io setting was configured */
+      uint16_t broadcast: 1;  /**< all broadcasts messages will be rebroadcasted by the bridge */
     };
   };
   union {
+
     gxPLIoXBeeSetting xbee;
   };
 } gxPLSetting;

@@ -32,6 +32,8 @@ extern "C" {
 #define CONFIG_DEVICE_CONFIGURABLE    1
 #define CONFIG_DEVICE_GROUP           1
 #define CONFIG_DEVICE_FILTER          1
+// add the "remote-addr" field in hbeat.basic
+#define CONFIG_HBEAT_BASIC_EXTENSION  1
 
 /* conditionals options ====================================================== */
 #ifndef NDEBUG

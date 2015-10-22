@@ -116,12 +116,16 @@ EXTRA_LIBDIRS =
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
-EXTRA_LIBS = sysio
+EXTRA_LIBS = 
 
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON
 
+# Enable linking with  sysio library (ON/OFF)
+USE_SYSIO_LIB = OFF
+
 # Compiler flag to set the C Standard level.
+
 #     c89   = "ANSI" C
 #     gnu89 = c89 plus GCC extensions
 #     gnu99 = c99 plus GCC extensions

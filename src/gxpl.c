@@ -23,17 +23,11 @@
 #include "gxpl_p.h"
 #include "version-git.h"
 
-/* macros =================================================================== */
-/* constants ================================================================ */
-/* structures =============================================================== */
 /* structures =============================================================== */
 typedef struct _listener_elmt {
   gxPLMessageListener func;
   void * data;
 } listener_elmt;
-
-/* types ==================================================================== */
-/* private variables ======================================================== */
 
 /* private functions ======================================================== */
 
@@ -205,8 +199,12 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
   gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
   assert (setting);
 
-  strcpy (setting->iface, iface);
-  strcpy (setting->iolayer, iolayer);
+  if (iface) {
+    strcpy (setting->iface, iface);
+  }
+  if (iolayer) {
+    strcpy (setting->iolayer, iolayer);
+  }
   setting->connecttype = type;
   setting->malloc = 1;
 
@@ -405,7 +403,7 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
 // -----------------------------------------------------------------------------
 int
 gxPLAppSendMessage (gxPLApplication * app, const gxPLMessage * message,
-                            const gxPLIoAddr * client) {
+                    const gxPLIoAddr * client) {
   int ret = -1;
   int count;
   char * str = gxPLMessageToString (message);
@@ -438,6 +436,7 @@ gxPLAppIsHubEchoMessage (const gxPLApplication * app, const gxPLMessage * msg,
 
   if ( (strcmp (gxPLMessageSchemaClassGet (msg), "hbeat") == 0) ||
        (strcmp (gxPLMessageSchemaClassGet (msg), "config") == 0)) {
+
     if (strcmp (gxPLMessageSchemaTypeGet (msg), "app") == 0) {
       const char * remote_ip = gxPLMessagePairGet (msg, "remote-ip");
 
@@ -459,8 +458,7 @@ gxPLAppIsHubEchoMessage (const gxPLApplication * app, const gxPLMessage * msg,
         }
       }
     }
-    else if (strcmp (gxPLMessageSchemaClassGet (msg), "basic") == 0) {
-
+    else if (strcmp (gxPLMessageSchemaTypeGet (msg), "basic") == 0) {
       if (my_id) {
         if (gxPLIdCmp (my_id, gxPLMessageSourceIdGet (msg)) == 0) {
 
@@ -626,6 +624,13 @@ gxPLConnectType
 gxPLAppConnectionType (const gxPLApplication * app) {
 
   return app->setting->connecttype;
+}
+
+// -----------------------------------------------------------------------------
+gxPLSetting * 
+gxPLAppSetting (gxPLApplication * app) {
+  
+  return app->setting;
 }
 
 // -----------------------------------------------------------------------------

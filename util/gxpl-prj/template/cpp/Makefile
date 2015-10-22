@@ -103,7 +103,11 @@ EXTRA_LIBS =
 # Enable link with  mathematics library (ON/OFF)
 MATH_LIB_ENABLE = ON
 
+# Enable linking with  sysio library (ON/OFF)
+USE_SYSIO_LIB = OFF
+
 # Compiler flag to set the C Standard level.
+
 #     c89   = "ANSI" C
 #     gnu89 = c89 plus GCC extensions
 #     gnu99 = c99 plus GCC extensions
@@ -135,7 +139,10 @@ COPY = cp
 #-------------------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
+3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
+VPATH+=:$(3RDPARTY_ROOT)
 CDEFS += -D_REENTRANT -D$(ARCH)
+
 CPPDEFS += -D_REENTRANT -D$(ARCH)
 
 EXTRA_LIBS += pthread rt stdc++

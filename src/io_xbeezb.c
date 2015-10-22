@@ -1,6 +1,6 @@
 /**
  * @file
- * xPL Hardware Layer, Template
+ * xPL Hardware Layer, XBee Modules Series 2 (Zigbee), API Mode (AP=1)
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -42,6 +42,7 @@ typedef struct xbeezb_data {
   xXBeePkt * atpkt;
   int bytes_read;
   uint8_t local_addr[8];
+  int max_payload;
 
   volatile int fid; // frame id
 } xbeezb_data;
@@ -57,7 +58,9 @@ typedef struct xbeezb_data {
 static const char *
 prvZbAddrToString (uint8_t * zbaddr, uint8_t zbaddr_size) {
   static char buffer[8 * 3];
-
+  
+  buffer[0] = '\0';
+  
   if (zbaddr_size == 8) {
 
     sprintf (buffer, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -67,10 +70,6 @@ prvZbAddrToString (uint8_t * zbaddr, uint8_t zbaddr_size) {
   else if (zbaddr_size == 2) {
 
     sprintf (buffer, "%02x:%02x", zbaddr[0], zbaddr[1]);
-  }
-  else {
-
-    return "Unk";
   }
   return buffer;
 }
@@ -309,6 +308,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
   if (io->pdata == NULL) {
     int fd;
     int ret;
+    uint16_t word;
 
     if (io->setting->iosflag == 0) {
 
@@ -422,6 +422,22 @@ gxPLXBeeZbOpen (gxPLIo * io) {
         }
       }
     }
+    
+    // Gets Maximum RF payload bytes (NP)
+    ret = prvSendLocalAt (io, XBEE_CMD_MAX_PAYLOAD, NULL, 0, 1000);
+    if (ret != 0) {
+
+      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      gxPLXBeeZbClose (io);
+      return -1;
+    }
+
+    if (iXBeePktParamGetUShort (&word, dp->atpkt, 0) == 0) {
+      
+      dp->max_payload = word;
+      PDEBUG("Maximum RF payload %d bytes", dp->max_payload);
+    }
+    
     vXBeeSetCB (&dp->xbee, XBEE_CB_DATA, prvZbDataCB);
     vXBeeSetCB (&dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
     if (io->setting->xbee.coordinator) {

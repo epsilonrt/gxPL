@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = gxpl-test-core
+TARGET = gxpl-test-bridge
 
 # Relative path of the project root directory
 PROJECT_TOPDIR = ../..
@@ -55,7 +55,8 @@ CPPSRC =
 ASRC =
 
 # Place -D or -U options here for C sources
-CDEFS +=
+CDEFS += 
+#CDEFS += -DXBEE_DEBUG
 
 # Place -D or -U options here for ASM sources
 ADEFS +=

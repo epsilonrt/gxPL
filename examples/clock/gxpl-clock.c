@@ -16,7 +16,7 @@
 
 /* constants ================================================================ */
 #define CLOCK_VERSION         VERSION_SHORT
-#define CLOCK_UPDATE_INTERVAL 10
+#define CLOCK_UPDATE_INTERVAL 30
 #define REPORT_OWN_MESSAGE    true
 
 /* private variables ======================================================== */
@@ -53,7 +53,7 @@ main (int argc, char * argv[]) {
 
   ret = gxPLDeviceVersionSet (clk, CLOCK_VERSION);
   assert (ret == 0);
-  
+
   ret = gxPLDeviceReportOwnMessagesSet (clk, REPORT_OWN_MESSAGE);
   assert (ret == 0);
 
@@ -94,26 +94,29 @@ main (int argc, char * argv[]) {
 // -----------------------------------------------------------------------------
 static void
 prvSendTick (void) {
-  static time_t last;
-  time_t now = time (NULL);
+  
+  if (gxPLDeviceIsHubConfirmed (clk) == true) {
+    static time_t last;
+    time_t now = time (NULL);
 
-  // Skip unless the delay has passed
-  if ( (last == 0) || ( (now - last) >= CLOCK_UPDATE_INTERVAL)) {
-    struct tm * t;
-    char str[24];
-    
-    // Format the date/time
-    t = localtime (&now);
-    strftime (str, 24, "%Y%m%d%H%M%S", t);
+    // Skip unless the delay has passed
+    if ( (last == 0) || ( (now - last) >= CLOCK_UPDATE_INTERVAL)) {
+      struct tm * t;
+      char str[24];
 
-    // Install the value and send the message
-    gxPLMessagePairSet (message, "time", str);
+      // Format the date/time
+      t = localtime (&now);
+      strftime (str, 24, "%Y%m%d%H%M%S", t);
 
-    // Broadcast the message
-    gxPLDeviceMessageSend (clk, message);
+      // Install the value and send the message
+      gxPLMessagePairSet (message, "time", str);
 
-    // And reset when we last sent the clock update
-    last = now;
+      // Broadcast the message
+      gxPLDeviceMessageSend (clk, message);
+
+      // And reset when we last sent the clock update
+      last = now;
+    }
   }
 }
 
