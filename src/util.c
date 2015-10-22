@@ -13,13 +13,6 @@
 #include <ctype.h>
 #include <gxPL/util.h>
 
-/* macros =================================================================== */
-/* constants ================================================================ */
-/* structures =============================================================== */
-/* types ==================================================================== */
-/* private variables ======================================================== */
-/* private functions ======================================================== */
-/* public variables ========================================================= */
 /* public api functions ===================================================== */
 
 // -----------------------------------------------------------------------------
@@ -241,6 +234,7 @@ gxPLIdCmp (const gxPLId * n1, const gxPLId * n2) {
 // vendor-device.instance\0
 int
 gxPLIdFromString (gxPLId * id, char * str) {
+
   if ( (str) && (id)) {
     char *p, *n;
 
@@ -276,6 +270,20 @@ gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2) {
   }
   return ret;
 }
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaMatch (const gxPLSchema * s, const char * schema_class,
+                 const char * schema_type) {
+
+  int ret = (strcmp (s->class, schema_class) == 0);
+  if (ret == true) {
+
+    ret = (strcmp (s->type, schema_type) == 0);
+  }
+  return ret;
+}
+
 
 // -----------------------------------------------------------------------------
 int
@@ -349,6 +357,31 @@ gxPLSchemaIsEmpty (const gxPLSchema * schema) {
     return true;
   }
   return false;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLSchemaFromString (gxPLSchema * schema, const char * str) {
+
+  if ( (schema) && (str)) {
+    if ( (strlen (str) < 18) && (strchr (str, '.'))) {
+      char buffer[18];
+      char * c;
+      char * t = buffer;
+
+      strcpy (buffer, str);
+      c = strsep (&t, ".");
+
+      if (gxPLSchemaClassSet (schema, c) == 0) {
+        if (gxPLSchemaTypeSet (schema, t) == 0) {
+          return 0;
+        }
+      }
+    }
+  }
+  
+  PERROR ("Unable to set schema from %s", str);
+  return -1;
 }
 
 /* ========================================================================== */

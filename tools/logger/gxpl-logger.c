@@ -87,14 +87,14 @@ main (int argc, char * argv[]) {
   assert (ret == 0);
 
   // Enable the device
-  gxPLDeviceEnabledSet (device, true);
+  gxPLDeviceEnable (device, true);
 
   // Install signal traps for proper shutdown
   signal (SIGTERM, prvSignalHandler);
   signal (SIGINT, prvSignalHandler);
 
   // Enable the service
-  ret = gxPLDeviceEnabledSet (device, true);
+  ret = gxPLDeviceEnable (device, true);
   assert (ret == 0);
 
   for (;;) {

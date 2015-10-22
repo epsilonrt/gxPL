@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
@@ -153,7 +154,7 @@ static int
 prvZbLocalAtCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
   gxPLIo * io = (gxPLIo *) xbee->user_context;
 
-  if ( (iXBeePktParamLen (pkt) > 0) && (dp->atpkt == NULL)) {
+  if ( (iXBeePktParamLen (pkt) >= 0) && (dp->atpkt == NULL)) {
 
     dp->atpkt = pkt;
     return 0;
@@ -175,7 +176,7 @@ prvZbTxStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 
     if (status) {
 
-      vLog (LOG_ERR, "Tx%d Err. %d\n", dp->fid, status);
+      PERROR ("Tx%d Err. %d\n", dp->fid, status);
     }
     dp->fid = 0;
   }
@@ -263,7 +264,7 @@ prvSendLocalAt (gxPLIo * io,
         else {
 
           // command status error
-          vLog (LOG_ERR, "AT command %2s failed with 0x%02X status\n", cmd, ret);
+          PERROR ("AT command %2s failed with 0x%02X status\n", cmd, ret);
           errno = EIO;
         }
       }
@@ -322,7 +323,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
     if ( (fd = iSerialOpen (io->setting->iface, &io->setting->xbee.ios)) < 0) {
 
-      vLog (LOG_ERR, "Unable to open serial port: %s (%d)",
+      PERROR ("Unable to open serial port: %s (%d)",
             strerror (errno), errno);
       return -1;
     }
@@ -334,7 +335,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     if (ret != 0) {
 
       gxPLXBeeZbClose (io);
-      vLog (LOG_ERR, "Unable to init XBee module, return %d", ret);
+      PERROR ("Unable to init XBee module, return %d", ret);
       return -1;
     }
 
@@ -345,7 +346,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_VERS_FIRMWARE, NULL, 0, 1000);
     if (ret != 0) {
 
-      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      PERROR ("Unable to read XBee module, return %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -356,7 +357,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       fwid = *pucXBeePktParam (dp->atpkt);
       if ( ( (fwid & 0xF0) != 0x20) || ( (fwid & 1) == 0)) {
 
-        vLog (LOG_ERR, "Bad XBee module or firmware version: 0x%02Xxx", fwid);
+        PERROR ("Bad XBee module or firmware version: 0x%02Xxx", fwid);
         gxPLXBeeZbClose (io);
         return -1;
       }
@@ -370,7 +371,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_SER_HI, NULL, 0, 1000);
     if (ret != 0) {
 
-      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      PERROR ("Unable to read XBee module, return %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -380,7 +381,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_SER_LO, NULL, 0, 1000);
     if (ret != 0) {
 
-      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      PERROR ("Unable to read XBee module, return %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -390,25 +391,25 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, NULL, 0, 1000);
     if (ret != 0) {
 
-      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      PERROR ("Unable to read XBee module, return %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
     else {
-      uint8_t panid[8];
-      uint8_t spanid[8];
-
-      * (uint64_t *) spanid = htonll (io->setting->xbee.panid);
-
-      memcpy (panid, pucXBeePktParam (dp->atpkt), 8);
-
-      if (memcmp (panid, spanid, 8) != 0) {
+      uint64_t panid;
+      
+      PDEBUG("iXBeePktParamLen=%d", iXBeePktParamLen(dp->atpkt));
+      ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
+      
+      if ((ret == 0) && (panid != io->setting->xbee.panid)) {
+        uint64_t new_panid = htonll (io->setting->xbee.panid);
 
         // current and setting PAN ID differs: change to new PAN ID
-        ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, spanid, 8, 1000);
+        vLog(LOG_INFO, "Write new PAN ID in XBee: %" PRIu64, io->setting->xbee.panid);
+        ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
         if (ret != 0) {
 
-          vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+          PERROR ("Unable to read XBee module, return %d", ret);
           gxPLXBeeZbClose (io);
           return -1;
         }
@@ -416,7 +417,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
         ret = prvSendLocalAt (io, XBEE_CMD_WRITE_PARAMS, NULL, 0, 2000);
         if (ret != 0) {
 
-          vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+          PERROR ("Unable to read XBee module, return %d", ret);
           gxPLXBeeZbClose (io);
           return -1;
         }
@@ -427,7 +428,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_MAX_PAYLOAD, NULL, 0, 1000);
     if (ret != 0) {
 
-      vLog (LOG_ERR, "Unable to read XBee module, return %d", ret);
+      PERROR ("Unable to read XBee module, return %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -489,10 +490,12 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
   const uint8_t * dst16;
 
   if (target) {
-
+    
+    // target provided
     if (target->isbroadcast == 0) {
+      
+      // target is not broadcast
       if (target->family == gxPLNetFamilyZigbee16) {
-
 
         dst16 = (const uint8_t *) target->addr;
         dst64 = pucXBeeAddr64Unknown();
@@ -504,13 +507,15 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
       }
     }
     else {
-
+      
+      // target is broadcast
       dst16 = pucXBeeAddr16Unknown();
       dst64 = pucXBeeAddr64Broadcast();
     }
   }
   else {
 
+    // target not provided, broadcast if coordinator else deliver to coordinator
     if (io->setting->xbee.coordinator) {
 
       dst64 = pucXBeeAddr64Broadcast();
@@ -527,7 +532,7 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
 
   if (dp->fid < 0) {
 
-    vLog (LOG_ERR, "Unable to deliver the message, error: %d", dp->fid);
+    PERROR ("Unable to deliver the message, error: %d", dp->fid);
     dp->fid = 0;
     return -1;
   }

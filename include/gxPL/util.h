@@ -186,6 +186,15 @@ int gxPLIdFromString (gxPLId * dest, char * src);
 int gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2);
 
 /**
+ * @brief Compare two schemas
+ * @param s1 schema 1
+ * @param s2 schema 2
+ * @return It returns an integer less than, equal to, or greater than zero if s1 
+ * is found, respectively, to be less than, to match, or be greater than s2. 
+ */
+int gxPLSchemaMatch (const gxPLSchema * s1, const char * schema_class, const char * schema_type);
+
+/**
  * @brief 
  * @param s
  * @param schema_class
@@ -217,6 +226,14 @@ int gxPLSchemaSet (gxPLSchema * schema, const char * schema_class, const char * 
  * @return 
  */
 int gxPLSchemaCopy (gxPLSchema * dst, const gxPLSchema * src);
+
+/**
+ * @brief 
+ * @param schema
+ * @param str
+ * @return 
+ */
+int gxPLSchemaFromString (gxPLSchema * schema, const char * str);
 
 /**
  * @brief 

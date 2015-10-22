@@ -110,7 +110,7 @@ main (int argc, char * argv[]) {
   signal (SIGINT, prvSignalHandler);
 
   // Enable the service
-  ret = gxPLDeviceEnabledSet (device, true);
+  ret = gxPLDeviceEnable (device, true);
   assert (ret == 0);
 
   for (;;) {

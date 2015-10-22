@@ -391,7 +391,7 @@ gxPLDeviceDelete (gxPLDevice * device) {
   if (device) {
 
     // Disable any heartbeats
-    gxPLDeviceEnabledSet (device, false);
+    gxPLDeviceEnable (device, false);
 
     // Release heartbeat message, if any
     gxPLMessageDelete (device->hbeat_msg);
@@ -572,7 +572,7 @@ gxPLDeviceVersionSet (gxPLDevice * device, const char * version) {
 
 // -----------------------------------------------------------------------------
 int
-gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled) {
+gxPLDeviceEnable (gxPLDevice * device, bool enabled) {
 
   // Skip if already enabled
   if (device->isenabled != enabled) {

@@ -16,7 +16,7 @@ prefix=/usr/local
 INSTALL_LIBDIR=$(prefix)/lib
 INSTALL_INCDIR=$(prefix)/include
 
-# Chemin relatif du répertoire racine de SysIO
+# Chemin relatif du répertoire racine de gxPL
 GXPL_ROOT = ../..
 
 # Chemin relatif du répertoire racine du projet de l'utilisateur
@@ -122,7 +122,7 @@ EXTRA_LIBS =
 MATH_LIB_ENABLE = ON
 
 # Enable linking with  sysio library (ON/OFF)
-USE_SYSIO_LIB = OFF
+USE_SYSIO_LIB = ON
 
 # Compiler flag to set the C Standard level.
 
@@ -162,6 +162,8 @@ RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
 RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
 #$(warning $(RPI_CPU))
 #$(warning $(RPI_REV))
+3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
+VPATH+=:$(3RDPARTY_ROOT)
 
 ifneq ($(RPI_CPU),)
 override ARCH = ARCH_ARM_RASPBERRYPI
@@ -185,6 +187,8 @@ $(error GXPL_ROOT not defined, double-check that !)
 else
 include $(GXPL_ROOT)/gxpl.mk
 endif
+
+include $(GXPL_ROOT)/sysio.mk
 
 VERSION = $(shell cat version-git.mk)
 

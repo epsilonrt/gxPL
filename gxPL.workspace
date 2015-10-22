@@ -23,7 +23,7 @@
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxpl-hub" ConfigName="Debug"/>
       <Project Name="gxpl-logger" ConfigName="Debug"/>

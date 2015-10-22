@@ -13,26 +13,52 @@
 #include <gxPL.h>
 #include "bridge_p.h"
 
+/* constants ================================================================ */
+#define BROADCAST_KEY "broadcast"
+#define ALLOW_KEY     "allow"
+
 /* private functions ======================================================== */
 // -----------------------------------------------------------------------------
 static const void *
-prvClientKey (const void * elmt) {
-  gxPLBridgeClient * client = (gxPLBridgeClient *) elmt;
+prvAllowKey (const void * allow) {
 
-  return &client->addr;
+  return allow;
+}
+
+// -----------------------------------------------------------------------------
+static int
+prvAllowMatch (const void *key1, const void *key2) {
+  const gxPLSchema * s1 = (const gxPLSchema *) key1;
+  const gxPLSchema * s2 = (const gxPLSchema *) key2;
+
+  return gxPLSchemaCmp (s1, s2);
+}
+
+// -----------------------------------------------------------------------------
+static const void *
+prvClientKey (const void * client) {
+
+  return client;
 }
 
 // -----------------------------------------------------------------------------
 static int
 prvClientMatch (const void *key1, const void *key2) {
-  const gxPLIoAddr * a1 = (const gxPLIoAddr *) key1;
-  const gxPLIoAddr * a2 = (const gxPLIoAddr *) key2;
+  const gxPLBridgeClient * c1 = (const gxPLBridgeClient *) key1;
+  const gxPLBridgeClient * c2 = (const gxPLBridgeClient *) key2;
+  int ret;
 
-  return memcmp (a1->addr, a2->addr, a1->addrlen);
+  ret = gxPLIdCmp (&c1->id, &c2->id);
+  if ( (ret == 0) && (c1->addr.family != gxPLNetFamilyUnknown) &&
+       (c1->addr.family == c2->addr.family)) {
+
+    ret = memcmp (c1->addr.addr, c2->addr.addr, c1->addr.addrlen);
+  }
+  return ret;
 }
 
 // -----------------------------------------------------------------------------
-// Receive xPL messages from inner side
+// Receive xPL messages from inside
 static void
 prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
   gxPLBridge * bridge = (gxPLBridge *) udata;
@@ -40,126 +66,185 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
 
   if ( (strcmp (gxPLMessageSchemaClassGet (message), "hbeat") == 0) ||
        (strcmp (gxPLMessageSchemaClassGet (message), "config") == 0)) {
+    char * endptr;
+    long now;
+    bool new_client = false;
+
+    gxPLBridgeClient * src = calloc (1, sizeof (gxPLBridgeClient));
+    assert (src);
+
+    now = gxPLTime();
+    gxPLIdCopy (&src->id, gxPLMessageSourceIdGet (message));
 
     // When the bridge receives a hbeat.app or config.app message
     // the bridge should extract the "remote-addr" value from the message body
     const char * str_addr = gxPLMessagePairGet (message, "remote-addr");
 
     if (str_addr) {
-      gxPLIoAddr clinfo;
-      char * endptr;
-      long now;
-
-      now = gxPLTime();
 
       // remote-ip matches with local address, converts to gxPLIoAddr
-      if (gxPLIoCtl (bridge->in, gxPLIoFuncNetAddrFromString, &clinfo, str_addr) != 0) {
+      if (gxPLIoCtl (bridge->in, gxPLIoFuncNetAddrFromString, &src->addr, str_addr) != 0) {
 
-        vLog (LOG_ERR, "unable to convert %s to remote address", str_addr);
+        PERROR ("unable to convert %s to remote address", str_addr);
+        return;
+      }
+    }
+
+    if (strcmp (gxPLMessageSchemaTypeGet (message), "basic") == 0) {
+      int interval;
+      const char * str_interval;
+
+      // Gets heartbeat interval for update
+      str_interval = gxPLMessagePairGet (message, "interval");
+      interval =  strtol (str_interval, &endptr, 10);
+      if (endptr == NULL) {
+
+        PERROR ("unable to convert %s to heartbeat interval", str_interval);
         return;
       }
 
-      if (strcmp (gxPLMessageSchemaTypeGet (message), "basic") == 0) {
-        int interval;
-        const char * str_interval;
+      client = pvVectorFindFirst (&bridge->clients, src);
+      if (client == NULL) {
 
-        // Gets heartbeat interval for update
-        str_interval = gxPLMessagePairGet (message, "interval");
-        interval =  strtol (str_interval, &endptr, 10);
-        if (endptr == NULL) {
+        // New client
+        client = src;
+        new_client = true;
 
-          vLog (LOG_ERR, "unable to convert %s to heartbeat interval", str_interval);
+        // then adds to the list
+        if (iVectorAppend (&bridge->clients, client) != 0) {
+
+          PERROR ("unable to append client");
+          free (client);
           return;
         }
-
-        client = pvVectorFindFirst (&bridge->clients, &clinfo);
-        if (client == NULL) {
-
-          // New client
-          client = calloc (1, sizeof (gxPLBridgeClient));
-          assert (client);
-
-          // Copies address for this client
-          memcpy (&client->addr, &clinfo, sizeof (clinfo));
-          gxPLIdCopy (&client->id, gxPLMessageSourceIdGet (message));
-
-          // then adds to the list
-          if (iVectorAppend (&bridge->clients, client) != 0) {
-
-            vLog (LOG_ERR, "unable to append client");
-            free (client);
-            return;
-          }
-          vLog (LOG_INFO, "New client %s, processing %d clients",
-                str_addr, iVectorSize (&bridge->clients));
-        }
-
-        client->hbeat_period_max = interval * 60 * 2 + 60;
-        client->hbeat_last = now;
+        vLog (LOG_INFO, "New client %s.%s.%s, processing %d clients",
+              src->id.vendor, src->id.device, src->id.instance,
+              iVectorSize (&bridge->clients));
       }
-      else if (strcmp (gxPLMessageSchemaTypeGet (message), "end") == 0) {
-        int c = iVectorFindFirstIndex (&bridge->clients, &clinfo);
 
-        if (c >= 0) {
+      client->hbeat_period_max = interval * 60 * 2 + 60;
+      client->hbeat_last = now;
+    }
+    else if (strcmp (gxPLMessageSchemaTypeGet (message), "end") == 0) {
+      int c = iVectorFindFirstIndex (&bridge->clients, src);
 
-          iVectorRemove (&bridge->clients, c);
-          vLog (LOG_INFO, "Delete client %s after receiving his"
-                " heartbeat end , processing %d clients",
-                str_addr, iVectorSize (&bridge->clients));
-        }
+      if (c >= 0) {
+
+        iVectorRemove (&bridge->clients, c);
+        vLog (LOG_INFO, "Delete client %s.%s.%s after receiving his"
+              " heartbeat end, processing %d clients",
+              src->id.vendor, src->id.device, src->id.instance,
+              iVectorSize (&bridge->clients));
       }
+    }
+
+    if (!new_client) {
+
+      free (src);
     }
   }
 
   if (gxPLAppSetting (bridge->in)->broadcast) {
 
-    // Deliver this message to all clients on inner side
-    PDEBUG ("Broadcasts message from inner to inner");
-    for (int i = 0; i < iVectorSize (&bridge->clients); i++) {
-
-      client = pvVectorGet (&bridge->clients, i);
-      gxPLAppSendMessage (bridge->in, message, &client->addr);
-    }
+    // Deliver this message to all inside clients
+    vLog (LOG_INFO,  "IN  --- IN  > Broadcast");
+    gxPLAppSendMessage (bridge->in, message, NULL);
   }
   else if (client) {
 
-    // if inner side broadcast is disabled, echoes hbeat.basic message to the client only
-    PDEBUG ("Echoes message to the client");
+    // if inside broadcast is disabled, echoes hbeat.basic message to the client only
+    vLog (LOG_INFO,  "IN  --- IN  > Deliver");
     gxPLAppSendMessage (bridge->in, message, &client->addr);
   }
 
   if (gxPLMessageHopGet (message) <= bridge->max_hop) {
 
-    // Broadcasts this message to the outer side
+    // Broadcasts this message outside
     gxPLMessageHopInc (message);
-    PDEBUG ("[OUT<--IN] Deliver message from inner to outer");
+    vLog (LOG_INFO,  "OUT <-- IN  > Deliver");
     gxPLAppSendMessage (bridge->out, message, NULL);
   }
 }
 
 // -----------------------------------------------------------------------------
-// Receive xPL messages from outer side
+// Receive xPL messages from outside
 static void
 prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
   gxPLBridge * bridge = (gxPLBridge *) udata;
 
   if (gxPLMessageHopGet (message) <= bridge->max_hop) {
 
-    // Broadcasts this message to the inner side
+    // the message should go on another network, increment the number of hops
     gxPLMessageHopInc (message);
 
-    // Deliver this message if outer side broadcast is enabled or if the target is on inner side
-    for (int i = 0; i < iVectorSize (&bridge->clients); i++) {
+    if (gxPLAppSetting (bridge->in)->broadcast) {
 
-      gxPLBridgeClient * client = pvVectorGet (&bridge->clients, i);
-      if ( (gxPLAppSetting (bridge->out)->broadcast) ||
-           (gxPLIdCmp (&client->id, gxPLMessageTargetIdGet (message)) == 0)) {
+      // Deliver this message to all inside clients
+      vLog (LOG_INFO,  "OUT --> IN  > Broadcast");
+      gxPLAppSendMessage (bridge->in, message, NULL);
+    }
+    else {
+      /*
+       * Broadcast disabled, deliver this message if:
+       * - target is inside
+       * - schema message is allowed to cross the bridge
+       */
+      const gxPLSchema * s = gxPLMessageSchemaGet (message);
 
-        PDEBUG ("[OUT-->IN] Deliver message from outer to inner");
-        gxPLAppSendMessage (bridge->in, message, &client->addr);
+      int allow = iVectorFindFirstIndex (&bridge->allow, s);
+      if (allow >= 0) {
+
+        vLog (LOG_INFO,  "OUT --> IN  > %s.%s allowed to cross", s->class, s->type);
+      }
+
+      for (int i = 0; i < iVectorSize (&bridge->clients); i++) {
+
+        gxPLBridgeClient * client = pvVectorGet (&bridge->clients, i);
+        if ( (gxPLIdCmp (&client->id, gxPLMessageTargetIdGet (message)) == 0) ||
+             (allow >= 0)) {
+
+          vLog (LOG_INFO,  "OUT --> IN  > Deliver");
+          gxPLAppSendMessage (bridge->in, message, &client->addr);
+        }
       }
     }
   }
+}
+
+// -----------------------------------------------------------------------------
+static void
+prvSetConfig (gxPLBridge * bridge) {
+  const char * str;
+
+  // Get append status
+  if ( (str = gxPLDeviceConfigValueGet (bridge->device, BROADCAST_KEY)) != NULL) {
+
+    gxPLAppSetting (bridge->in)->broadcast = strcasecmp (str, "true") == 0;
+  }
+
+  iVectorClear (&bridge->allow);
+  for (int i = 0; i < gxPLDeviceConfigValueCount (bridge->device, ALLOW_KEY); i++) {
+    gxPLSchema * schema = malloc (sizeof (gxPLSchema));
+    assert (schema);
+
+    if (gxPLSchemaFromString (schema, gxPLDeviceConfigValueGetAt (bridge->device, ALLOW_KEY, i)) == 0) {
+
+      iVectorAppend (&bridge->allow, schema);
+    }
+    else {
+
+      free (schema);
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+//  Handle a change to the device device configuration */
+static void
+prvConfigChanged (gxPLDevice * device, void * udata) {
+
+  // Read setting items for device and install */
+  prvSetConfig (udata);
 }
 
 /* public api functions ===================================================== */
@@ -171,7 +256,7 @@ gxPLBridgeOpen (gxPLSetting * insetting, gxPLSetting * outsetting, uint8_t max_h
   if ( (strcmp (insetting->iolayer, "udp") == 0) &&
        (strlen (insetting->iolayer) == 0)) {
 
-    vLog (LOG_ERR, "iolayer of inner side  must be provided and different of udp");
+    PERROR ("iolayer for inside must be provided and different of udp");
   }
   else {
     gxPLBridge * bridge = calloc (1, sizeof (gxPLBridge));
@@ -179,40 +264,37 @@ gxPLBridgeOpen (gxPLSetting * insetting, gxPLSetting * outsetting, uint8_t max_h
 
     // ignore connection type for inner
     insetting->connecttype = gxPLConnectStandAlone;
+
     // ignore iolayer and connection type for outer
     strcpy (outsetting->iolayer, "udp");
     outsetting->connecttype = gxPLConnectViaHub;
 
     bridge->in  = gxPLAppOpen (insetting);
     bridge->out = gxPLAppOpen (outsetting);
+
     if ( (bridge->in) && (bridge->out)) {
 
-      if (iVectorInit (&bridge->clients, 1, NULL, free) == 0) {
+      iVectorInit (&bridge->clients, 1, NULL, free);
+      iVectorInitSearch (&bridge->clients, prvClientKey, prvClientMatch);
+      iVectorInit (&bridge->allow, 1, NULL, free);
+      iVectorInitSearch (&bridge->allow, prvAllowKey, prvAllowMatch);
+      gxPLMessageListenerAdd (bridge->in, prvHandleInnerMessage, bridge);
+      gxPLMessageListenerAdd (bridge->out, prvHandleOuterMessage, bridge);
 
-        if (iVectorInitSearch (&bridge->clients, prvClientKey, prvClientMatch) == 0) {
+      if (max_hop == 0) {
 
-          if (gxPLMessageListenerAdd (bridge->in, prvHandleInnerMessage, bridge) == 0) {
-
-            if (gxPLMessageListenerAdd (bridge->out, prvHandleOuterMessage, bridge) == 0) {
-
-              if (max_hop == 0) {
-
-                max_hop = 1;
-              }
-              else if (max_hop > 9) {
-
-                max_hop = 9;
-              }
-              bridge->max_hop = max_hop;
-              return bridge;
-            }
-          }
-        }
+        max_hop = 1;
       }
+      else if (max_hop > 9) {
+
+        max_hop = 9;
+      }
+      bridge->max_hop = max_hop;
+      return bridge;
     }
     free (bridge);
   }
-  vLog (LOG_ERR, "unable to open bridge");
+  PERROR ("unable to open bridge");
   return NULL;
 }
 
@@ -252,14 +334,14 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
 
   i = gxPLAppPoll (bridge->in, timeout_ms);
   if (i != 0) {
-    
+
     ret = i;
     vLog (LOG_NOTICE, "Unable to poll inner application");
   }
-  
+
   i = gxPLAppPoll (bridge->out, timeout_ms);
   if (i != 0) {
-    
+
     ret = i;
     vLog (LOG_NOTICE, "Unable to poll outer application");
   }
@@ -276,14 +358,12 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
       gxPLBridgeClient * client = pvVectorGet (&bridge->clients, i);
 
       if ( (now - client->hbeat_last) > client->hbeat_period_max) {
-        char * str;
-        if (gxPLIoCtl (bridge->in, gxPLIoFuncNetAddrToString, &client->addr, &str) == 0) {
 
-          vLog (LOG_INFO, "Delete client %s:%d after heartbeat timeout, "
-                "processing %d clients",
-                str, client->addr.port,
-                iVectorSize (&bridge->clients) - 1);
-        }
+        vLog (LOG_INFO, "Delete client %s.%s.%s after heartbeat timeout, "
+              "processing %d clients",
+              client->id.vendor, client->id.device, client->id.instance,
+              iVectorSize (&bridge->clients) - 1);
+
         iVectorRemove (&bridge->clients, i);
       }
     }
@@ -304,4 +384,63 @@ gxPLBridgeOutApp (gxPLBridge * bridge) {
 
   return bridge->out;
 }
+
+// -----------------------------------------------------------------------------
+int
+gxPLBridgeDeviceSet (gxPLBridge * bridge,
+                     const char * vendor_id, const char * device_id,
+                     const char * filename, const char * version) {
+
+  // Create a configurable device and set our application version
+  bridge->device = gxPLAppAddConfigurableDevice (bridge->out,
+                   vendor_id, device_id, filename);
+
+  if (bridge->device) {
+
+    if (version) {
+
+      gxPLDeviceVersionSet (bridge->device, version);
+    }
+
+    if (gxPLDeviceIsConfigured (bridge->device) == false) {
+
+      // Define the configurable items and give it a default
+      gxPLDeviceConfigItemAdd (bridge->device, BROADCAST_KEY, gxPLConfigReconf, 1);
+      gxPLDeviceConfigValueSet (bridge->device, BROADCAST_KEY, "false");
+
+      gxPLDeviceConfigItemAdd (bridge->device, ALLOW_KEY, gxPLConfigReconf, 16);
+      gxPLDeviceConfigValueSet (bridge->device, ALLOW_KEY, "hbeat.request");
+    }
+
+    // Parse the device configurables into a form this program
+    // can use (whether we read a config or not)
+    prvSetConfig (bridge);
+
+    // Add a device change listener we'll use to pick up changes
+    return gxPLDeviceConfigListenerAdd (bridge->device, prvConfigChanged, bridge);
+  }
+  return -1;
+}
+
+// -----------------------------------------------------------------------------
+gxPLDevice *
+gxPLBridgeDevice (gxPLBridge * bridge) {
+
+  return bridge->device;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLBridgeDeviceEnable (gxPLBridge * bridge, bool enable) {
+
+  return gxPLDeviceEnable (bridge->device, enable);
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLBridgeDeviceIsEnabled (const gxPLBridge * bridge) {
+
+  return gxPLDeviceIsEnabled (bridge->device);
+}
+
 /* ========================================================================== */

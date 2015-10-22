@@ -78,7 +78,7 @@ int gxPLAppDisableAllDevice (gxPLApplication * app) {
   for (int i = 0; i < iVectorSize (&app->device); i++) {
 
     device = pvVectorGet (&app->device, i);
-    if (gxPLDeviceEnabledSet (device, false) != 0) {
+    if (gxPLDeviceEnable (device, false) != 0) {
       return -1;
     }
   }

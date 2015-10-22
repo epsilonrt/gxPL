@@ -14,6 +14,10 @@
 #include "version-git.h"
 
 /* constants ================================================================ */
+#define BRIDGE_VERSION VERSION_SHORT
+#define BRIDGE_VENDOR "epsirt"
+#define BRIDGE_DEVICE "bridge"
+#define BRIDGE_CONFIG_FILE "bridge.xpl"
 
 /* macros =================================================================== */
 #define test(t) do { \
@@ -52,13 +56,24 @@ main (int argc, char **argv) {
   bridge = gxPLBridgeOpen (insetting, outsetting, 1);
   test (bridge);
 
-  // View network information
+  // set up the device that receives messages from the outside
+  test_count++;
+  ret = gxPLBridgeDeviceSet (bridge, BRIDGE_VENDOR, BRIDGE_DEVICE,
+                             BRIDGE_CONFIG_FILE, BRIDGE_VERSION);
+  test (ret == 0);
+
+  // Enable the device
+  test_count++;
+  ret = gxPLBridgeDeviceEnable (bridge, true);
+  assert (ret == 0);
+
+  // Gets the applications to read their informations
   gxPLApplication * in = gxPLBridgeInApp (bridge);
   gxPLApplication * out = gxPLBridgeOutApp (bridge);
 
   printf ("Starting bridge test for %s network\n", insetting->iolayer);
-  printf ("  inner side listen on  %s\n", gxPLIoLocalAddrGet (in));
-  printf ("  outer side listen on  %s:%d\n", gxPLIoLocalAddrGet (out),
+  printf ("  listen inside on  %s\n", gxPLIoLocalAddrGet (in));
+  printf ("  listen outside on  %s:%d\n", gxPLIoLocalAddrGet (out),
           gxPLIoInfoGet (out)->port);
   printf ("Press Ctrl+C to abort ...\n");
 

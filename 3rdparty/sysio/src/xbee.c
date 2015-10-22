@@ -197,7 +197,7 @@ vXBeeIn (xXBee *xbee, const void *buf, uint8_t len) {
       INC_RX_CRC_ERROR (xbee);
       continue;
     }
-
+    
     // Paquet reçu et vérifié, on le passe au callback
     if (iXBeeRecvPktCB (xbee, xbee->in.packet, xbee->in.bytes_rcvd) == -1) {
 
@@ -887,6 +887,23 @@ iXBeePktParamGetULong (uint32_t * ulDest, xXBeePkt *pkt, int iOffset) {
 
     memcpy (&ulNet, pucXBeePktParam (pkt) + iOffset, sizeof (ulNet));
     *ulDest = ntohl (ulNet);
+    return 0;
+  }
+  return -1;
+}
+
+// -----------------------------------------------------------------------------
+int
+iXBeePktParamGetULongLong (uint64_t * ullDest, xXBeePkt *pkt, int iOffset) {
+  int iLen;
+  uint64_t ullNet;
+
+  iLen = iXBeePktParamLen (pkt) - iOffset;
+
+  if (iLen >= sizeof (ullNet)) {
+
+    memcpy (&ullNet, pucXBeePktParam (pkt) + iOffset, sizeof (ullNet));
+    *ullDest = ntohll (ullNet);
     return 0;
   }
   return -1;

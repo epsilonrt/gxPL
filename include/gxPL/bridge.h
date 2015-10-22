@@ -1,6 +1,6 @@
 /**
  * @file
- * xPL Bridge 
+ * xPL Bridge
  *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -19,8 +19,8 @@ __BEGIN_C_DECLS
 /**
  * @defgroup xPLBridge Bridge
  * A bridge connects two networks do not have the same physical layer. \n
- * The outer side of a bridge uses UDP and behaves like a device associated 
- * with a schema. The inner side of a bridge acts as a hub and does not use UDP.
+ * The outside of a bridge uses UDP and behaves like a device associated
+ * with a schema. The inside of a bridge acts as a hub and does not use UDP.
  * @{
  */
 
@@ -31,6 +31,40 @@ __BEGIN_C_DECLS
  * @return the object or NULL if error occurs
  */
 gxPLBridge * gxPLBridgeOpen (gxPLSetting * insetting, gxPLSetting * outsetting, uint8_t max_hop);
+
+/**
+ * @brief
+ * @param vendor_id
+ * @param device_id
+ * @param filename
+ * @param version
+ * @return
+ */
+int gxPLBridgeDeviceSet (gxPLBridge * bridge,
+                         const char * vendor_id, const char * device_id,
+                         const char * filename, const char * version);
+
+/**
+ * @brief
+ * @param bridge
+ * @return
+ */
+gxPLDevice * gxPLBridgeDevice (gxPLBridge * bridge);
+
+/**
+ * @brief
+ * @param bridge
+ * @param enable
+ * @return
+ */
+int gxPLBridgeDeviceEnable (gxPLBridge * bridge, bool enable);
+
+/**
+ * @brief
+ * @param bridge
+ * @return
+ */
+int gxPLBridgeDeviceIsEnabled (const gxPLBridge * bridge);
 
 /**
  * @brief Close a gxPLBridge object and release all ressources
@@ -48,16 +82,16 @@ int gxPLBridgeClose (gxPLBridge * bridge);
 int gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms);
 
 /**
- * @brief 
+ * @brief
  * @param bridge
- * @return 
+ * @return
  */
 gxPLApplication * gxPLBridgeInApp (gxPLBridge * bridge);
 
 /**
- * @brief 
+ * @brief
  * @param bridge
- * @return 
+ * @return
  */
 gxPLApplication * gxPLBridgeOutApp (gxPLBridge * bridge);
 

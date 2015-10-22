@@ -91,7 +91,7 @@ EXTRA_LIBS =
 MATH_LIB_ENABLE = ON
 
 # Enable linking with  sysio library (ON/OFF)
-USE_SYSIO_LIB = OFF
+USE_SYSIO_LIB = ON
 
 # Compiler flag to set the C Standard level.
 

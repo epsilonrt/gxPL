@@ -135,13 +135,13 @@ typedef enum {
  * @brief Net families
  */
 typedef enum {
+  gxPLNetFamilyUnknown  = 0,
   gxPLNetFamilyInet     = 2, /**< family & gxPLNetFamilyInet -> true for two revisions of IP (v4 and v6) */
   gxPLNetFamilyInet4    = gxPLNetFamilyInet,
   gxPLNetFamilyInet6    = gxPLNetFamilyInet | 1,
   gxPLNetFamilyZigbee   = 4,
   gxPLNetFamilyZigbee16 = gxPLNetFamilyZigbee,
-  gxPLNetFamilyZigbee64 = gxPLNetFamilyZigbee | 1,
-  gxPLNetFamilyUnknown  = -1
+  gxPLNetFamilyZigbee64 = gxPLNetFamilyZigbee | 1
 } gxPLNetFamily;
 
 /**

@@ -30,9 +30,11 @@ typedef struct _gxPLBridgeClient {
 typedef struct _gxPLBridge {
   gxPLApplication * in;
   gxPLApplication * out;
+  gxPLDevice * device;
   xVector clients;
+  xVector allow;
   long timeout;
-  uint8_t max_hop;
+  uint8_t max_hop; /* only messages with a hop count less than or equal to max_hop cross the bridge */
 } gxPLBridge;
 
 /* ========================================================================== */

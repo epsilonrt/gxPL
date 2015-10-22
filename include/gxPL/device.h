@@ -234,7 +234,7 @@ int gxPLDeviceVersionSet (gxPLDevice * device, const char * version);
  * @param enabled true for eanbled
  * @return 0, -1 if an error occurs
  */
-int gxPLDeviceEnabledSet (gxPLDevice * device, bool enabled);
+int gxPLDeviceEnable (gxPLDevice * device, bool enabled);
 
 /**
  * @brief Sets the heartbeat interval

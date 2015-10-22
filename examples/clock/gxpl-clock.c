@@ -76,7 +76,7 @@ main (int argc, char * argv[]) {
   signal (SIGINT, prvSignalHandler);
 
   // Enable the device
-  ret = gxPLDeviceEnabledSet (clk, true);
+  ret = gxPLDeviceEnable (clk, true);
   assert (ret == 0);
 
   // Main Loop of Clock Action

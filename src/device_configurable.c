@@ -17,17 +17,11 @@
 #include <gxPL.h>
 #include "device_p.h"
 
-/* constants ================================================================ */
-/* macros =================================================================== */
-/* private variables ======================================================== */
 /* structures =============================================================== */
 typedef struct _listener_elmt {
   gxPLDeviceConfigListener func;
   void * data;
 } listener_elmt;
-
-/* types ==================================================================== */
-/* private variables ======================================================== */
 
 /* private functions ======================================================== */
 // -----------------------------------------------------------------------------
@@ -288,7 +282,7 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
   // See if we need to restart the device
   if (was_enabled && restart_needed) {
 
-    gxPLDeviceEnabledSet (device, false);
+    gxPLDeviceEnable (device, false);
     PDEBUG ("Need to restart the device");
   }
   // Install new values
@@ -307,7 +301,7 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
   // Restart device, if needed
   if (was_enabled && restart_needed) {
 
-    gxPLDeviceEnabledSet (device, true);
+    gxPLDeviceEnable (device, true);
     PDEBUG ("device restarted");
   }
 

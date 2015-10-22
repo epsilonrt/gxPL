@@ -106,11 +106,11 @@ main (int argc, char **argv) {
   test_ok (ret == 0);
 
   test_new ("enable the new device");
-  ret = gxPLDeviceEnabledSet (device1, true);
+  ret = gxPLDeviceEnable (device1, true);
   test_ok (ret == 0);
 
   test_new ("enable the new device");
-  ret = gxPLDeviceEnabledSet (device2, true);
+  ret = gxPLDeviceEnable (device2, true);
   test_ok (ret == 0);
 
   signal (SIGTERM, prvSignalHandler);

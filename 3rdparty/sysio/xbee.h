@@ -701,8 +701,24 @@ int iXBeePktParamGetStr (char * pcDest, xXBeePkt *pkt, int iDestSize);
 int iXBeePktParamGetULong (uint32_t * ulDest, xXBeePkt *pkt, int iOffset);
 
 /**
+ * @brief Copie d'un mot long des paramètres de commande AT
+ * @param ulDest mot long résultat
+ * @param pkt pointeur sur le paquet
+ * @return 0, -1 sur erreur
+ */
+int iXBeePktParamGetULong (uint32_t * ulDest, xXBeePkt *pkt, int iOffset);
+
+/**
+ * @brief Copie d'un très long mot des paramètres de commande AT
+ * @param ullDest très long mot résultat
+ * @param pkt pointeur sur le paquet
+ * @return 0, -1 sur erreur
+ */
+int iXBeePktParamGetULongLong (uint64_t * ullDest, xXBeePkt *pkt, int iOffset);
+
+/**
  * @brief Copie d'un mot des paramètres de commande AT
- * @param ulDest mot résultat
+ * @param usDest mot résultat
  * @param pkt pointeur sur le paquet
  * @return 0, -1 sur erreur
  */
