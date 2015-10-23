@@ -234,6 +234,7 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
   int new_interval = -1;
   bool restart_needed = false;
   bool was_enabled = device->isenabled;
+  bool was_configured = device->isconfigured;
 
   PDEBUG ("Parse to set config at index = % d", index);
   for (int i = index; i < iVectorSize (config); i++) {
@@ -303,6 +304,14 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
 
     gxPLDeviceEnable (device, true);
     PDEBUG ("device restarted");
+  }
+  
+  // informs the manager that the configuration has been taken
+  if (was_configured == false) {
+    
+    gxPLMessageDelete (device->hbeat_msg);
+    device->hbeat_msg = NULL;
+    gxPLDeviceHeartbeatSend (device, gxPLHeartbeatHello);
   }
 
   // Fire config changed message
