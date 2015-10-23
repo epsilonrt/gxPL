@@ -59,9 +59,9 @@ typedef struct xbeezb_data {
 static const char *
 prvZbAddrToString (uint8_t * zbaddr, uint8_t zbaddr_size) {
   static char buffer[8 * 3];
-  
+
   buffer[0] = '\0';
-  
+
   if (zbaddr_size == 8) {
 
     sprintf (buffer, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
@@ -173,20 +173,74 @@ prvZbTxStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 
   if (iXBeePktFrameId (pkt) == dp->fid) {
     int status = iXBeePktStatus (pkt);
+    const char * error_msg;
 
-    if (status) {
-
-      PERROR ("Tx%d Err. %d\n", dp->fid, status);
+    if (status != 0) {
+#ifndef __AVR__
+      switch (status) {
+        case 0x01:
+          error_msg = "MAC ACK Failure";
+          break;
+        case 0x02:
+          error_msg = "CCA Failure";
+          break;
+        case 0x15:
+          error_msg = "Invalid destination endpoint";
+          break;
+        case 0x21:
+          error_msg = "Network ACK Failure";
+          break;
+        case 0x22:
+          error_msg = "Not Joined to Network";
+          break;
+        case 0x23:
+          error_msg = "Self-addressed";
+          break;
+        case 0x24:
+          error_msg = "Address Not Found";
+          break;
+        case 0x25:
+          error_msg = "Route Not Found";
+          break;
+        case 0x26:
+          error_msg = "Broadcast source failed to hear a neighbor relay the message";
+          break;
+        case 0x2B:
+          error_msg = "Invalid binding table index";
+          break;
+        case 0x2C:
+          error_msg = "Resource error lack of free buffers, timers, etc.";
+          break;
+        case 0x2D:
+          error_msg = "Attempted broadcast with APS transmission";
+          break;
+        case 0x2E:
+          error_msg = "Attempted unicast with APS transmission, but EE=0";
+          break;
+        case 0x32:
+          error_msg = "Resource error lack of free buffers, timers, etc.";
+          break;
+        case 0x74:
+          error_msg = "Data payload too large";
+          break;
+        default:
+          error_msg = "Unknown";
+          break;
+      }
+      PERROR ("TX Status message error 0x%02X: %s", status, error_msg);
+#else
+      PERROR ("TX Status message error 0x%02X", status);
+#endif
     }
-    dp->fid = 0;
   }
+  dp->fid = 0;
   vXBeeFreePkt (xbee, pkt);
   return 0;
 }
 
 // -----------------------------------------------------------------------------
 static int
-prvZbNodeIdCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
+prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 
   vLog (LOG_INFO, "%s joined zigbee network",
         prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
@@ -224,7 +278,7 @@ prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
 static int
 prvSendLocalAt (gxPLIo * io,
                 const char cmd[],
-                const uint8_t *params,
+                const uint8_t * params,
                 uint8_t param_len,
                 int timeout_ms) {
   int ret;
@@ -324,7 +378,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     if ( (fd = iSerialOpen (io->setting->iface, &io->setting->xbee.ios)) < 0) {
 
       PERROR ("Unable to open serial port: %s (%d)",
-            strerror (errno), errno);
+              strerror (errno), errno);
       return -1;
     }
 
@@ -397,15 +451,15 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     }
     else {
       uint64_t panid;
-      
-      PDEBUG("iXBeePktParamLen=%d", iXBeePktParamLen(dp->atpkt));
+
+      PDEBUG ("iXBeePktParamLen=%d", iXBeePktParamLen (dp->atpkt));
       ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
-      
-      if ((ret == 0) && (panid != io->setting->xbee.panid)) {
+
+      if ( (ret == 0) && (panid != io->setting->xbee.panid)) {
         uint64_t new_panid = htonll (io->setting->xbee.panid);
 
         // current and setting PAN ID differs: change to new PAN ID
-        vLog(LOG_INFO, "Write new PAN ID in XBee: %" PRIu64, io->setting->xbee.panid);
+        vLog (LOG_INFO, "Write new PAN ID in XBee: %" PRIu64, io->setting->xbee.panid);
         ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
         if (ret != 0) {
 
@@ -423,7 +477,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
         }
       }
     }
-    
+
     // Gets Maximum RF payload bytes (NP)
     ret = prvSendLocalAt (io, XBEE_CMD_MAX_PAYLOAD, NULL, 0, 1000);
     if (ret != 0) {
@@ -434,11 +488,11 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     }
 
     if (iXBeePktParamGetUShort (&word, dp->atpkt, 0) == 0) {
-      
+
       dp->max_payload = word;
-      PDEBUG("Maximum RF payload %d bytes", dp->max_payload);
+      PDEBUG ("Maximum RF payload %d bytes", dp->max_payload);
     }
-    
+
     vXBeeSetCB (&dp->xbee, XBEE_CB_DATA, prvZbDataCB);
     vXBeeSetCB (&dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
     if (io->setting->xbee.coordinator) {
@@ -490,10 +544,10 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
   const uint8_t * dst16;
 
   if (target) {
-    
+
     // target provided
     if (target->isbroadcast == 0) {
-      
+
       // target is not broadcast
       if (target->family == gxPLNetFamilyZigbee16) {
 
@@ -507,7 +561,7 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
       }
     }
     else {
-      
+
       // target is broadcast
       dst16 = pucXBeeAddr16Unknown();
       dst64 = pucXBeeAddr64Broadcast();
