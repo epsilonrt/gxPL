@@ -58,7 +58,7 @@ main (int argc, char * argv[]) {
   }
 
   // Create a configurable device and set our application version
-  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock", "clock.xpl");
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock", "gxpl-clock.xpl");
   assert (device);
   
   ret = gxPLDeviceVersionSet (device, CLOCK_VERSION);

@@ -58,7 +58,7 @@ main (int argc, char * argv[]) {
   assert (ret == 0);
 
   // Create a configurable device and set our application version
-  device = gxPLAppAddConfigurableDevice (app, "epsirt", "logger", "logger.xpl");
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "logger", "gxpl-logger.xpl");
   assert (device);
 
   ret = gxPLDeviceVersionSet (device, LOGGER_VERSION);

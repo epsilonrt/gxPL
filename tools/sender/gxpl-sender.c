@@ -248,7 +248,7 @@ prvPrintUsage (void) {
           "[-m message_type] -c schema  name=value name=value ...\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0)"
           " as network interface\n");
-  printf ("  -d           - enable hub and gxPLib debugging messages\n");
+  printf ("  -d           - enable debugging messages\n");
   printf ("  -h           - print this message\n");
   printf ("  -s source    - source of message in vendor-device.instance"
           " (default: " DEFAULT_SOURCE ")\n");
