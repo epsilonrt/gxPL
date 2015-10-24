@@ -10,7 +10,6 @@
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
-  <Project Name="gxpl-xbee" Path="tools/xbee/gxpl-xbee.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
   <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
@@ -20,9 +19,10 @@
   <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
-  <Project Name="gxpl-bridge" Path="tools/bridge/gxpl-bridge.project" Active="No"/>
+  <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
+  <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -35,7 +35,6 @@
       <Project Name="git-version" ConfigName="Debug"/>
       <Project Name="gxpl-prj" ConfigName="Debug"/>
       <Project Name="gxPLib" ConfigName="Debug"/>
-      <Project Name="gxpl-xbee" ConfigName="Debug"/>
       <Project Name="gxpl-test-message" ConfigName="Debug"/>
       <Project Name="gxpl-template" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
@@ -49,6 +48,8 @@
       <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
+      <Project Name="gxpl-bridge" ConfigName="Debug"/>
+      <Project Name="gxpl-xbee-bridge" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -61,7 +62,6 @@
       <Project Name="git-version" ConfigName="Release"/>
       <Project Name="gxpl-prj" ConfigName="Release"/>
       <Project Name="gxPLib" ConfigName="Release"/>
-      <Project Name="gxpl-xbee" ConfigName="Release"/>
       <Project Name="gxpl-test-message" ConfigName="Release"/>
       <Project Name="gxpl-template" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
@@ -75,6 +75,8 @@
       <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test-bridge" ConfigName="Release"/>
       <Project Name="gxpl-bridge" ConfigName="Release"/>
+      <Project Name="gxpl-bridge" ConfigName="Release"/>
+      <Project Name="gxpl-xbee-bridge" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

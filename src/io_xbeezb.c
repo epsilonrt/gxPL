@@ -19,13 +19,14 @@
 
 #if defined(__unix__)
 #include <sysio/xbee.h>
+#include <sysio/delay.h>
 #define PROGMEM
 #define memcpy_P(dst,src,size) memcpy(dst,src,size)
 #define strcpy_P(dst,src) strcpy(dst,src)
 
 #elif defined(__AVR__)
 #include <avrio/xbee.h>
-
+#include <avrio/delay.h>
 #else
 #error This target platform is not supported.
 #endif
@@ -441,8 +442,49 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     }
     memcpy (&dp->local_addr[4], pucXBeePktParam (dp->atpkt), 4);
 
-    // Gets PAN ID
-    ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, NULL, 0, 1000);
+    if (io->setting->xbee.new_panid) {
+
+      // New PAN ID
+      ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, NULL, 0, 1000);
+      if (ret != 0) {
+
+        PERROR ("Unable to read XBee module, return %d", ret);
+        gxPLXBeeZbClose (io);
+        return -1;
+      }
+      else {
+        uint64_t panid;
+
+        ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
+
+        if ( (ret == 0) && (panid != io->setting->xbee.panid)) {
+          uint64_t new_panid = htonll (io->setting->xbee.panid);
+
+          // current and setting PAN ID differs: change to new PAN ID
+          vLog (LOG_INFO, "Write new PAN ID in XBee: 0x%" PRIx64
+                ", new PAN ID will be operational in a few seconds (usually 6)..." ,
+                io->setting->xbee.panid);
+          ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
+          if (ret != 0) {
+
+            PERROR ("Unable to read XBee module, return %d", ret);
+            gxPLXBeeZbClose (io);
+            return -1;
+          }
+
+          ret = prvSendLocalAt (io, XBEE_CMD_WRITE_PARAMS, NULL, 0, 2000);
+          if (ret != 0) {
+
+            PERROR ("Unable to read XBee module, return %d", ret);
+            gxPLXBeeZbClose (io);
+            return -1;
+          }
+        }
+      }
+    }
+
+    // Gets Operating PAN ID
+    ret = prvSendLocalAt (io, XBEE_CMD_OPERATING_PAN_ID, NULL, 0, 1000);
     if (ret != 0) {
 
       PERROR ("Unable to read XBee module, return %d", ret);
@@ -452,28 +494,16 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     else {
       uint64_t panid;
 
-      PDEBUG ("iXBeePktParamLen=%d", iXBeePktParamLen (dp->atpkt));
       ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
+      if (ret == 0) {
+        if (panid == io->setting->xbee.panid) {
 
-      if ( (ret == 0) && (panid != io->setting->xbee.panid)) {
-        uint64_t new_panid = htonll (io->setting->xbee.panid);
-
-        // current and setting PAN ID differs: change to new PAN ID
-        vLog (LOG_INFO, "Write new PAN ID in XBee: %" PRIu64, io->setting->xbee.panid);
-        ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
-        if (ret != 0) {
-
-          PERROR ("Unable to read XBee module, return %d", ret);
-          gxPLXBeeZbClose (io);
-          return -1;
+          vLog (LOG_INFO, "Starting Zigbee network, PAN ID 0x%" PRIx64, panid);
         }
+        else {
 
-        ret = prvSendLocalAt (io, XBEE_CMD_WRITE_PARAMS, NULL, 0, 2000);
-        if (ret != 0) {
-
-          PERROR ("Unable to read XBee module, return %d", ret);
-          gxPLXBeeZbClose (io);
-          return -1;
+          vLog (LOG_INFO, "Starting Zigbee network, PAN ID being modified to 0x%"
+                PRIx64 "...", io->setting->xbee.panid);
         }
       }
     }

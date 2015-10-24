@@ -15,11 +15,15 @@
 
 #include <gxPL.h>
 #include "version-git.h"
+#include "config.h"
 
 /* constants ================================================================ */
 #define LOGGER_VERSION VERSION_SHORT
 #define LOG_FILE_CFG_NAME "filename"
 #define LOG_APPEND_CFG_NAME "append"
+#define LOGGER_VENDOR "epsirt"
+#define LOGGER_DEVICE "logger"
+#define DEFAULT_CONFIG_FILE "gxpl-logger.xpl"
 
 /* private variables ======================================================== */
 static gxPLApplication * app;
@@ -58,7 +62,8 @@ main (int argc, char * argv[]) {
   assert (ret == 0);
 
   // Create a configurable device and set our application version
-  device = gxPLAppAddConfigurableDevice (app, "epsirt", "logger", "gxpl-logger.xpl");
+  device = gxPLAppAddConfigurableDevice (app, LOGGER_VENDOR, LOGGER_DEVICE,
+                                         gxPLConfigPath (DEFAULT_CONFIG_FILE));
   assert (device);
 
   ret = gxPLDeviceVersionSet (device, LOGGER_VERSION);
@@ -170,19 +175,19 @@ prvSetConfig (gxPLDevice * device) {
 static void
 prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
 
-  fprintf (logfile, "%s [xpl-message] type=%s",
-            gxPLTimeStr (gxPLTime()), 
-            gxPLMessageTypeToString (gxPLMessageTypeGet (message)));
+  fprintf (logfile, " %s [xpl - message] type = %s",
+           gxPLTimeStr (gxPLTime()),
+           gxPLMessageTypeToString (gxPLMessageTypeGet (message)));
 
 
   // Print hop count, if interesting
   if (gxPLMessageHopGet (message) != 1) {
 
-    fprintf (logfile, ", hops=%d", gxPLMessageHopGet (message));
+    fprintf (logfile, ", hops = %d", gxPLMessageHopGet (message));
   }
 
   // Source Info
-  fprintf (logfile, ", source=%s-%s.%s, target=",
+  fprintf (logfile, ", source = %s - %s. %s, target = ",
            gxPLMessageSourceVendorIdGet (message),
            gxPLMessageSourceDeviceIdGet (message),
            gxPLMessageSourceInstanceIdGet (message));
@@ -194,14 +199,14 @@ prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
   }
   else {
 
-    fprintf (logfile, "%s-%s.%s",
+    fprintf (logfile, " %s - %s. %s",
              gxPLMessageTargetVendorIdGet (message),
              gxPLMessageTargetDeviceIdGet (message),
              gxPLMessageTargetInstanceIdGet (message));
   }
 
   // Echo Schema Info
-  fprintf (logfile, ", class=%s, type=%s",
+  fprintf (logfile, ", class = %s, type = %s",
            gxPLMessageSchemaClassGet (message),
            gxPLMessageSchemaTypeGet (message));
   fprintf (logfile, "\n");
@@ -227,7 +232,7 @@ prvSignalHandler (int s) {
     fflush (logfile);
     fclose (logfile);
   }
-  
+
   // all devices will be deactivated and destroyed before closing
   ret = gxPLAppClose (app);
   assert (ret == 0);

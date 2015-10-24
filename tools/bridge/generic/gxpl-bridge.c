@@ -46,7 +46,6 @@ static pid_t bridge_pid = 0;
 static gxPLBridge * bridge;
 static const char default_vendor_id[] = DEFAULT_VENDOR;
 static const char default_device_id[] = DEFAULT_DEVICE;
-static const char default_cfg_filename[] = DEFAULT_CONFIG_FILE;
 
 /* private functions ======================================================== */
 static void prvPrintUsage (void);
@@ -64,11 +63,12 @@ main (int argc, char * argv[]) {
     .out = NULL,
     .vendor_id = default_vendor_id,
     .device_id = default_device_id,
-    .cfg_filename = default_cfg_filename,
     .maxhop = 1
   };
 
   vLogInit (LOG_UPTO (LOG_INFO));
+  setting.cfg_filename = gxPLConfigPath (DEFAULT_CONFIG_FILE);
+  
   setting.in = calloc (1, sizeof (gxPLSetting));
   assert (setting.in);
   setting.in->malloc = 1; // will be freed by gxPLBridgeClose()
@@ -127,7 +127,7 @@ static void
 prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
   int c;
 
-  static const char short_options[] = "i:o:n:v:c:f:m:bDdh" GXPL_GETOPT;
+  static const char short_options[] = "i:o:n:v:c:f:m:bDdh";
   static struct option long_options[] = {
     {"in",          required_argument,  NULL, 'i' },
     {"out",         required_argument,  NULL, 'o' },
@@ -171,12 +171,12 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
 
       case 'c':
         setting->device_id = optarg;
-        PDEBUG ("set bridge device_id to %s", setting->vendor_id);
+        PDEBUG ("set bridge device_id to %s", setting->device_id);
         break;
 
       case 'f':
-        setting->cfg_filename = optarg;
-        PDEBUG ("set configuration filename to %s", setting->vendor_id);
+        setting->cfg_filename = gxPLConfigPath (optarg);
+        PDEBUG ("set configuration filename to %s", setting->cfg_filename);
         break;
 
       case 'm': {

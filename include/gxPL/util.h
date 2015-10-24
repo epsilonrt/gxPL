@@ -26,25 +26,45 @@ __BEGIN_C_DECLS
  * @defgroup gxPLUtilText Text functions
  * @{
  */
- 
+
 /**
  * @brief Copy string in accordance with xPL
- * 
- * Copies the C string pointed by src into the array pointed by dst, 
+ *
+ * Copies the C string pointed by src into the array pointed by dst,
  * including the terminating null character (and stopping at that point).
- * src must contain only the following characters: A-Z, a-z, 0-9 and "-" 
- * (letters, numbers and the hyphen/dash character - ASCII 45). If this is not 
+ * src must contain only the following characters: A-Z, a-z, 0-9 and "-"
+ * (letters, numbers and the hyphen/dash character - ASCII 45). If this is not
  * the case, the copying is interrupted and -1 is returned.
 
- * @param dst This is the pointer to an array of char elements where the 
+ * @param dst This is the pointer to an array of char elements where the
  * resulting C string is stored.
  * @param src source string
- * @return If successful, the total number of characters written is returned 
- * excluding the null-character appended at the end of the string, otherwise a 
+ * @return If successful, the total number of characters written is returned
+ * excluding the null-character appended at the end of the string, otherwise a
  * negative number is returned in case of failure.
  */
 int gxPLStrCpy (char * dst, const char * src);
 
+/**
+ * @brief Returns the path of a configuration file
+ *
+ * @param filename the file name
+ * @return If filename is a basename, add a directory that depends on the
+ * context and the host system. On a Unix system, the added directory is
+ * /etc/gxpl if the user is root, $HOME/.gxpl] otherwise. \n
+ * If filename is not a basename, filename is returned
+ */
+const char * gxPLConfigPath (const char * filename);
+
+/**
+ * @brief
+ * @param filename
+ * @param vendor_id
+ * @param device_id
+ * @return
+ */
+xVector * gxPLConfigReadFile (const char * filename, const char * vendor_id,
+                              const char * device_id);
 /**
  * @}
  */
@@ -153,15 +173,15 @@ int gxPLIdCopy (gxPLId * dst, const gxPLId * src);
  * @brief Compare two identifiers
  * @param id1 first id
  * @param id2 second id
- * @return It returns an integer less than, equal to, or greater than zero if id1 
- * is found, respectively, to be less than, to match, or be greater than id2. 
+ * @return It returns an integer less than, equal to, or greater than zero if id1
+ * is found, respectively, to be less than, to match, or be greater than id2.
  */
 int gxPLIdCmp (const gxPLId * id1, const gxPLId * id2);
 
 /**
  * @brief Gets an identifier from a string
  * @param dest destination
- * @param src source string vendor-device.instance\0, this string is modified 
+ * @param src source string vendor-device.instance\0, this string is modified
  * by the function and is no longer valid after call.
  * @return 0, -1 if an error occurs
  */
@@ -180,8 +200,8 @@ int gxPLIdFromString (gxPLId * dest, char * src);
  * @brief Compare two schemas
  * @param s1 schema 1
  * @param s2 schema 2
- * @return It returns an integer less than, equal to, or greater than zero if s1 
- * is found, respectively, to be less than, to match, or be greater than s2. 
+ * @return It returns an integer less than, equal to, or greater than zero if s1
+ * is found, respectively, to be less than, to match, or be greater than s2.
  */
 int gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2);
 
@@ -189,56 +209,56 @@ int gxPLSchemaCmp (const gxPLSchema * s1, const gxPLSchema * s2);
  * @brief Compare two schemas
  * @param s1 schema 1
  * @param s2 schema 2
- * @return It returns an integer less than, equal to, or greater than zero if s1 
- * is found, respectively, to be less than, to match, or be greater than s2. 
+ * @return It returns an integer less than, equal to, or greater than zero if s1
+ * is found, respectively, to be less than, to match, or be greater than s2.
  */
 int gxPLSchemaMatch (const gxPLSchema * s1, const char * schema_class, const char * schema_type);
 
 /**
- * @brief 
+ * @brief
  * @param s
  * @param schema_class
- * @return 
+ * @return
  */
 int gxPLSchemaClassSet (gxPLSchema * s, const char * schema_class);
 
 /**
- * @brief 
+ * @brief
  * @param s
  * @param schema_type
- * @return 
+ * @return
  */
 int gxPLSchemaTypeSet (gxPLSchema * s, const char * schema_type);
 
 /**
- * @brief 
+ * @brief
  * @param schema
  * @param schema_class
  * @param schema_type
- * @return 
+ * @return
  */
 int gxPLSchemaSet (gxPLSchema * schema, const char * schema_class, const char * schema_type);
 
 /**
- * @brief 
+ * @brief
  * @param dst
  * @param src
- * @return 
+ * @return
  */
 int gxPLSchemaCopy (gxPLSchema * dst, const gxPLSchema * src);
 
 /**
- * @brief 
+ * @brief
  * @param schema
  * @param str
- * @return 
+ * @return
  */
 int gxPLSchemaFromString (gxPLSchema * schema, const char * str);
 
 /**
- * @brief 
+ * @brief
  * @param schema
- * @return 
+ * @return
  */
 int gxPLSchemaIsEmpty (const gxPLSchema * schema);
 /**
@@ -250,10 +270,10 @@ int gxPLSchemaIsEmpty (const gxPLSchema * schema);
  * @{
  */
 /**
- * @brief System time 
+ * @brief System time
  * @return time in seconds
  */
-long gxPLTime(void);
+long gxPLTime (void);
 
 /**
  * @brief System time in milliseconds
@@ -267,7 +287,7 @@ int gxPLTimeMs (unsigned long * ms);
  * @param t time return by gxPLTime
  * @return system time t into a null-terminated string
  */
-char * gxPLTimeStr(unsigned long t);
+char * gxPLTimeStr (unsigned long t);
 
 /**
  * @brief suspends execution for (at least) ms milliseconds

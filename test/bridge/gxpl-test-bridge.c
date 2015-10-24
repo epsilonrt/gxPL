@@ -17,7 +17,7 @@
 #define BRIDGE_VERSION VERSION_SHORT
 #define BRIDGE_VENDOR "epsirt"
 #define BRIDGE_DEVICE "bridge"
-#define BRIDGE_CONFIG_FILE "bridge.xpl"
+#define BRIDGE_CONFIG_FILE "test-bridge.xpl"
 
 /* macros =================================================================== */
 #define test(t) do { \
@@ -59,7 +59,7 @@ main (int argc, char **argv) {
   // set up the device that receives messages from the outside
   test_count++;
   ret = gxPLBridgeDeviceSet (bridge, BRIDGE_VENDOR, BRIDGE_DEVICE,
-                             BRIDGE_CONFIG_FILE, BRIDGE_VERSION);
+                             gxPLConfigPath (BRIDGE_CONFIG_FILE), BRIDGE_VERSION);
   test (ret == 0);
 
   // Enable the device

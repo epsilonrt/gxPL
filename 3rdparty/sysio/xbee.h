@@ -36,6 +36,7 @@ __BEGIN_C_DECLS
  */
 #define XBEE_CMD_CHANNEL                "CH"
 #define XBEE_CMD_PAN_ID                 "ID"
+#define XBEE_CMD_OPERATING_PAN_ID       "OP"
 #define XBEE_CMD_DEST_ADDR64_HI         "DH"
 #define XBEE_CMD_DEST_ADDR64_LO         "DL"
 #define XBEE_CMD_SRC_ADDR16             "MY"

@@ -33,6 +33,14 @@ __BEGIN_C_DECLS
 gxPLBridge * gxPLBridgeOpen (gxPLSetting * insetting, gxPLSetting * outsetting, uint8_t max_hop);
 
 /**
+ * @brief 
+ * @param bridge
+ * @param insetting
+ * @return 
+ */
+int gxPLBridgeSetNewInSetting (gxPLBridge * bridge, gxPLSetting * insetting);
+
+/**
  * @brief
  * @param vendor_id
  * @param device_id

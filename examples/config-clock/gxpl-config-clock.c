@@ -22,6 +22,7 @@
 #define TICK_RATE_CFG_NAME "tickrate"
 #define STARTED_CFG_NAME "started"
 #define REPORT_OWN_MESSAGE    true
+#define DEFAULT_CONFIG_FILE "gxpl-clock.xpl"
 
 /* private variables ======================================================== */
 static gxPLApplication * app;
@@ -58,12 +59,13 @@ main (int argc, char * argv[]) {
   }
 
   // Create a configurable device and set our application version
-  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock", "gxpl-clock.xpl");
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock",
+                                         gxPLConfigPath (DEFAULT_CONFIG_FILE));
   assert (device);
-  
+
   ret = gxPLDeviceVersionSet (device, CLOCK_VERSION);
   assert (ret == 0);
-  
+
   ret = gxPLDeviceReportOwnMessagesSet (device, REPORT_OWN_MESSAGE);
   assert (ret == 0);
 
@@ -117,8 +119,8 @@ main (int argc, char * argv[]) {
     // Let XPL run for a while, returning after it hasn't seen any
     // activity in 100ms or so
     ret = gxPLAppPoll (app, 100);
-    assert(ret == 0);
-    
+    assert (ret == 0);
+
     // Process clock tick update checking
     prvSendTick();
   }
@@ -145,7 +147,7 @@ prvIntToStr (int value) {
 //  will want to parse the same data after a setting file is loaded */
 static void
 prvSetConfig (gxPLDevice * device) {
-  
+
   // Get the tickrate */
   const char * str_rate = gxPLDeviceConfigValueGet (device, TICK_RATE_CFG_NAME);
   const char * str_started = gxPLDeviceConfigValueGet (device, STARTED_CFG_NAME);
@@ -160,17 +162,17 @@ prvSetConfig (gxPLDevice * device) {
 
   // Convert text to a number */
   new_rate = strtol (str_rate, &endptr, 10);
-  
+
   if (*endptr != '\0') {
     // Bad value -- override it */
     gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (tick_rate));
     return;
   }
-  
-  if (strcmp(str_started, "on") == 0) {
+
+  if (strcmp (str_started, "on") == 0) {
     started = true;
   }
-  else if (strcmp(str_started, "off") == 0) {
+  else if (strcmp (str_started, "off") == 0) {
     started = false;
   }
 
@@ -220,8 +222,8 @@ prvSignalHandler (int s) {
 // -----------------------------------------------------------------------------
 static void
 prvSendTick (void) {
-  
-  if ((tick_rate > 0) && (started))  {
+
+  if ( (tick_rate > 0) && (started))  {
     static time_t last;
     time_t now = time (NULL);
 

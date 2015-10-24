@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="gxpl-test-bridge" InternalType="">
+<CodeLite_Project Name="gxpl-bridge" InternalType="">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -28,9 +28,9 @@
   </Plugins>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="gxpl-test-bridge">
+  <VirtualDirectory Name="gxpl-bridge">
     <File Name="Makefile"/>
-    <File Name="gxpl-test-bridge.c"/>
+    <File Name="gxpl-bridge.c"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -48,7 +48,7 @@
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/gxpl-test-bridge" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-test-bridge" CommandArguments="-d -i /dev/ttyUSB0 -n xbeezb" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/gxpl-bridge" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-bridge" CommandArguments="-d -D" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -87,7 +87,7 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="gxpl-test-bridge" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-test-bridge" CommandArguments="-d -i wlan0" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="gxpl-bridge" IntermediateDirectory="." Command="$(IntermediateDirectory)/gxpl-bridge" CommandArguments="-d -i /dev/ttyUSB0 -n xbeezb -D" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

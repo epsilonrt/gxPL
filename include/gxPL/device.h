@@ -610,6 +610,13 @@ const char * gxPLDeviceConfigValueGetAt (gxPLDevice * device, const char * name,
 const char * gxPLDeviceConfigFilenameGet (const gxPLDevice * device);
 
 /**
+ * @brief Save out the current configuration
+ * @param device
+ * @return 0, -1 if error occurs
+ */
+int gxPLDeviceConfigSave (const gxPLDevice * device);
+
+/**
  * @}
  */
 

@@ -19,6 +19,8 @@ extern "C" {
 #define DEFAULT_CONNECT_TYPE              gxPLConnectViaHub
 #define DEFAULT_HEARTBEAT_INTERVAL        300
 #define DEFAULT_CONFIG_HEARTBEAT_INTERVAL 60
+#define DEFAULT_CONFIG_HOME_DIRECTORY     ".gxpl"
+#define DEFAULT_CONFIG_SYS_DIRECTORY      "/etc/gxpl"
 #define DEFAULT_HUB_DISCOVERY_INTERVAL    3
 #define DEFAULT_ALLOC_STR_GROW            256
 #define DEFAULT_LINE_BUFSIZE              256

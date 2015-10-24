@@ -22,32 +22,18 @@
 #endif
 
 /* api functions ============================================================ */
-// -----------------------------------------------------------------------------
-// Clear out existing configuration data and attempt to load it from
-// the currently installed config file.  If there is no installed
-// config file, nothing happens.  If there is a file specified but
-// it does not exist, any previous config data is lost, but no error
-// is thrown (it may be this is the first use of this file).
 xVector *
-gxPLDeviceConfigLoad (gxPLDevice * device) {
+gxPLConfigReadFile (const char * filename, const char * vendor_id,
+                    const char * device_id) {
   FILE *file;
   char buf[DEFAULT_LINE_BUFSIZE];
   char *line, *p;
-  char *vendor_id;
-  char *device_id;
+  char *vid;
+  char *did;
   xVector * values;
 
-  // Skip unless we have a local config file
-  if (device->isenabled
-      || (device->config->filename == NULL)
-      || device->isconfigured) {
-
-    errno = EBUSY;
-    return NULL;
-  }
-
   // Attempt to open the configuration file
-  if ( (file = fopen (device->config->filename, "r")) == NULL) {
+  if ( (file = fopen (filename, "r")) == NULL) {
 
     return NULL;
   }
@@ -55,7 +41,7 @@ gxPLDeviceConfigLoad (gxPLDevice * device) {
   // Get the header and insure it matches
   if (fgets (buf, sizeof (buf), file) == NULL) {
 
-    PERROR ("%s (%s)", strerror (errno), device->config->filename);
+    PERROR ("%s (%s)", strerror (errno), filename);
     fclose (file);
     return NULL;
   }
@@ -71,17 +57,17 @@ gxPLDeviceConfigLoad (gxPLDevice * device) {
     return NULL;
   }
 
-  device_id = strchr (line, '[');
-  if (device_id == NULL) {
+  did = strchr (line, '[');
+  if (did == NULL) {
 
     PERROR ("wrong file header");
     fclose (file);
     return NULL;
   }
 
-  device_id++;
-  vendor_id = strsep (&device_id, "-");
-  if ( (vendor_id == NULL) || (device_id == NULL)) {
+  did++;
+  vid = strsep (&did, "-");
+  if ( (vid == NULL) || (did == NULL)) {
 
     PERROR ("wrong file header");
     fclose (file);
@@ -89,25 +75,28 @@ gxPLDeviceConfigLoad (gxPLDevice * device) {
   }
 
   // Insure it matches
-  if ( (strcasecmp (vendor_id, device->id.vendor) != 0)
-       || (strcasecmp (device_id, device->id.device) != 0)) {
+  if ( (vendor_id) && (device_id)) {
+    if ( (strcasecmp (vid, vendor_id) != 0)
+         || (strcasecmp (did, device_id) != 0)) {
 
-    PWARNING ("file header does not match this device");
-    fclose (file);
-    return NULL;
+      PWARNING ("file header does not match this device");
+      fclose (file);
+      return NULL;
+    }
+    PDEBUG ("file header match this device");
   }
-  PDEBUG ("file header match this device");
 
   values = malloc (sizeof (xVector));
   iVectorInit (values, 2, NULL, gxPLPairDelete);
+  iVectorInitSearch (values, gxPLPairKey, gxPLPairMatch);
 
   // Read in each line and pick it apart into an NV pair
   while (fgets (buf, sizeof (buf), file)) {
 
     gxPLPair * pair = gxPLPairFromLine (buf);
     if (pair) {
-      
-      PDEBUG("read line: %s=%s", pair->name, (pair->value ? pair->value : ""));
+
+      PDEBUG ("read line: %s=%s", pair->name, (pair->value ? pair->value : ""));
       iVectorAppend (values, pair);
     }
   }
@@ -115,7 +104,6 @@ gxPLDeviceConfigLoad (gxPLDevice * device) {
   fclose (file);
 
   // And we are done
-  PINFO ("%s config file sucessfully loaded", device->config->filename);
   return values;
 }
 

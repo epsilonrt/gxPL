@@ -307,7 +307,7 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
   }
   
   // informs the manager that the configuration has been taken
-  if (was_configured == false) {
+  if ((was_configured == false) && (device->hbeat_msg)) {
     
     gxPLMessageDelete (device->hbeat_msg);
     device->hbeat_msg = NULL;
@@ -751,6 +751,37 @@ int
 gxPLDeviceConfigValueSet (gxPLDevice * device,
                           const char * name, const char * value) {
   return gxPLDeviceConfigValueSetAt (device, name, 0, value);
+}
+
+
+// -----------------------------------------------------------------------------
+// Clear out existing configuration data and attempt to load it from
+// the currently installed config file.  If there is no installed
+// config file, nothing happens.  If there is a file specified but
+// it does not exist, any previous config data is lost, but no error
+// is thrown (it may be this is the first use of this file).
+xVector *
+gxPLDeviceConfigLoad (gxPLDevice * device) {
+  xVector * values;
+
+  // Skip unless we have a local config file
+  if (device->isenabled
+      || (device->config->filename == NULL)
+      || device->isconfigured) {
+
+    errno = EBUSY;
+    return NULL;
+  }
+
+  values = gxPLConfigReadFile (device->config->filename, device->id.vendor,
+                               device->id.device);
+
+  // And we are done
+  if (values) {
+    
+    PINFO ("%s config file sucessfully loaded", device->config->filename);
+  }
+  return values;
 }
 
 /* ========================================================================== */

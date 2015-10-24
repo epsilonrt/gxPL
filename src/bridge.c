@@ -216,7 +216,7 @@ static void
 prvSetConfig (gxPLBridge * bridge) {
   const char * str;
 
-  // Get append status
+  PDEBUG ("Starting bridge configuration");
   if ( (str = gxPLDeviceConfigValueGet (bridge->device, BROADCAST_KEY)) != NULL) {
 
     gxPLAppSetting (bridge->in)->broadcast = strcasecmp (str, "true") == 0;
@@ -317,6 +317,35 @@ gxPLBridgeClose (gxPLBridge * bridge) {
     vVectorDestroy (&bridge->clients);
     free (bridge);
     return ret;
+  }
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+int
+gxPLBridgeSetNewInSetting (gxPLBridge * bridge, gxPLSetting * insetting) {
+
+  if ( (strcmp (insetting->iolayer, "udp") == 0) &&
+       (strlen (insetting->iolayer) == 0)) {
+
+    PERROR ("iolayer for inside must be provided and different of udp");
+    return -1;
+  }
+
+  if (memcmp (insetting, gxPLAppSetting (bridge->in), sizeof (gxPLSetting)) != 0) {
+    if (gxPLAppClose (bridge->in) != 0) {
+
+      PERROR ("Unable close inside application");
+      return -1;
+    }
+    bridge->in  = gxPLAppOpen (insetting);
+    if (bridge->in == NULL) {
+
+      PERROR ("Unable open inside application, this bridge was closed in emergency");
+      gxPLBridgeClose (bridge);
+      return -1;
+    }
+    gxPLMessageListenerAdd (bridge->in, prvHandleInnerMessage, bridge);
   }
   return 0;
 }

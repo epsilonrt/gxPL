@@ -92,12 +92,6 @@ typedef struct _gxPLDevice {
  */
 xVector * gxPLDeviceConfigLoad (gxPLDevice * device);
 
-/**
- * @brief Save out the current configuration
- * @param device
- * @return 0, -1 if error occurs
- */
-int gxPLDeviceConfigSave (const gxPLDevice * device);
 
 /**
  * @brief 

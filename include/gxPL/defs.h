@@ -192,6 +192,7 @@ typedef struct _gxPLIoXBeeSetting {
     uint8_t flag;
     struct {
       uint8_t coordinator: 1;
+      uint8_t new_panid: 1;
     };
   };
 } gxPLIoXBeeSetting;
