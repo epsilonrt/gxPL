@@ -16,11 +16,11 @@ __BEGIN_C_DECLS
 #if !defined(GXPL_INTERNALS) && !defined(__DOXYGEN__)
 #warning You should not add the header file gxPL/io.h in your source code
 #endif
-
 /**
- * @addtogroup gxPLIo
+ * @defgroup gxPLIoDoc Hardware Layer
+ * Allows end-user to read information and to control the hardware layer.
  * @{
- * @defgroup gxPLIoInterface Abstract interface
+ * @defgroup gxPLIoInterfaceDoc Hardware Abstract Layer
  * 
  * Description of the IO layer to the application layer.
  * The application layer uses functions described here to access the io 

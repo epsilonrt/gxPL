@@ -16,13 +16,14 @@
   <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
-  <Project Name="gxpl-hub-service" Path="script/init.d/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
   <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
-  <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="Yes"/>
+  <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="No"/>
+  <Project Name="gxpl-hub-service" Path="script/init.d/hub/gxpl-hub-service.project" Active="No"/>
+  <Project Name="gxpl-xbee-bridge-service" Path="script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -50,6 +51,8 @@
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-xbee-bridge" ConfigName="Debug"/>
+      <Project Name="gxpl-hub-service" ConfigName="Debug"/>
+      <Project Name="gxpl-xbee-bridge-service" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -77,6 +80,8 @@
       <Project Name="gxpl-bridge" ConfigName="Release"/>
       <Project Name="gxpl-bridge" ConfigName="Release"/>
       <Project Name="gxpl-xbee-bridge" ConfigName="Release"/>
+      <Project Name="gxpl-hub-service" ConfigName="Release"/>
+      <Project Name="gxpl-xbee-bridge-service" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

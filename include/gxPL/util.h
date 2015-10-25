@@ -17,13 +17,13 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 
 /**
- * @defgroup gxPLUtil Utilities
+ * @defgroup gxPLUtilDoc Utilities
  * Functions for miscellaneous purpose
  * @{
  */
 
 /**
- * @defgroup gxPLUtilText Text functions
+ * @defgroup gxPLUtilTextDoc Text functions
  * @{
  */
 
@@ -44,6 +44,15 @@ __BEGIN_C_DECLS
  * negative number is returned in case of failure.
  */
 int gxPLStrCpy (char * dst, const char * src);
+
+/**
+ * @}
+ */
+
+/**
+ * @defgroup gxPLUtilConfigDoc Configuration file
+ * @{
+ */
 
 /**
  * @brief Returns the path of a configuration file
@@ -70,7 +79,7 @@ xVector * gxPLConfigReadFile (const char * filename, const char * vendor_id,
  */
 
 /**
- * @defgroup gxPLUtilPair Name/Value pairs
+ * @defgroup gxPLUtilPairDoc Name/Value pairs
  * @{
  */
 
@@ -123,7 +132,7 @@ const void * gxPLPairKey (const void * pair);
  */
 
 /**
- * @defgroup gxPLUtilId Identifiers
+ * @defgroup gxPLUtilIdDoc Identifiers
  * @{
  */
 
@@ -192,7 +201,7 @@ int gxPLIdFromString (gxPLId * dest, char * src);
  */
 
 /**
- * @defgroup gxPLUtilSchema Schemas
+ * @defgroup gxPLUtilSchemaDoc Schemas
  * @{
  */
 
@@ -266,7 +275,7 @@ int gxPLSchemaIsEmpty (const gxPLSchema * schema);
  */
 
 /**
- * @defgroup gxPLUtilTime Time
+ * @defgroup gxPLUtilTimeDoc Time
  * @{
  */
 /**

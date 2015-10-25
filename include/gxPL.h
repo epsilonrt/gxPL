@@ -21,7 +21,7 @@ __BEGIN_C_DECLS
 
 /* api functions ============================================================ */
 /**
- * @defgroup gxPLSetting Settings
+ * @defgroup gxPLSettingDoc Settings
  * gxPLSetting is used to pass settings to top-level classes. This class can be
  * instantiated directly or through the parameters of the command line.
  * @{
@@ -59,7 +59,7 @@ gxPLSetting * gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectTy
  */
 
 /**
- * @defgroup gxPLApplication Applications
+ * @defgroup gxPLApplicationDoc Applications
  * gxPLApplication is the central element of a xPL application.
  * This class performs all operations to open and close the xPL network,
  * send and receive messages. An application is needed to create devices.
@@ -110,7 +110,7 @@ gxPLSetting * gxPLAppSetting (gxPLApplication * app);
  */
 
 /**
- * @addtogroup gxPLMessage
+ * @addtogroup gxPLMessageDoc
  * @{
  */
 
@@ -150,7 +150,7 @@ int gxPLAppIsHubEchoMessage (const gxPLApplication * app,
  */
 
 /**
- * @addtogroup gxPLDevice
+ * @addtogroup gxPLDeviceDoc
  * @{
  */
 
@@ -198,7 +198,7 @@ int gxPLAppDeviceIndex (gxPLApplication * app, const gxPLDevice * device);
 int gxPLAppRemoveDevice (gxPLApplication * app, gxPLDevice * device);
 
 /**
- * @addtogroup gxPLDeviceConfig
+ * @addtogroup gxPLDeviceConfigDoc
  * @{
  */
 
@@ -220,7 +220,7 @@ gxPLDevice * gxPLAppAddConfigurableDevice (gxPLApplication * app,
  */
 
 /**
- * @addtogroup gxPLUtilId
+ * @addtogroup gxPLUtilIdDoc
  * @{
  */
 
@@ -243,9 +243,9 @@ int gxPLGenerateUniqueId (const gxPLApplication * app, char * id, int len);
  */
 
 /**
- * @addtogroup gxPLMessage
+ * @addtogroup gxPLMessageDoc
  * @{
- * @defgroup gxPLMessageListener Message Listeners
+ * @defgroup gxPLMessageListenerDoc Message Listeners
  * Provides functions to intercept messages received if the devices are not used.
  * @{
  */
@@ -282,7 +282,7 @@ int gxPLMessageListenerRemove (gxPLApplication * app, gxPLMessageListener listen
  */
 
 /**
- * @defgroup gxPLVersion Version
+ * @defgroup gxPLVersionDoc Version
  * Provides information on the version of the library.
  * @{
  */
@@ -317,8 +317,7 @@ int gxPLVersionSha1 (void);
  */
 
 /**
- * @defgroup gxPLIo Io layer
- * Allows end-user to read information and to control the hardware layer.
+ * @addtogroup gxPLIoDoc
  * @{
  */
 

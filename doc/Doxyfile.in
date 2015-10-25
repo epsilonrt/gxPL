@@ -750,7 +750,14 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = .  \
-                         ../include
+                         ../include/gxPL/defs.h \
+                         ../include/gxPL/util.h \
+                         ../include/gxPL/io.h \
+                         ../include/gxPL/message.h \
+                         ../include/gxPL/device.h \
+                         ../include/gxPL/hub.h \
+                         ../include/gxPL/bridge.h \
+                         ../include/gxPL.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

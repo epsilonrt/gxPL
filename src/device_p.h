@@ -75,7 +75,7 @@ typedef struct _gxPLDevice {
 
 /**
  * -----------------------------------------------------------------------------
- * @addtogroup xPLDeviceConfig
+ * @addtogroup xPLDeviceConfigDoc
  * @{
  */
 
@@ -106,7 +106,7 @@ void gxPLDeviceConfigDelete (gxPLDevice * device);
 
 /**
  * -----------------------------------------------------------------------------
- * @addtogroup xPLDeviceGroup
+ * @addtogroup gxPLDeviceGroupDoc
  * @{
  */
 /**
@@ -145,7 +145,7 @@ int  gxPLDeviceGroupAddCurrentValues (gxPLDevice * device, gxPLMessage * message
 
 /**
  * -----------------------------------------------------------------------------
- * @addtogroup xPLDeviceFilter
+ * @addtogroup gxPLDeviceFilterDoc
  * @{
  */
 

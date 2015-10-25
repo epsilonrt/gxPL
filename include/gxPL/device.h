@@ -14,7 +14,7 @@ __BEGIN_C_DECLS
 /* ========================================================================== */
 
 /**
- * @defgroup gxPLDevice Devices
+ * @defgroup gxPLDeviceDoc Devices
  * gxPLDevice xPL corresponds to a device. This is the basic network element. 
  * It is identified by vendor ID, device and instance. A device signals its 
  * arrival and departure on the network by transmitting a heartbeat message. \n
@@ -34,10 +34,13 @@ __BEGIN_C_DECLS
  */
 typedef void (* gxPLDeviceListener) (gxPLDevice *, gxPLMessage *, void *);
 
+/**
+ * @}
+ */
 
 /* internal public functions ================================================ */
 /**
- * @addtogroup gxPLMessage
+ * @addtogroup gxPLMessageDoc
  * @{
  */
 
@@ -68,6 +71,11 @@ int gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message);
 
 /**
  * @}
+ */
+
+/**
+ * @addtogroup gxPLDeviceDoc
+ * @{
  */
 
 /**
@@ -261,7 +269,7 @@ int gxPLDeviceRespondToBroadcastSet (gxPLDevice * device, bool respond);
 int gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
 
 /**
- * @defgroup xPLDeviceGroup Groups
+ * @defgroup gxPLDeviceGroupDoc Groups
  * When a device or application is configured, the management station may wish 
  * to configure the device to be logically grouped with other units. \n
  * xPL provides a powerful mechanism for this to happen in the form of the 
@@ -327,7 +335,7 @@ int gxPLDeviceGroupHave (const gxPLDevice * device);
  */
 
 /**
- * @defgroup xPLDeviceFilter Filters
+ * @defgroup gxPLDeviceFilterDoc Filters
  * Filters provide an incredibly powerful method of addressing devices and 
  * applications. Filters are only applied to incoming broadcast messages, and 
  * are intended to reduce the number of messages that a device will act upon. \n
@@ -415,7 +423,7 @@ const char * gxPLDeviceFilterToString (const gxPLFilter * filter);
  */
 
 /**
- * @defgroup gxPLDeviceConfig Configurable devices
+ * @defgroup gxPLDeviceConfigDoc Configurable devices
  * xPL provides a powerful yet simple mechanism for device configuration, 
  * intended to suit the requirements of devices ranging from embedded 
  * micro-controllers through to powerful PC applications. \n

@@ -17,7 +17,7 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 
 /**
- * @defgroup xPLHub Hub
+ * @defgroup gxPLHubDoc Hub
  * xPL hub on a system using ethernet networking. \n 
  * The primary purpose of a xPL hub is to bind to port 3865, receive xPL 
  * messages from the network at that port and redistribute those messages to all 
@@ -60,9 +60,9 @@ int gxPLHubClose (gxPLHub * hub);
 int gxPLHubPoll (gxPLHub * hub, int timeout_ms);
 
 /**
- * @brief 
- * @param hub
- * @return 
+ * @brief Returns the application
+ * @param hub pointer to a gxPLHub object
+ * @return the application
  */
 gxPLApplication * gxPLHubApplication (gxPLHub * hub);
 

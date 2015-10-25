@@ -15,7 +15,7 @@ __BEGIN_C_DECLS
 /* ========================================================================== */
 
 /**
- * @defgroup gxPLMessage Messages
+ * @defgroup gxPLMessageDoc Messages
  * gxPLMessage is a message circulating on xPL network.
  * @{
  */

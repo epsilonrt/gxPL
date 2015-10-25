@@ -61,6 +61,7 @@
         <File Name="src/sys/unix/io_udp.c"/>
         <File Name="src/sys/unix/util.c"/>
         <File Name="src/sys/unix/device_configurable.c"/>
+        <File Name="src/sys/unix/io_xbeezb.c"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <File Name="src/io_p.h"/>
@@ -81,7 +82,6 @@
     <File Name="src/hub_p.h"/>
     <File Name="src/hub.c"/>
     <File Name="src/internal_p.h"/>
-    <File Name="src/io_xbeezb.c"/>
     <File Name="src/bridge.c"/>
     <File Name="src/bridge_p.h"/>
   </VirtualDirectory>

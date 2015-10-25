@@ -17,7 +17,7 @@ __BEGIN_C_DECLS
 /* internal public functions ================================================ */
 
 /**
- * @defgroup xPLBridge Bridge
+ * @defgroup gxPLBridgeDoc Bridge
  * A bridge connects two networks do not have the same physical layer. \n
  * The outside of a bridge uses UDP and behaves like a device associated
  * with a schema. The inside of a bridge acts as a hub and does not use UDP.
@@ -26,51 +26,57 @@ __BEGIN_C_DECLS
 
 /**
  * @brief Opens a new gxPLBridge object
- * @param setting pointer to a configuration, this configuration can be modified
- * by the function to return the actual configuration.
+ * @param insetting pointer to the inside configuration, this configuration can be 
+ * modified by the function to return the actual configuration.
+ * @param outsetting pointer to the outside configuration (udp), this 
+ * configuration can be  modified by the function to return the actual configuration
+ * @param max_hop only messages with a hop count less than or equal to max_hop cross the bridge
  * @return the object or NULL if error occurs
  */
 gxPLBridge * gxPLBridgeOpen (gxPLSetting * insetting, gxPLSetting * outsetting, uint8_t max_hop);
 
 /**
- * @brief 
- * @param bridge
- * @param insetting
- * @return 
+ * @brief Sets new setting for inside network
+ * If configuration differ, the network will be closed then opened with the new
+ * configuration
+ * @param bridge pointer to a gxPLBridge object
+ * @param insetting new inside network setting
+ * @return 0, -1 if an error occurs
  */
 int gxPLBridgeSetNewInSetting (gxPLBridge * bridge, gxPLSetting * insetting);
 
 /**
- * @brief
+ * @brief Sets the device for the outsite network
+ * @param bridge pointer to a gxPLBridge object
  * @param vendor_id
  * @param device_id
  * @param filename
  * @param version
- * @return
+ * @return 0, -1 if an error occurs
  */
 int gxPLBridgeDeviceSet (gxPLBridge * bridge,
                          const char * vendor_id, const char * device_id,
                          const char * filename, const char * version);
 
 /**
- * @brief
- * @param bridge
+ * @brief Returns the device for the outsite network
+ * @param bridge pointer to a gxPLBridge object
  * @return
  */
 gxPLDevice * gxPLBridgeDevice (gxPLBridge * bridge);
 
 /**
- * @brief
- * @param bridge
+ * @brief Enable device for the outsite network
+ * @param bridge pointer to a gxPLBridge object
  * @param enable
- * @return
+ * @return 0, -1 if an error occurs
  */
 int gxPLBridgeDeviceEnable (gxPLBridge * bridge, bool enable);
 
 /**
- * @brief
- * @param bridge
- * @return
+ * @brief Checks if device is enabled
+ * @param bridge pointer to a gxPLBridge object
+ * @return false, true, -1 if an error occurs
  */
 int gxPLBridgeDeviceIsEnabled (const gxPLBridge * bridge);
 
@@ -90,16 +96,16 @@ int gxPLBridgeClose (gxPLBridge * bridge);
 int gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms);
 
 /**
- * @brief
- * @param bridge
- * @return
+ * @brief Returns the inside application
+ * @param bridge pointer to a gxPLBridge object
+ * @return the application
  */
 gxPLApplication * gxPLBridgeInApp (gxPLBridge * bridge);
 
 /**
- * @brief
- * @param bridge
- * @return
+ * @brief Returns the outside application
+ * @param bridge pointer to a gxPLBridge object
+ * @return the application
  */
 gxPLApplication * gxPLBridgeOutApp (gxPLBridge * bridge);
 

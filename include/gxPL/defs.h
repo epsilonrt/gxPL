@@ -42,7 +42,7 @@ typedef struct _gxPLBridge gxPLBridge;
 #endif
 
 /**
- * @defgroup xPLDefs Definitions
+ * @defgroup gxPLDefsDoc Definitions
  * @{
  */
 
