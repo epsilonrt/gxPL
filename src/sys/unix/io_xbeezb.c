@@ -1,11 +1,12 @@
 /**
  * @file
  * xPL Hardware Layer, XBee Modules Series 2 (Zigbee), API Mode (AP=1)
- *
+ *                    (unix source code)
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#if defined(__unix__)
 #include "config.h"
 #include <errno.h>
 #include <stdio.h>
@@ -13,26 +14,13 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <sysio/xbee.h>
+#include <sysio/delay.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
 
-#if defined(__unix__)
-#include <sysio/xbee.h>
-#include <sysio/delay.h>
-#define PROGMEM
-#define memcpy_P(dst,src,size) memcpy(dst,src,size)
-#define strcpy_P(dst,src) strcpy(dst,src)
-
-#elif defined(__AVR__)
-#include <avrio/xbee.h>
-#include <avrio/delay.h>
-#else
-#error This target platform is not supported.
-#endif
-
 /* constants ================================================================ */
-#define DEFAUL
 #define IO_NAME "xbeezb"
 
 /* types ==================================================================== */
@@ -115,7 +103,7 @@ prvZbAddrFromString (gxPLIoAddr * zbaddr, const char * str) {
 // -----------------------------------------------------------------------------
 static void
 prvSetDefaultIos (gxPLIo * io) {
-  const xSerialIos default_ios PROGMEM = {
+  const xSerialIos default_ios  = {
     .baud = DEFAULT_XBEE_BAUDRATE,
     .dbits = SERIAL_DATABIT_8,
     .parity = SERIAL_PARITY_NONE,
@@ -123,15 +111,15 @@ prvSetDefaultIos (gxPLIo * io) {
     .flow = DEFAULT_XBEE_FLOW,
     .flag = 0
   };
-  memcpy_P (&io->setting->xbee.ios, &default_ios, sizeof (xSerialIos));
+  memcpy (&io->setting->xbee.ios, &default_ios, sizeof (xSerialIos));
 }
 
 // -----------------------------------------------------------------------------
 static void
 prvSetDefaultIface (gxPLIo * io) {
-  const char default_iface[] PROGMEM = DEFAULT_XBEE_PORT;
+  const char default_iface[]  = DEFAULT_XBEE_PORT;
 
-  strcpy_P (io->setting->iface, default_iface);
+  strcpy (io->setting->iface, default_iface);
 }
 
 // -----------------------------------------------------------------------------
@@ -496,15 +484,9 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
       ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
       if (ret == 0) {
-        if (panid == io->setting->xbee.panid) {
 
-          vLog (LOG_INFO, "Starting Zigbee network, PAN ID 0x%" PRIx64, panid);
-        }
-        else {
-
-          vLog (LOG_INFO, "Starting Zigbee network, PAN ID being modified to 0x%"
-                PRIx64 "...", io->setting->xbee.panid);
-        }
+        vLog (LOG_INFO, "Starting Zigbee network, current operating PAN ID 0x%"
+              PRIx64, panid);
       }
     }
 
@@ -725,3 +707,4 @@ gxPLXBeeZbExit (void) {
 }
 
 /* ========================================================================== */
+#endif /* __unix__ defined */
