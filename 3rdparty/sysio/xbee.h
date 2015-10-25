@@ -375,7 +375,7 @@ typedef struct xXBee {
   int fd;
   eXBeeSeries series;
   void *user_context; // yours to pass data around with
-  pthread_mutex_t mutex;
+  pthread_mutex_t mutex __attribute__ ((aligned (8)));
 #ifdef XBEE_DEBUG
   int rx_crc_error, rx_error, rx_dropped;
   int tx_error, tx_dropped;

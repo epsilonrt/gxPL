@@ -16,3 +16,7 @@ SRC += $(addprefix 3rdparty/sysio/src/, $(notdir $(wildcard $(GXPL_ROOT)/3rdpart
 SRC += $(addprefix 3rdparty/sysio/src/posix/, $(notdir $(wildcard $(GXPL_ROOT)/3rdparty/sysio/posix/*.c)))
 endif
 
+ifeq ($(ARCH),ARCH_ARM_RASPBERRYPI)
+CDEFS += -DARCH_ARM
+#CFLAGS += -munaligned-access
+endif
