@@ -3,30 +3,28 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
+SUBDIRS = hub xbee-bridge
 
-TARGET = gxpl-hub
+all: $(SUBDIRS)
+clean: $(SUBDIRS)
+distclean: $(SUBDIRS)
+rebuild: $(SUBDIRS)
+lib: $(SUBDIRS)
+cleanlib: $(SUBDIRS)
+extcoff: $(SUBDIRS)
+program: $(SUBDIRS)
+debug: $(SUBDIRS)
+install: $(SUBDIRS)
+uninstall: $(SUBDIRS)
 
-#---------------- Install Options ----------------
-INSTALL_BINDIR=/etc/init.d
-INSTALL_DATDIR=/etc
-MSG_INSTALL = [INSTALL]
-MSG_UNINSTALL = [UNINSTALL]
+elf: $(SUBDIRS)
+hex: $(SUBDIRS)
+eep: $(SUBDIRS)
+lss: $(SUBDIRS)
+sym: $(SUBDIRS)
 
-all:
-	@echo "shell script project, only targets install and uninstall are available !"
+.PHONY: all clean distclean rebuild lib cleanlib extcoff program debug elf hex eep lss sym $(SUBDIRS)
 
-install: uninstall
-	@echo "$(MSG_INSTALL) $(TARGET) in $(INSTALL_BINDIR)"
-	@-install -m 0644 $(TARGET).conf $(INSTALL_DATDIR)
-	@-install -m 0755 $(TARGET) $(INSTALL_BINDIR)
+$(SUBDIRS):
+	$(MAKE) -w -C $@ $(MAKECMDGOALS)
 
-uninstall:
-	@echo "$(MSG_UNINSTALL) $(TARGET) from $(INSTALL_BINDIR)"
-ifeq (,$(wildcard $(INSTALL_BINDIR)/$(TARGET)))
-else
-	@-$(INSTALL_BINDIR)/$(TARGET) stop
-endif
-	@-rm -f $(INSTALL_DATDIR)/$(TARGET).conf
-	@-rm -f $(INSTALL_BINDIR)/$(TARGET)
-
-.PHONY: all install uninstall

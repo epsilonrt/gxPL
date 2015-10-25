@@ -1,0 +1,128 @@
+#!/bin/bash
+###############################################################################
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# All rights reserved.                                                        #
+# Licensed under the Apache License, Version 2.0 (the "License")              #
+###############################################################################
+### BEGIN INIT INFO
+# Provides:          gxpl-xbee-bridge
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: xPL XBee Bridge sysv init script
+# Description:       xPL XBee Bridge
+### END INIT INFO
+# Version: 0.1.0
+
+NAME=gxpl-xbee-bridge
+CONFIGFILE=/etc/$NAME.conf
+DAEMON=/usr/local/bin/$NAME
+
+XPL_OIF=
+XPL_IIF=
+XPL_DEBUG=
+XPL_BROADCAST=
+XPL_BAUDRATE=
+XPL_MAXHOP=
+XPL_PANID=
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+niceness=0
+pgm_args="--quiet"
+
+trim () {
+  local var="$*"
+  var="${var#"${var%%[![:space:]]*}"}"   # remove leading whitespace characters
+  var="${var%"${var##*[![:space:]]}"}"   # remove trailing whitespace characters
+  echo -n "$var"
+}
+
+set_args () {
+  
+  local tmpf=$(tempfile)
+  # remove comments
+  sed '/^[[:space:]]*\#/d' $CONFIGFILE > $tmpf
+  
+  local var=$(trim "$(grep 'oiface' $tmpf | cut -d '=' -f2)")
+  if [ "_$var" != "_" ]; then
+    ifconfig $var > /dev/null 2>&1 && XPL_OIF=$var
+  fi
+  if [ "_$XPL_OIF" != "_" ]; then
+    XPL_OIF="-o $XPL_OIF"
+  fi
+  
+  local var=$(trim "$(grep 'iiface' $tmpf | cut -d '=' -f2)")
+  if [ "_$var" != "_" ] && [ -c "$var" ]; then
+    XPL_IIF="-i $var"
+  fi
+  
+  local var=$(trim "$(grep 'baudrate' $tmpf | cut -d '=' -f2)")
+  if [ "_$var" != "_" ]; then
+    XPL_BAUDRATE="-B $var"
+  fi
+  
+  local var=$(trim "$(grep 'panid' $tmpf | cut -d '=' -f2)")
+  if [ "_$var" != "_" ]; then
+    XPL_PANID="-p $var"
+  fi
+  
+  local var=$(trim "$(grep 'maxhop' $tmpf | cut -d '=' -f2)")
+  if [ "_$var" != "_" ]; then
+    XPL_MAXHOP="-m $var"
+  fi
+  
+  var=$(trim "$(grep 'broadcast' $tmpf | cut -d '=' -f2)")
+  if [ "$var" = "1" ] || [ "$var" = "true" ]; then
+    XPL_BROADCAST=-b
+  fi
+  
+  var=$(trim "$(grep 'debug' $tmpf | cut -d '=' -f2)")
+  if [ "$var" = "1" ] || [ "$var" = "true" ]; then
+    XPL_DEBUG=-d
+  fi
+  
+  rm -f $tmpf
+}
+
+daemon_start () {
+
+  set_args
+  log_daemon_msg "Starting xPL XBee Bridge" "gxpl-xbee-bridge"
+  start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- $XPL_OIF $XPL_IIF $XPL_BAUDRATE $XPL_PANID $XPL_MAXHOP $XPL_BROADCAST $XPL_DEBUG
+  log_end_msg $?
+  return $?
+}
+
+daemon_stop () {
+  
+  log_daemon_msg "Stopping xPL XBee Bridge" "gxpl-xbee-bridge"
+  start-stop-daemon --stop  $pgm_args --retry 5 --exec $DAEMON
+  log_end_msg $?
+  return $?
+}
+
+
+case "$1" in
+  start)
+    daemon_start
+    ;;
+  stop)
+    daemon_stop
+    ;;
+  force-reload|restart)
+    daemon_stop
+    daemon_start
+    ;;
+  status)
+    status_of_proc $DAEMON "xPL XBee Bridge" && exit 0 || exit $?
+    ;;
+  *)
+     echo "Usage: /etc/init.d/gxpl-xbee-bridge {start|stop|restart|force-reload|status}"
+     exit 1
+esac
+
+exit 0
