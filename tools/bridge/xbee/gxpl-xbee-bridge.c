@@ -71,7 +71,7 @@ prvBridgeSetting setting = {
   .maxhop = 1,
 };
 
-  vLogInit (LOG_UPTO (LOG_INFO));
+  vLogInit (LOG_UPTO (LOG_NOTICE));
   setting.cfg_filename = gxPLConfigPath (DEFAULT_CONFIG_FILE);
 
   setting.in = calloc (1, sizeof (gxPLSetting));

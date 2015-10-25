@@ -44,7 +44,7 @@ int
 main (int argc, char * argv[]) {
   gxPLSetting * setting;
 
-  vLogInit(LOG_UPTO (LOG_INFO));
+  vLogInit(LOG_UPTO (LOG_NOTICE));
   
   // retrieved the requested configuration from the command line
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectStandAlone);

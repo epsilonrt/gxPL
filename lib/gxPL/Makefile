@@ -370,9 +370,9 @@ endif
 
 uninstall:
 	@echo "$(MSG_UNINSTALL) $(TARGET) lib and headers from $(prefix)"
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).so
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).so.*
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB).a
+	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so
+	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.*
+	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).a
 	@-rm -f $(INSTALL_INCDIR)/gxPL.h
 	@-rm -fr $(INSTALL_INCDIR)/gxPL
 
