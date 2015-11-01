@@ -34,6 +34,8 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 #include <sysio/xbee.h>
+// mutex
+#include <pthread.h>
 
 #ifdef CONFIG_XBEE_REENTRANT_TX
 #error CONFIG_XBEE_REENTRANT_TX requires XBEE_ALLOC to be set!
@@ -140,8 +142,62 @@ __BEGIN_C_DECLS
 #endif
 
 /* structures =============================================================== */
+/*
+ * Entête de paquet
+ *
+ * Un paquet XBee commence toujours par cet entête
+ */
+typedef struct xXBeePktHdr {
+  uint8_t         start; /**< Flag 0x7E */
+  uint16_t        len;   /**< Taille du paquet, entête et CRC exclu */
+} __attribute__ ( (__packed__)) xXBeePktHdr;
 
-/* --- Packet layouts --- */
+/*
+ * Paquet XBee générique
+ *
+ * Un paquet est constitué d'un entête, de données (payload) et d'un CRC
+ */
+typedef struct xXBeePkt {
+  xXBeePktHdr  hdr;         /**< Entête */
+  uint8_t         type;     /**< Type de paquet \ref eXBeePktType */
+  uint8_t         data[0];  /**< Données du paquet (tableau de taille variable) */
+} __attribute__ ( (__packed__)) xXBeePkt;
+
+/*
+ * Contexte d'un module XBee
+ *
+ * Cette structure est opaque pour l'utilisateur
+ */
+#if defined(__DOXYGEN__)
+typedef struct xXBee xXBee;
+#else
+typedef struct xXBee {
+  struct {
+    uint8_t bytes_left;
+    uint8_t bytes_rcvd;
+    xXBeePkt *packet;
+    uint8_t hdr_data[sizeof (xXBeePktHdr)];
+    iXBeeRxCB user_cb[XBEE_SIZEOF_CB];
+  } __attribute__ ( (__packed__)) in;
+  struct {
+    uint8_t frame_id;
+  } __attribute__ ( (__packed__)) out;
+  int fd;
+  eXBeeSeries series;
+  void *user_context; // yours to pass data around with
+  pthread_mutex_t mutex __attribute__ ((aligned (8)));
+#ifdef XBEE_DEBUG
+  int rx_crc_error, rx_error, rx_dropped;
+  int tx_error, tx_dropped;
+#endif
+} __attribute__ ( (__packed__)) xXBee;
+#endif
+
+/*
+ * Paquet spécifiques
+ * Packet layouts
+ */
+
 /* XBEE_PKT_TYPE_ATCMD 0x08: S1 & S2 Series -- */
 /* XBEE_PKT_TYPE_QATCMD 0x09: S1 & S2 Series -- */
 typedef struct xXBeeAtCmdPkt {

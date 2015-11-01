@@ -27,7 +27,7 @@
 
 /* structures =============================================================== */
 typedef struct xbeezb_data {
-  xXBee xbee;
+  xXBee * xbee;
   xXBeePkt * rxpkt;
   xXBeePkt * atpkt;
   int bytes_read;
@@ -125,7 +125,7 @@ prvSetDefaultIface (gxPLIo * io) {
 // -----------------------------------------------------------------------------
 static int
 prvZbDataCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
-  gxPLIo * io = (gxPLIo *) xbee->user_context;
+  gxPLIo * io = (gxPLIo *) pvXBeeGetUserContext (xbee);
 
   if ( (iXBeePktDataLen (pkt) > 0) && (dp->rxpkt == NULL)) {
 
@@ -141,7 +141,7 @@ prvZbDataCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 // -----------------------------------------------------------------------------
 static int
 prvZbLocalAtCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
-  gxPLIo * io = (gxPLIo *) xbee->user_context;
+  gxPLIo * io = (gxPLIo *) pvXBeeGetUserContext (xbee);
 
   if ( (iXBeePktParamLen (pkt) >= 0) && (dp->atpkt == NULL)) {
 
@@ -158,7 +158,7 @@ prvZbLocalAtCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 // Gestionnaire de status de fin de transmission
 static int
 prvZbTxStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
-  gxPLIo * io = (gxPLIo *) xbee->user_context;
+  gxPLIo * io = (gxPLIo *) pvXBeeGetUserContext (xbee);
 
   if (iXBeePktFrameId (pkt) == dp->fid) {
     int status = iXBeePktStatus (pkt);
@@ -245,7 +245,7 @@ prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
   while ( (timeout_ms > 0) && (dp->rxpkt == NULL) && (ret == 0)) {
 
     // loop until AT response was received (or timeout or error)
-    ret = iXBeePoll (&dp->xbee, 10);
+    ret = iXBeePoll (dp->xbee, 10);
     timeout_ms -= 10;
   }
 
@@ -273,15 +273,15 @@ prvSendLocalAt (gxPLIo * io,
   int ret;
 
   // Clear previous AT response
-  vXBeeFreePkt (&dp->xbee, dp->atpkt);
+  vXBeeFreePkt (dp->xbee, dp->atpkt);
   dp->atpkt = NULL;
 
-  int frame_id = iXBeeSendAt (&dp->xbee, cmd, params, param_len);
+  int frame_id = iXBeeSendAt (dp->xbee, cmd, params, param_len);
 
   do {
 
     // loop until AT response was received (or timeout)
-    ret = iXBeePoll (&dp->xbee, 10);
+    ret = iXBeePoll (dp->xbee, 10);
     timeout_ms -= 10;
   }
   while ( (timeout_ms > 0) && (dp->atpkt == NULL) && (ret == 0));
@@ -332,15 +332,16 @@ static int
 gxPLXBeeZbClose (gxPLIo * io) {
 
   if (io->pdata) {
-
-    vSerialClose (dp->xbee.fd);
-    vXBeeFreePkt (&dp->xbee, dp->atpkt);
+    int ret;
+    
+    vXBeeFreePkt (dp->xbee, dp->atpkt);
     dp->atpkt = NULL;
-    vXBeeFreePkt (&dp->xbee, dp->rxpkt);
+    vXBeeFreePkt (dp->xbee, dp->rxpkt);
     dp->rxpkt = NULL;
+    ret = iXBeeClose (dp->xbee);
     free (io->pdata);
     io->pdata = NULL;
-    return 0;
+    return ret;
   }
   return -1;
 }
@@ -350,7 +351,7 @@ static int
 gxPLXBeeZbOpen (gxPLIo * io) {
 
   if (io->pdata == NULL) {
-    int fd;
+    xXBee * xbee;
     int ret;
     uint16_t word;
 
@@ -363,27 +364,20 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
       prvSetDefaultIface (io);
     }
+    if ( (xbee = xXBeeOpen (io->setting->iface, &io->setting->xbee.ios,
+                            XBEE_SERIES_S2)) == NULL) {
 
-    if ( (fd = iSerialOpen (io->setting->iface, &io->setting->xbee.ios)) < 0) {
-
-      PERROR ("Unable to open serial port: %s (%d)",
+      PERROR ("Unable to open xbee module: %s (%d)",
               strerror (errno), errno);
       return -1;
     }
 
     io->pdata = calloc (1, sizeof (xbeezb_data));
     assert (io->pdata);
-
-    ret = iXBeeInit (&dp->xbee, XBEE_SERIES_S2, fd);
-    if (ret != 0) {
-
-      gxPLXBeeZbClose (io);
-      PERROR ("Unable to init XBee module, return %d", ret);
-      return -1;
-    }
-
-    dp->xbee.user_context = io;
-    vXBeeSetCB (&dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
+    
+    dp->xbee = xbee;
+    vXBeeSetUserContext(xbee, io);
+    vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
 
     // Gets and checks firmware version
     ret = prvSendLocalAt (io, XBEE_CMD_VERS_FIRMWARE, NULL, 0, 1000);
@@ -505,11 +499,11 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       PDEBUG ("Maximum RF payload %d bytes", dp->max_payload);
     }
 
-    vXBeeSetCB (&dp->xbee, XBEE_CB_DATA, prvZbDataCB);
-    vXBeeSetCB (&dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
+    vXBeeSetCB (dp->xbee, XBEE_CB_DATA, prvZbDataCB);
+    vXBeeSetCB (dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
     if (io->setting->xbee.coordinator) {
 
-      vXBeeSetCB (&dp->xbee, XBEE_CB_NODE_IDENT, prvZbNodeIdCB);
+      vXBeeSetCB (dp->xbee, XBEE_CB_NODE_IDENT, prvZbNodeIdCB);
     }
     return 0;
   }
@@ -539,7 +533,7 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 
     if (dp->bytes_read >= iXBeePktDataLen (dp->rxpkt)) {
 
-      vXBeeFreePkt (&dp->xbee, dp->rxpkt);
+      vXBeeFreePkt (dp->xbee, dp->rxpkt);
       dp->rxpkt = NULL;
       dp->bytes_read = 0;
     }
@@ -594,7 +588,7 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
   }
 
   // Try to send the message
-  dp->fid = iXBeeZbSend (&dp->xbee, buffer, count, dst64, dst16, 0, 0);
+  dp->fid = iXBeeZbSend (dp->xbee, buffer, count, dst64, dst16, 0, 0);
 
   if (dp->fid < 0) {
 

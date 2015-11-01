@@ -8,7 +8,7 @@
   <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
-  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
+  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="Yes"/>
   <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
@@ -18,7 +18,7 @@
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
   <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="No"/>

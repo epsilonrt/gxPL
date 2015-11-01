@@ -77,6 +77,35 @@ __BEGIN_C_DECLS
 # error Unable to detect operating system !
 #endif
 
+// ntohs, htons, ntohl, htonl, ntohll, htonll 
+#include <arpa/inet.h>
+
+#ifndef htonll
+/* htonll not defined ------------------------------------------------------- */
+#if defined(SYSIO_OS_LINUX)
+#include <byteswap.h>
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define be64_to_cpu(val) bswap_64(val)
+#elif BYTE_ORDER == BIG_ENDIAN
+#define be64_to_cpu(val) (val)
+#else
+#error unknwon BYTE_ORDER
+#endif
+
+#elif defined(SYSIO_OS_APPLE)
+#warning TODO:  be64_to_cpu(val) for darwin
+
+#elif defined(SYSIO_OS_WIN32)
+#warning TODO:  be64_to_cpu(val) for win32
+
+#endif /* SYSIO_OS_WIN32 defined */
+
+#define ntohll(x) be64_to_cpu(x)
+#define htonll(x) ntohll(x)
+/* htonll not defined ------------------------------------------------------- */
+#endif
+
 /* internal public functions ================================================ */
 /*
  * Modifie le message de la dernière erreur

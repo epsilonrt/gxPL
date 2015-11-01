@@ -15,6 +15,7 @@ __BEGIN_C_DECLS
 /* ========================================================================== */
 #include <errno.h>
 #include <stdio.h>
+#include <sysio/serial.h>
 
 /**
  *  @defgroup sysio_xbee XBee
@@ -140,57 +141,22 @@ __BEGIN_C_DECLS
  * @}
  */
 
-/* macros =================================================================== */
-#ifndef __DOXYGEN__
-struct xXBeePkt;
-struct xXBee;
-#define pvXBeeUserContext(xbee) ((xbee).user_context)
 
-// ntohs, htons, ntohl, htonl, ntohll, htonll 
-#include <arpa/inet.h>
-// mutex
-#include <pthread.h>
-
-#ifndef htonll
-/* htonll not defined ------------------------------------------------------- */
-#if defined(SYSIO_OS_LINUX)
-#include <byteswap.h>
-
-#if BYTE_ORDER == LITTLE_ENDIAN
-#define be64_to_cpu(val) bswap_64(val)
-#elif BYTE_ORDER == BIG_ENDIAN
-#define be64_to_cpu(val) (val)
-#else
-#error unknwon BYTE_ORDER
-#endif
-
-#elif defined(SYSIO_OS_APPLE)
-#warning TODO:  be64_to_cpu(val) for darwin
-
-#elif defined(SYSIO_OS_WIN32)
-#warning TODO:  be64_to_cpu(val) for win32
-
-#endif /* SYSIO_OS_WIN32 defined */
-
-#define ntohll(x) be64_to_cpu(x)
-#define htonll(x) ntohll(x)
-/* htonll not defined ------------------------------------------------------- */
-#endif
-
-#else
+/* structures =============================================================== */
 /**
- * @brief Renvoie le pointeur contexte utilisateur
+ * @brief Paquet XBee générique
  *
- * Le contexte xbee dispose d'un pointeur void * permettant à l'utilisateur
- * d'y attacher des donnnées spécifiques. \n
- * Cette macro renvoie ce pointeur.
- *
- * @param xbee pointeur sur le contexte xbee initialisé
- * @return pointeur sur le contexte utilisateur
+ * Un paquet est constitué d'un entête, de données (payload) et d'un CRC
  */
-#define pvXBeeUserContext(xbee)
+typedef struct xXBeePkt xXBeePkt;
 
-#endif
+/**
+ * @brief Contexte d'un module XBee
+ *
+ * Cette structure est opaque pour l'utilisateur
+ */
+typedef struct xXBee xXBee;
+
 
 /* types ==================================================================== */
 /**
@@ -332,61 +298,11 @@ typedef enum {
 } eXBeeSourceEvent;
 
 /* structures =============================================================== */
-/**
- * @brief Entête de paquet
- *
- * Un paquet XBee commence toujours par cet entête
- */
-typedef struct xXBeePktHdr {
-  uint8_t         start; /**< Flag 0x7E */
-  uint16_t        len;   /**< Taille du paquet, entête et CRC exclu */
-} __attribute__ ( (__packed__)) xXBeePktHdr;
-
-/**
- * @brief Paquet XBee générique
- *
- * Un paquet est constitué d'un entête, de données (payload) et d'un CRC
- */
-typedef struct xXBeePkt {
-  xXBeePktHdr  hdr;         /**< Entête */
-  uint8_t         type;     /**< Type de paquet \ref eXBeePktType */
-  uint8_t         data[0];  /**< Données du paquet (tableau de taille variable) */
-} __attribute__ ( (__packed__)) xXBeePkt;
-
-/**
- * @brief Contexte d'un module XBee
- *
- * Cette structure est opaque pour l'utilisateur
- */
-#if defined(__DOXYGEN__)
-typedef struct xXBee xXBee;
-#else
-typedef struct xXBee {
-  struct {
-    uint8_t bytes_left;
-    uint8_t bytes_rcvd;
-    xXBeePkt *packet;
-    uint8_t hdr_data[sizeof (xXBeePktHdr)];
-    iXBeeRxCB user_cb[XBEE_SIZEOF_CB];
-  } __attribute__ ( (__packed__)) in;
-  struct {
-    uint8_t frame_id;
-  } __attribute__ ( (__packed__)) out;
-  int fd;
-  eXBeeSeries series;
-  void *user_context; // yours to pass data around with
-  pthread_mutex_t mutex __attribute__ ((aligned (8)));
-#ifdef XBEE_DEBUG
-  int rx_crc_error, rx_error, rx_dropped;
-  int tx_error, tx_dropped;
-#endif
-} __attribute__ ( (__packed__)) xXBee;
-#endif
 
 
 /* internal public functions ================================================ */
 /**
- * @brief Initialise le contexte du module XBee
+ * @brief Ouverture d'un module XBee
  *
  * Cette fonction doit être appellée avant toute utilisation du contexte xbee.
  * 
@@ -395,7 +311,14 @@ typedef struct xXBee {
  *  connecté au module XBee, doit être ouvert en mode non-bloquant.
  * @return 0, -1 si erreur
  */
-int iXBeeInit (xXBee *xbee, eXBeeSeries series, int fd);
+xXBee * xXBeeOpen (const char * pcDevice, xSerialIos * xIos, eXBeeSeries series);
+
+/**
+ * @brief Fermeture d'un module XBee
+ * @param xbee pointeur sur l'objet XBee
+ * @return 0, -1 si erreur
+ */
+int iXBeeClose (xXBee *xbee);
 
 /**
  * @brief Modifie un gestionnaire de réception
@@ -407,6 +330,36 @@ int iXBeeInit (xXBee *xbee, eXBeeSeries series, int fd);
  * type, il est tout simplement détruit.
  */
 void vXBeeSetCB (xXBee *xbee, eXBeeCbType cb_type, iXBeeRxCB cb);
+
+/**
+ * @brief Renvoie le pointeur contexte utilisateur
+ *
+ * Le contexte xbee dispose d'un pointeur void * permettant à l'utilisateur
+ * d'y attacher des donnnées spécifiques. \n
+ *
+ * @param xbee pointeur sur l'objet XBee
+ * @return pointeur sur le contexte utilisateur
+ */
+void * pvXBeeGetUserContext(xXBee *xbee);
+
+/**
+ * @brief Modifie le contexte utilisateur
+ *
+ * Le contexte xbee dispose d'un pointeur void * permettant à l'utilisateur
+ * d'y attacher des donnnées spécifiques. \n
+ *
+ * @param xbee pointeur sur l'objet XBee
+ * @param pvContext contexte de l'utilisateur
+ * @return pointeur sur le contexte utilisateur
+ */
+void vXBeeSetUserContext(xXBee *xbee, void * pvContext);
+
+/**
+ * @brief Retourne la série du module fournie à l'ouverture
+ * @param xbee pointeur sur l'objet XBee
+ * @return la série du module
+ */
+eXBeeSeries eXBeeGetSeries (const xXBee *xbee);
 
 /**
  * @brief Scrute le flux relié au module en attente de réception d'octet

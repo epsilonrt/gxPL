@@ -129,7 +129,7 @@ vXBeeIn (xXBee *xbee, const void *buf, uint8_t len) {
           }
           data++;
         }
-        
+
         // 0x7E reçu, on le stocke
         xbee->in.hdr_data[xbee->in.bytes_rcvd++] = *data++;
         if (--len == 0) {
@@ -197,7 +197,7 @@ vXBeeIn (xXBee *xbee, const void *buf, uint8_t len) {
       INC_RX_CRC_ERROR (xbee);
       continue;
     }
-    
+
     // Paquet reçu et vérifié, on le passe au callback
     if (iXBeeRecvPktCB (xbee, xbee->in.packet, xbee->in.bytes_rcvd) == -1) {
 
@@ -312,18 +312,47 @@ iXBeeRecvPktCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 
 /* -----------------------------------------------------------------------------
  */
-int
-iXBeeInit (xXBee *xbee, eXBeeSeries series, int fd) {
+void *
+pvXBeeGetUserContext (xXBee *xbee) {
 
+  return xbee->user_context;
+}
+
+/* -----------------------------------------------------------------------------
+ */
+void
+vXBeeSetUserContext (xXBee *xbee, void * pvContext) {
+
+  xbee->user_context = pvContext;
+}
+
+/* -----------------------------------------------------------------------------
+ */
+xXBee *
+xXBeeOpen (const char * pcDevice, xSerialIos * xIos, eXBeeSeries series) {
+
+  xXBee * xbee = calloc (1, sizeof (xXBee));
+  assert (xbee);
+  if ( (xbee->fd = iSerialOpen (pcDevice, xIos)) >= 0) {
+
+    pthread_mutex_init (&xbee->mutex, NULL);
+    xbee->series = series;
+    return xbee;
+  }
+  free (xbee);
+  return NULL;
+}
+
+/* -----------------------------------------------------------------------------
+ */
+int 
+iXBeeClose (xXBee *xbee) {
+  
   if (xbee) {
-    if (bSerialFdIsValid (fd)) {
-
-      memset (xbee, 0, sizeof (xXBee));
-      pthread_mutex_init (&xbee->mutex, NULL);
-      xbee->fd = fd;
-      xbee->series = series;
-      return 0;
-    }
+    
+    vSerialClose (xbee->fd);
+    free(xbee);
+    return 0;
   }
   return -1;
 }
