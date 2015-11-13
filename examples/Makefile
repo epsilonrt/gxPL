@@ -3,7 +3,7 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
-SUBDIRS = clock config-clock
+SUBDIRS = clock config-clock config-clock-avr
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)

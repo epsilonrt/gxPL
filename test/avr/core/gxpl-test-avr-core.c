@@ -8,8 +8,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
 #include <gxPL.h>
 #include "version-git.h"
 
@@ -25,9 +23,9 @@ static const gxPLId source = {
 /* macros =================================================================== */
 #define test(t) do { \
     if (!(t)) { \
-      fprintf (stderr, "line %d in %s: test %d failed !\n",  __LINE__, \
+      fprintf_P (stderr, PSTR("line %d in %s: %d failed !\n"),  __LINE__, \
                __FUNCTION__, test_count); \
-      exit (EXIT_FAILURE); \
+      exit (-1); \
     } \
   } while (0)
 
@@ -55,14 +53,10 @@ main (int argc, char **argv) {
   test_count++;
   iolist = gxPLIoLayerList();
   test (iolist);
-  printf ("%d iolayers found on this system:\nName\n", iVectorSize (iolist));
-  for (int i = 0; i < iVectorSize (iolist); i++) {
-    printf ("%s\n", (char *) pvVectorGet (iolist, i));
-  }
 
   // retrieved the requested configuration from the command line
   test_count++;
-  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingNew ("s0", "xbeezb", gxPLConnectViaHub);
   test (setting);
 
   // verify that the requested io layer is available
@@ -95,12 +89,6 @@ main (int argc, char **argv) {
   printf ("  bcast  on  %s\n", gxPLIoBcastAddrGet (app));
   printf ("Press Ctrl+C to abort ...\n");
 
-  signal (SIGTERM, prvSignalHandler);
-  signal (SIGINT, prvSignalHandler);
-  signal (SIGALRM, prvSignalHandler);
-
-  // start the countdown for sending message
-  alarm (10);
 
   for (;;) {
 
@@ -115,6 +103,7 @@ main (int argc, char **argv) {
 
 
 /* private functions ======================================================== */
+#if 0
 // -----------------------------------------------------------------------------
 // signal handler
 static void
@@ -153,6 +142,7 @@ prvSignalHandler (int sig) {
   }
 
 }
+#endif
 
 // -----------------------------------------------------------------------------
 // message handler

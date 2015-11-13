@@ -64,7 +64,7 @@ prvPairFromLine (char ** line) {
     if (pair) {
       return pair;
     }
-    vLog (LOG_INFO, "unable to find a '=' in this line: %s", p);
+    PINFO ("unable to find a '=' in this line: %s", p);
   }
   return NULL;
 }
@@ -108,7 +108,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
              (line == NULL) || (strlen (p) != 8)) {
 
           // The string does not contain a xPL Message !
-          vLog (LOG_INFO, "Unknown message header '%s' - bad message", p);
+          PINFO ("Unknown message header '%s' - bad message", p);
           m->iserror = 1;
           break;
         }
@@ -127,7 +127,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          vLog (LOG_INFO, "Unknown message type '%s' - bad message", p);
+          PINFO ("Unknown message type '%s' - bad message", p);
           m->iserror = 1;
           break;
         }
@@ -145,7 +145,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "{") != 0) {
 
-          vLog (LOG_INFO, "incorrectly formatted message", p);
+          PINFO ("incorrectly formatted message", p);
           m->iserror = 1;
           break;
         }
@@ -175,7 +175,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
             // invalid hop value
             gxPLPairDelete (pair);
-            vLog (LOG_INFO, "invalid hop count");
+            PINFO ("invalid hop count");
             m->iserror = 1;
             break;
           }
@@ -185,7 +185,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          vLog (LOG_INFO, "unable to find hop count");
+          PINFO ("unable to find hop count");
           m->iserror = 1;
           break;
         }
@@ -211,7 +211,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
             // illegal source value
             gxPLPairDelete (pair);
-            vLog (LOG_INFO, "invalid source");
+            PINFO ("invalid source");
             m->iserror = 1;
             break;
           }
@@ -221,7 +221,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          vLog (LOG_INFO, "unable to find source");
+          PINFO ("unable to find source");
           m->iserror = 1;
           break;
         }
@@ -250,7 +250,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
             if (gxPLIdFromString (&m->target, pair->value) != 0) {
 
               // illegal target value
-              vLog (LOG_INFO, "invalid target");
+              PINFO ("invalid target");
               gxPLPairDelete (pair);
               break;
             }
@@ -268,7 +268,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          vLog (LOG_INFO, "unable to find target");
+          PINFO ("unable to find target");
           m->iserror = 1;
           break;
         }
@@ -285,7 +285,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "}") != 0) {
 
-          vLog (LOG_INFO, "incorrectly formatted message", p);
+          PINFO ("incorrectly formatted message", p);
           m->iserror = 1;
           break;
         }
@@ -303,19 +303,19 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
           class = strsep (&type, ".");
           if (type == NULL) {
 
-            vLog (LOG_INFO, "unable to find a '.' in this line: %s", p);
+            PINFO ("unable to find a '.' in this line: %s", p);
             m->iserror = 1;
             break;
           }
           if (gxPLMessageSchemaClassSet (m, class) != 0) {
 
-            vLog (LOG_INFO, "invalid schema class");
+            PINFO ("invalid schema class");
             m->iserror = 1;
             break;
           }
           if (gxPLMessageSchemaTypeSet (m, type) != 0) {
 
-            vLog (LOG_INFO, "invalid schema type");
+            PINFO ("invalid schema type");
             m->iserror = 1;
             break;
           }
@@ -339,7 +339,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "{") != 0) {
 
-          vLog (LOG_INFO, "Message improperly formatted: %s", p);
+          PINFO ("Message improperly formatted: %s", p);
           m->iserror = 1;
           break;
         }
@@ -360,7 +360,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
             gxPLPairDelete (pair);
           }
           m->iserror = 1;
-          vLog (LOG_INFO, "unable to append a pair in the message body");
+          PINFO ("unable to append a pair in the message body");
           break;
         }
         else {
@@ -380,7 +380,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "}") != 0) {
 
-          vLog (LOG_INFO, "Message improperly formatted: %s", p);
+          PINFO ("Message improperly formatted: %s", p);
           m->iserror = 1;
           break;
         }
@@ -440,7 +440,7 @@ gxPLMessageTypeFromString (const char * str) {
   else if (strncmp (str, "xpl-trig", 8) == 0) {
     return gxPLMessageTrigger;
   }
-  vLog (LOG_ERR, "Unknown message type");
+  PERROR ( "Unknown message type");
   return -1;
 }
 
@@ -460,7 +460,7 @@ gxPLMessageToString (const gxPLMessage * message) {
   str = gxPLMessageTypeToString (message->type);
   if (str == NULL) {
 
-    vLog (LOG_ERR,
+    PERROR (
           "Unable to format message -- invalid/unknown message type %d",
           message->type);
     free (buf);

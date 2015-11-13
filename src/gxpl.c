@@ -12,9 +12,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <sysio/dlist.h>
-
 #include <gxPL.h>
 #define GXPL_INTERNALS
 #include <gxPL/io.h>
@@ -356,7 +353,7 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
         if (msg) {
 
           if (gxPLMessageIsError (msg)) {
-            vLog (LOG_INFO, "Error parsing network message - ignored");
+            PINFO ("Error parsing network message - ignored");
           }
           else if (gxPLMessageIsValid (msg)) {
 
@@ -383,7 +380,7 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
         }
         else {
 
-          vLog (LOG_INFO, "Error parsing network message - ignored");
+          PINFO ("Error parsing network message - ignored");
         }
       }
       free (buffer);
@@ -395,7 +392,7 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
   }
   else {
 
-    vLog (LOG_INFO, "Error Polling");
+    PINFO ("Error Polling");
   }
   return ret;
 }
@@ -676,7 +673,7 @@ gxPLVersionPatch (void) {
 }
 
 // -----------------------------------------------------------------------------
-int
+unsigned long
 gxPLVersionSha1 (void) {
 
   return VERSION_SHA1;

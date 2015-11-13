@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
-#include <assert.h>
 #include <gxPL.h>
 #include "version-git.h"
 

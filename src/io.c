@@ -9,12 +9,9 @@
 #include "config.h"
 #include <errno.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <sysio/dlist.h>
-#include <sysio/vector.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"

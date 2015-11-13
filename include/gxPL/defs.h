@@ -11,14 +11,20 @@
 
 #if defined(__unix__)
 #include <limits.h>
+#include <assert.h>
 #include <sysio/defs.h>
 #include <sysio/log.h>
 #include <sysio/vector.h>
 #include <sysio/serial.h>
+#include <sysio/delay.h>
 #elif defined(__AVR__)
 #include <avrio/defs.h>
 #include <avrio/vector.h>
+#include <avrio/dlist.h>
 #include <avrio/serial.h>
+#include <avrio/assert.h>
+#include <avrio/log.h>
+#include <avrio/delay.h>
 #define NAME_MAX 16
 #else
 #error This target platform is not supported.

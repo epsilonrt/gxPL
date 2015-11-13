@@ -3,28 +3,28 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
-
-SUBDIRS = unix
-
-# Choix de l'architecture matérielle du système
-ARCH = ARCH_GENERIC_LINUX
-#ARCH = ARCH_ARM_RASPBERRYPI
-
-# Activation des informations Debug (ON/OFF)
-# Si défini sur ON, aucune information de debug ne sera générée
-#DEBUG = ON
-
-#---------------- Install Options ----------------
-prefix=/usr/local
+SUBDIRS = core device message
 
 all: $(SUBDIRS)
-rebuild: $(SUBDIRS)
 clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
+rebuild: $(SUBDIRS)
+lib: $(SUBDIRS)
+cleanlib: $(SUBDIRS)
+extcoff: $(SUBDIRS)
+program: $(SUBDIRS)
+debug: $(SUBDIRS)
 install: $(SUBDIRS)
 uninstall: $(SUBDIRS)
 
-$(SUBDIRS):
-	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
+elf: $(SUBDIRS)
+hex: $(SUBDIRS)
+eep: $(SUBDIRS)
+lss: $(SUBDIRS)
+sym: $(SUBDIRS)
 
-.PHONY: all rebuild clean distclean install uninstall $(SUBDIRS)
+.PHONY: all clean distclean rebuild lib cleanlib extcoff program debug elf hex eep lss sym $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -w -C $@ $(MAKECMDGOALS)
+

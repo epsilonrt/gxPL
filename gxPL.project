@@ -63,6 +63,12 @@
         <File Name="src/sys/unix/device_configurable.c"/>
         <File Name="src/sys/unix/io_xbeezb.c"/>
       </VirtualDirectory>
+      <VirtualDirectory Name="avr">
+        <File Name="src/sys/avr/device_configurable.c"/>
+        <File Name="src/sys/avr/gxpl.c"/>
+        <File Name="src/sys/avr/io_xbeezb.c"/>
+        <File Name="src/sys/avr/util.c"/>
+      </VirtualDirectory>
     </VirtualDirectory>
     <File Name="src/io_p.h"/>
     <File Name="src/gxpl.c"/>
@@ -112,6 +118,7 @@
     <File Name="config.h"/>
     <File Name="gxpl.mk"/>
     <File Name="sysio.mk"/>
+    <File Name="avrio.mk"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

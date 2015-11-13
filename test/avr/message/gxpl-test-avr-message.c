@@ -15,7 +15,7 @@
 /* macros =================================================================== */
 #define test(t) do { \
     if (!t) { \
-      fprintf (stderr, "line %d in %s: test %d failed !\n",  __LINE__, __FUNCTION__, test_count); \
+      fprintf_P (stderr, PSTR("line %d in %s: %d failed !\n"),  __LINE__, __FUNCTION__, test_count); \
       exit (EXIT_FAILURE); \
     } \
   } while (0)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="gxPL" Database="" SWTLW="No">
+<CodeLite_Workspace Name="gxPL" Database="">
   <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
   <Project Name="gxpl-logger" Path="tools/logger/gxpl-logger.project" Active="No"/>
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
@@ -8,8 +8,6 @@
   <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
-  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="Yes"/>
-  <Project Name="gxPLib" Path="lib/gxPL/gxPLib.project" Active="No"/>
   <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
   <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
@@ -18,12 +16,17 @@
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
   <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="script/init.d/hub/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge-service" Path="script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
+  <Project Name="gxpl-test-avr-core" Path="test/avr/core/gxpl-test-avr-core.project" Active="No"/>
+  <Project Name="gxpl-test-avr-device" Path="test/avr/device/gxpl-test-avr-device.project" Active="No"/>
+  <Project Name="gxpl-test-avr-message" Path="test/avr/message/gxpl-test-avr-message.project" Active="No"/>
+  <Project Name="gxpl-config-clock-avr" Path="examples/config-clock-avr/gxpl-config-clock-avr.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -46,13 +49,18 @@
       <Project Name="gxpl-hub-service" ConfigName="Debug"/>
       <Project Name="gxpl-tools" ConfigName="Debug"/>
       <Project Name="gxpl-examples" ConfigName="Debug"/>
-      <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-xbee-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-hub-service" ConfigName="Debug"/>
       <Project Name="gxpl-xbee-bridge-service" ConfigName="Debug"/>
+      <Project Name="gxPL" ConfigName="Debug"/>
+      <Project Name="gxPLibAvr" ConfigName="Debug"/>
+      <Project Name="gxpl-test-avr-core" ConfigName="Debug"/>
+      <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
+      <Project Name="gxpl-test-avr-message" ConfigName="Debug"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -75,13 +83,18 @@
       <Project Name="gxpl-hub-service" ConfigName="Release"/>
       <Project Name="gxpl-tools" ConfigName="Release"/>
       <Project Name="gxpl-examples" ConfigName="Release"/>
-      <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test-bridge" ConfigName="Release"/>
       <Project Name="gxpl-bridge" ConfigName="Release"/>
       <Project Name="gxpl-bridge" ConfigName="Release"/>
       <Project Name="gxpl-xbee-bridge" ConfigName="Release"/>
       <Project Name="gxpl-hub-service" ConfigName="Release"/>
       <Project Name="gxpl-xbee-bridge-service" ConfigName="Release"/>
+      <Project Name="gxPL" ConfigName="Release"/>
+      <Project Name="gxPLibAvr" ConfigName="Release"/>
+      <Project Name="gxpl-test-avr-core" ConfigName="Release"/>
+      <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
+      <Project Name="gxpl-test-avr-message" ConfigName="Release"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

@@ -15,6 +15,7 @@
 #warning You should not add the header file gxPL/io.h in your source code
 #endif
 
+#ifndef __AVR__
 /* constants ================================================================ */
 #define GXPL_PRIORITY   101
 #define GXPLIO_PRIORITY 102
@@ -24,6 +25,13 @@
 #define __gxpl_exit __attribute__ ((destructor(GXPL_PRIORITY)))
 #define __gxplio_init __attribute__ ((constructor(GXPLIO_PRIORITY)))
 #define __gxplio_exit __attribute__ ((destructor(GXPLIO_PRIORITY)))
+
+#else /* __AVR__ defined */
+#define __gxpl_init __attribute__ ((section (".init5")))
+#define __gxpl_exit __attribute__ ((section (".fini5")))
+#define __gxplio_init __attribute__ ((section (".init7")))
+#define __gxplio_exit __attribute__ ((section (".fini7")))
+#endif  /* __AVR__ defined */
 
 /* structures =============================================================== */
 

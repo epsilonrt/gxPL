@@ -9,7 +9,6 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <ctype.h>
 #include <gxPL/util.h>
 
@@ -53,7 +52,7 @@ gxPLPairFromLine (char * line) {
     if (pair) {
       return pair;
     }
-    vLog (LOG_INFO, "unable to find a '=' in this line: %s", p);
+    PINFO ("unable to find a '=' in this line: %s", p);
   }
   return NULL;
 }

@@ -1,12 +1,12 @@
 /**
  * @file
  * xPL Hardware Layer, XBee Modules Series 2 (Zigbee), API Mode (AP=1)
- *                    (unix source code)
+ *                    (avr 8-bits source code)
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#if defined(__unix__)
+#if defined(__AVR__)
 #include "config.h"
 #include <errno.h>
 #include <stdio.h>
@@ -14,16 +14,15 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
-#include <sysio/xbee.h>
-#include <sysio/delay.h>
+#include <avrio/xbee.h>
+#include <avrio/task.h>
+#include <gxPL/util.h>
 
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
 
 /* constants ================================================================ */
 #define IO_NAME "xbeezb"
-
-/* types ==================================================================== */
 
 /* structures =============================================================== */
 typedef struct xbeezb_data {
@@ -117,7 +116,7 @@ prvSetDefaultIos (gxPLIo * io) {
 // -----------------------------------------------------------------------------
 static void
 prvSetDefaultIface (gxPLIo * io) {
-  const char default_iface[]  = DEFAULT_XBEE_PORT;
+  const char default_iface[]  = "ser";
 
   strcpy (io->setting->iface, default_iface);
 }
@@ -162,64 +161,9 @@ prvZbTxStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 
   if (iXBeePktFrameId (pkt) == dp->fid) {
     int status = iXBeePktStatus (pkt);
-    const char * error_msg;
 
     if (status != 0) {
-#ifndef __AVR__
-      switch (status) {
-        case 0x01:
-          error_msg = "MAC ACK Failure";
-          break;
-        case 0x02:
-          error_msg = "CCA Failure";
-          break;
-        case 0x15:
-          error_msg = "Invalid destination endpoint";
-          break;
-        case 0x21:
-          error_msg = "Network ACK Failure";
-          break;
-        case 0x22:
-          error_msg = "Not Joined to Network";
-          break;
-        case 0x23:
-          error_msg = "Self-addressed";
-          break;
-        case 0x24:
-          error_msg = "Address Not Found";
-          break;
-        case 0x25:
-          error_msg = "Route Not Found";
-          break;
-        case 0x26:
-          error_msg = "Broadcast source failed to hear a neighbor relay the message";
-          break;
-        case 0x2B:
-          error_msg = "Invalid binding table index";
-          break;
-        case 0x2C:
-          error_msg = "Resource error lack of free buffers, timers, etc.";
-          break;
-        case 0x2D:
-          error_msg = "Attempted broadcast with APS transmission";
-          break;
-        case 0x2E:
-          error_msg = "Attempted unicast with APS transmission, but EE=0";
-          break;
-        case 0x32:
-          error_msg = "Resource error lack of free buffers, timers, etc.";
-          break;
-        case 0x74:
-          error_msg = "Data payload too large";
-          break;
-        default:
-          error_msg = "Unknown";
-          break;
-      }
-      PERROR ("TX Status message error 0x%02X: %s", status, error_msg);
-#else
       PERROR ("TX Status message error 0x%02X", status);
-#endif
     }
   }
   dp->fid = 0;
@@ -232,7 +176,7 @@ static int
 prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 
   PINFO ("%s joined zigbee network",
-        prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
+         prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
   vXBeeFreePkt (xbee, pkt);
   return 0;
 }
@@ -240,13 +184,17 @@ prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 // -----------------------------------------------------------------------------
 static int
 prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
+  unsigned long now, end;
   int ret = 0;
 
-  while ( (timeout_ms > 0) && (dp->rxpkt == NULL) && (ret == 0)) {
+  gxPLTimeMs (&now);
+  end = now + timeout_ms;
+
+  while ( (now < end) && (dp->rxpkt == NULL) && (ret == 0)) {
 
     // loop until AT response was received (or timeout or error)
-    ret = iXBeePoll (dp->xbee, 10);
-    timeout_ms -= 10;
+    ret = iXBeePoll (dp->xbee, 0);
+    gxPLTimeMs (&now);
   }
 
   if (ret == 0) {
@@ -270,6 +218,7 @@ prvSendLocalAt (gxPLIo * io,
                 const uint8_t * params,
                 uint8_t param_len,
                 int timeout_ms) {
+  unsigned long now, end;
   int ret;
 
   // Clear previous AT response
@@ -278,13 +227,15 @@ prvSendLocalAt (gxPLIo * io,
 
   int frame_id = iXBeeSendAt (dp->xbee, cmd, params, param_len);
 
+  gxPLTimeMs (&now);
+  end = now + timeout_ms;
   do {
 
     // loop until AT response was received (or timeout)
-    ret = iXBeePoll (dp->xbee, 10);
-    timeout_ms -= 10;
+    ret = iXBeePoll (dp->xbee, 0);
+    gxPLTimeMs (&now);
   }
-  while ( (timeout_ms > 0) && (dp->atpkt == NULL) && (ret == 0));
+  while ( (now < end) && (dp->atpkt == NULL) && (ret == 0));
 
   if (ret == 0) {
 
@@ -307,7 +258,7 @@ prvSendLocalAt (gxPLIo * io,
         else {
 
           // command status error
-          PERROR ("AT command %2s failed with 0x%02X status\n", cmd, ret);
+          PERROR ("AT%2s failed 0x%02X\n", cmd, ret);
           errno = EIO;
         }
       }
@@ -333,7 +284,7 @@ gxPLXBeeZbClose (gxPLIo * io) {
 
   if (io->pdata) {
     int ret;
-    
+
     vXBeeFreePkt (dp->xbee, dp->atpkt);
     dp->atpkt = NULL;
     vXBeeFreePkt (dp->xbee, dp->rxpkt);
@@ -367,23 +318,22 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     if ( (xbee = xXBeeOpen (io->setting->iface, &io->setting->xbee.ios,
                             XBEE_SERIES_S2)) == NULL) {
 
-      PERROR ("Unable to open xbee module: %s (%d)",
-              strerror (errno), errno);
+      PERROR ("XBee open %d", errno);
       return -1;
     }
 
     io->pdata = calloc (1, sizeof (xbeezb_data));
     assert (io->pdata);
-    
+
     dp->xbee = xbee;
-    vXBeeSetUserContext(xbee, io);
+    vXBeeSetUserContext (xbee, io);
     vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
 
     // Gets and checks firmware version
     ret = prvSendLocalAt (io, XBEE_CMD_VERS_FIRMWARE, NULL, 0, 1000);
     if (ret != 0) {
 
-      PERROR ("Unable to read XBee module, return %d", ret);
+      PERROR ("XBee read %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -394,7 +344,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       fwid = *pucXBeePktParam (dp->atpkt);
       if ( ( (fwid & 0xF0) != 0x20) || ( (fwid & 1) == 0)) {
 
-        PERROR ("Bad XBee module or firmware version: 0x%02Xxx", fwid);
+        PERROR ("Bad XBee: 0x%02Xxx", fwid);
         gxPLXBeeZbClose (io);
         return -1;
       }
@@ -408,7 +358,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_SER_HI, NULL, 0, 1000);
     if (ret != 0) {
 
-      PERROR ("Unable to read XBee module, return %d", ret);
+      PERROR ("XBee read %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -418,7 +368,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_SER_LO, NULL, 0, 1000);
     if (ret != 0) {
 
-      PERROR ("Unable to read XBee module, return %d", ret);
+      PERROR ("XBee read %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -430,7 +380,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, NULL, 0, 1000);
       if (ret != 0) {
 
-        PERROR ("Unable to read XBee module, return %d", ret);
+        PERROR ("XBee read %d", ret);
         gxPLXBeeZbClose (io);
         return -1;
       }
@@ -443,13 +393,11 @@ gxPLXBeeZbOpen (gxPLIo * io) {
           uint64_t new_panid = htonll (io->setting->xbee.panid);
 
           // current and setting PAN ID differs: change to new PAN ID
-          PINFO ("Write new PAN ID in XBee: 0x%" PRIx64
-                ", new PAN ID will be operational in a few seconds (usually 6)..." ,
-                io->setting->xbee.panid);
+          PINFO ("Write PAN ID 0x%lu", io->setting->xbee.panid);
           ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
           if (ret != 0) {
 
-            PERROR ("Unable to read XBee module, return %d", ret);
+            PERROR ("XBee read %d", ret);
             gxPLXBeeZbClose (io);
             return -1;
           }
@@ -457,7 +405,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
           ret = prvSendLocalAt (io, XBEE_CMD_WRITE_PARAMS, NULL, 0, 2000);
           if (ret != 0) {
 
-            PERROR ("Unable to read XBee module, return %d", ret);
+            PERROR ("XBee read %d", ret);
             gxPLXBeeZbClose (io);
             return -1;
           }
@@ -469,7 +417,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_OPERATING_PAN_ID, NULL, 0, 1000);
     if (ret != 0) {
 
-      PERROR ("Unable to read XBee module, return %d", ret);
+      PERROR ("XBee read %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -479,8 +427,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
       if (ret == 0) {
 
-        PINFO ("Starting Zigbee network, current operating PAN ID 0x%"
-              PRIx64, panid);
+        PINFO ("Starting PAN ID 0x%lu", panid);
       }
     }
 
@@ -488,7 +435,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     ret = prvSendLocalAt (io, XBEE_CMD_MAX_PAYLOAD, NULL, 0, 1000);
     if (ret != 0) {
 
-      PERROR ("Unable to read XBee module, return %d", ret);
+      PERROR ("XBee read %d", ret);
       gxPLXBeeZbClose (io);
       return -1;
     }
@@ -496,7 +443,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     if (iXBeePktParamGetUShort (&word, dp->atpkt, 0) == 0) {
 
       dp->max_payload = word;
-      PDEBUG ("Maximum RF payload %d bytes", dp->max_payload);
+      PDEBUG ("RF payload %d bytes", dp->max_payload);
     }
 
     vXBeeSetCB (dp->xbee, XBEE_CB_DATA, prvZbDataCB);
@@ -592,11 +539,11 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
 
   if (dp->fid < 0) {
 
-    PERROR ("Unable to deliver the message, error: %d", dp->fid);
+    PERROR ("XBee deliver %d", dp->fid);
     dp->fid = 0;
     return -1;
   }
-  PDEBUG ("Send ZigBee frame #%d (%d bytes)", dp->fid, count);
+  PDEBUG ("Send frame #%d", dp->fid);
 
   return dp->fid;
 }
@@ -701,4 +648,4 @@ gxPLXBeeZbExit (void) {
 }
 
 /* ========================================================================== */
-#endif /* __unix__ defined */
+#endif /* __AVR__ defined */

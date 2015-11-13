@@ -6,10 +6,10 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#ifndef  __AVR__
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <gxPL.h>
 #include "hub_p.h"
 
@@ -113,7 +113,7 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
               free (client);
               return;
             }
-            vLog (LOG_INFO, "add application %s:%s, processing %d applications",
+            PINFO ("add application %s:%s, processing %d applications",
                   str_addr, str_port,
                   iVectorSize (&hub->clients));
           }
@@ -127,7 +127,7 @@ prvHandleMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
           if (c >= 0) {
 
             iVectorRemove (&hub->clients, c);
-            vLog (LOG_INFO, "remove application %s:%s after receiving his"
+            PINFO ("remove application %s:%s after receiving his"
                   " heartbeat end , processing %d applications",
                   str_addr, str_port,
                   iVectorSize (&hub->clients));
@@ -214,7 +214,7 @@ gxPLHubPoll (gxPLHub * hub, int timeout_ms) {
         char * str;
         if (gxPLIoCtl (hub->app, gxPLIoFuncNetAddrToString, &client->addr, &str) == 0) {
 
-          vLog (LOG_INFO, "remove application %s:%d after heartbeat timeout, "
+          PINFO ("remove application %s:%d after heartbeat timeout, "
                 "processing %d applications",
                 str, client->addr.port,
                 iVectorSize (&hub->clients) - 1);
@@ -233,3 +233,4 @@ gxPLHubApplication (gxPLHub * hub) {
   return hub->app;
 }
 /* ========================================================================== */
+#endif /*  __AVR__ not defined */

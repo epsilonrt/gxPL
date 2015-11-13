@@ -16,6 +16,8 @@ extern "C" {
 
 /* default values =========================================================== */
 #define DEFAULT_UNIX_IO_LAYER             "udp"
+#define DEFAULT_AVR8_IO_LAYER             "xbeezb"
+#define DEFAULT_AVR8_EEFILE_MAX           512
 #define DEFAULT_CONNECT_TYPE              gxPLConnectViaHub
 #define DEFAULT_HEARTBEAT_INTERVAL        300
 #define DEFAULT_CONFIG_HEARTBEAT_INTERVAL 60
@@ -44,8 +46,10 @@ extern "C" {
 #define GXPL_LOG_DEBUG_LEVEL LOG_INFO
 #endif
 
-#ifdef  __unix__
+#if defined(__unix__)
 #define DEFAULT_IO_LAYER DEFAULT_UNIX_IO_LAYER
+#elif defined(__AVR__)
+#define DEFAULT_IO_LAYER DEFAULT_AVR8_IO_LAYER
 #else
 #error this platform is not supported yet
 #endif

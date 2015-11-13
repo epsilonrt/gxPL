@@ -8,10 +8,8 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <signal.h>
 #include <gxPL.h>
-#include <sysio/delay.h>
 
 /* constants ================================================================ */
 /* macros =================================================================== */

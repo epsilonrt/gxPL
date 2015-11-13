@@ -44,12 +44,11 @@ static gxPLDevice * device1, * device2;
 static int test_count;
 
 /* private functions ======================================================== */
-static void prvSignalHandler (int sig) ;
 static void prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p);
 
 /* main ===================================================================== */
 int
-main (int argc, char **argv) {
+main (void) {
   int ret = 0;
   gxPLSetting * setting;
   char hello1[] = "hello1";
@@ -58,7 +57,7 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_new ("retrieved the requested configuration from the command line");
-  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  setting = gxPLSettingNew ("s0", "xbeezb", gxPLConnectViaHub);
   test_ok (setting);
 
   // opens the xPL network
@@ -93,7 +92,6 @@ main (int argc, char **argv) {
   ret = gxPLDeviceListenerAdd (device1, prvDeviceHandler, gxPLMessageAny, NULL, NULL, hello1);
   test_ok (ret == 0);
 
-
   test_new ("adds a new device on the network");
   device2 = gxPLAppAddDevice (app, "epsirt", "test", NULL);
   test_ok (device2);
@@ -112,18 +110,11 @@ main (int argc, char **argv) {
   ret = gxPLDeviceEnable (device2, true);
   test_ok (ret == 0);
 
-  signal (SIGTERM, prvSignalHandler);
-  signal (SIGINT, prvSignalHandler);
-  printf ("Press Ctrl+C to abort ...\n");
-
   for (;;) {
 
     // Main loop
     ret = gxPLAppPoll (app, 100);
     test (ret == 0);
-/*    if (gxPLDeviceIsHubConfirmed (device2)) {
-      prvSignalHandler (SIGTERM);
-    }*/
     fflush (stdout);
   }
 
@@ -132,29 +123,6 @@ main (int argc, char **argv) {
 
 
 /* private functions ======================================================== */
-// -----------------------------------------------------------------------------
-// signal handler
-static void
-prvSignalHandler (int sig) {
-  int ret;
-
-  switch (sig) {
-
-    case SIGTERM:
-    case SIGINT:
-
-      test_new ("close the xPL network");
-      ret = gxPLAppClose (app);
-      test_ok (ret == 0);
-
-      printf ("\neverything was closed.\nHave a nice day !\n");
-      exit (EXIT_SUCCESS);
-      break;
-    default:
-      break;
-  }
-
-}
 
 // -----------------------------------------------------------------------------
 // message handler

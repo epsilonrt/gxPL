@@ -11,7 +11,6 @@
 /* ========================================================================== */
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <gxPL.h>
 #include "device_p.h"
 

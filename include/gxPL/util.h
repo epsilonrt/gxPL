@@ -280,9 +280,11 @@ int gxPLSchemaIsEmpty (const gxPLSchema * schema);
  */
 /**
  * @brief System time
+ * This time can be an absolute time (a date) or relative to the system startup 
+ * (on embedded platform, for example)
  * @return time in seconds
  */
-long gxPLTime (void);
+unsigned long gxPLTime (void);
 
 /**
  * @brief System time in milliseconds

@@ -310,7 +310,7 @@ int gxPLVersionPatch (void);
 /**
  * @brief SHA1 signature of the current version
  */
-int gxPLVersionSha1 (void);
+unsigned long gxPLVersionSha1 (void);
 
 /**
  * @}

@@ -6,10 +6,10 @@
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
+#ifndef  __AVR__
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <gxPL.h>
 #include "bridge_p.h"
 
@@ -117,7 +117,7 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
           free (client);
           return;
         }
-        vLog (LOG_INFO, "New client %s.%s.%s, processing %d clients",
+        PINFO ("New client %s.%s.%s, processing %d clients",
               src->id.vendor, src->id.device, src->id.instance,
               iVectorSize (&bridge->clients));
       }
@@ -131,7 +131,7 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
       if (c >= 0) {
 
         iVectorRemove (&bridge->clients, c);
-        vLog (LOG_INFO, "Delete client %s.%s.%s after receiving his"
+        PINFO ("Delete client %s.%s.%s after receiving his"
               " heartbeat end, processing %d clients",
               src->id.vendor, src->id.device, src->id.instance,
               iVectorSize (&bridge->clients));
@@ -147,13 +147,13 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
   if (gxPLAppSetting (bridge->in)->broadcast) {
 
     // Deliver this message to all inside clients
-    vLog (LOG_INFO,  "IN  --- IN  > Broadcast");
+    PINFO ( "IN  --- IN  > Broadcast");
     gxPLAppSendMessage (bridge->in, message, NULL);
   }
   else if (client) {
 
     // if inside broadcast is disabled, echoes hbeat.basic message to the client only
-    vLog (LOG_INFO,  "IN  --- IN  > Deliver");
+    PINFO ( "IN  --- IN  > Deliver");
     gxPLAppSendMessage (bridge->in, message, &client->addr);
   }
 
@@ -161,7 +161,7 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
 
     // Broadcasts this message outside
     gxPLMessageHopInc (message);
-    vLog (LOG_INFO,  "OUT <-- IN  > Deliver");
+    PINFO ( "OUT <-- IN  > Deliver");
     gxPLAppSendMessage (bridge->out, message, NULL);
   }
 }
@@ -180,7 +180,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
     if (gxPLAppSetting (bridge->in)->broadcast) {
 
       // Deliver this message to all inside clients
-      vLog (LOG_INFO,  "OUT --> IN  > Broadcast");
+      PINFO ( "OUT --> IN  > Broadcast");
       gxPLAppSendMessage (bridge->in, message, NULL);
     }
     else {
@@ -194,7 +194,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
       int allow = iVectorFindFirstIndex (&bridge->allow, s);
       if (allow >= 0) {
 
-        vLog (LOG_INFO,  "OUT --> IN  > %s.%s allowed to cross", s->class, s->type);
+        PINFO ( "OUT --> IN  > %s.%s allowed to cross", s->class, s->type);
       }
 
       for (int i = 0; i < iVectorSize (&bridge->clients); i++) {
@@ -203,7 +203,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
         if ( (gxPLIdCmp (&client->id, gxPLMessageTargetIdGet (message)) == 0) ||
              (allow >= 0)) {
 
-          vLog (LOG_INFO,  "OUT --> IN  > Deliver");
+          PINFO ( "OUT --> IN  > Deliver");
           gxPLAppSendMessage (bridge->in, message, &client->addr);
         }
       }
@@ -307,11 +307,11 @@ gxPLBridgeClose (gxPLBridge * bridge) {
 
     ret = gxPLAppClose (bridge->in);
     if (ret != 0) {
-      vLog (LOG_NOTICE, "Unable to close inner application");
+      PNOTICE ( "Unable to close inner application");
     }
     ret = gxPLAppClose (bridge->out);
     if (ret != 0) {
-      vLog (LOG_NOTICE, "Unable to close outer application");
+      PNOTICE ( "Unable to close outer application");
     }
 
     vVectorDestroy (&bridge->clients);
@@ -365,14 +365,14 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
   if (i != 0) {
 
     ret = i;
-    vLog (LOG_NOTICE, "Unable to poll inner application");
+    PNOTICE ( "Unable to poll inner application");
   }
 
   i = gxPLAppPoll (bridge->out, timeout_ms);
   if (i != 0) {
 
     ret = i;
-    vLog (LOG_NOTICE, "Unable to poll outer application");
+    PNOTICE ( "Unable to poll outer application");
   }
   bridge->timeout += timeout_ms;
 
@@ -388,7 +388,7 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
 
       if ( (now - client->hbeat_last) > client->hbeat_period_max) {
 
-        vLog (LOG_INFO, "Delete client %s.%s.%s after heartbeat timeout, "
+        PINFO ("Delete client %s.%s.%s after heartbeat timeout, "
               "processing %d clients",
               client->id.vendor, client->id.device, client->id.instance,
               iVectorSize (&bridge->clients) - 1);
@@ -473,3 +473,4 @@ gxPLBridgeDeviceIsEnabled (const gxPLBridge * bridge) {
 }
 
 /* ========================================================================== */
+#endif /*  __AVR__ not defined */
