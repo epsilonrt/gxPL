@@ -102,13 +102,12 @@ prvZbAddrFromString (gxPLIoAddr * zbaddr, const char * str) {
 // -----------------------------------------------------------------------------
 static void
 prvSetDefaultIos (gxPLIo * io) {
-  const xSerialIos default_ios  = {
+  static const xSerialIos default_ios  = {
     .baud = DEFAULT_XBEE_BAUDRATE,
     .dbits = SERIAL_DATABIT_8,
     .parity = SERIAL_PARITY_NONE,
     .sbits = SERIAL_STOPBIT_ONE,
-    .flow = DEFAULT_XBEE_FLOW,
-    .flag = 0
+    .flow = DEFAULT_XBEE_FLOW
   };
   memcpy (&io->setting->xbee.ios, &default_ios, sizeof (xSerialIos));
 }
@@ -290,6 +289,7 @@ gxPLXBeeZbClose (gxPLIo * io) {
     vXBeeFreePkt (dp->xbee, dp->rxpkt);
     dp->rxpkt = NULL;
     ret = iXBeeClose (dp->xbee);
+    free (dp->xbee);
     free (io->pdata);
     io->pdata = NULL;
     return ret;
@@ -315,8 +315,12 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
       prvSetDefaultIface (io);
     }
-    if ( (xbee = xXBeeOpen (io->setting->iface, &io->setting->xbee.ios,
-                            XBEE_SERIES_S2)) == NULL) {
+
+#warning TODO broche de RESET XBee
+    xbee = xXBeeNew (XBEE_SERIES_S2, NULL);
+    assert (xbee);
+
+    if (iXBeeOpen (xbee, io->setting->iface, &io->setting->xbee.ios) != 0) {
 
       PERROR ("XBee open %d", errno);
       return -1;
@@ -591,7 +595,7 @@ gxPLXBeeZbCtl (gxPLIo * io, int c, va_list ap) {
 
       if ( (addr->family == gxPLNetFamilyZigbee16) ||
            (addr->family == gxPLNetFamilyZigbee64)) {
-        const char ** str_addr = va_arg (ap, char**);
+        const char ** str_addr = (const char **) va_arg (ap, char**);
 
         *str_addr = prvZbAddrToString (addr->addr, addr->addrlen);
       }

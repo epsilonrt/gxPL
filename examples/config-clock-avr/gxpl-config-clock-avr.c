@@ -44,7 +44,7 @@ main (void) {
   int ret;
   gxPLSetting * setting;
 
-  setting = gxPLSettingNew ("s0", "xbeezb", gxPLConnectViaHub);
+  setting = gxPLSettingNew ("tty1", "xbeezb", gxPLConnectViaHub);
   assert (setting);
 
   // opens the xPL network
@@ -52,7 +52,7 @@ main (void) {
   if (app == NULL) {
 
     fprintf (stderr, "Unable to start xPL");
-    exit (EXIT_FAILURE);
+    return -1;
   }
 
   // Create a configurable device and set our application version

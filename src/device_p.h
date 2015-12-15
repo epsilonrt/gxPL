@@ -19,17 +19,17 @@
 /*
  * @brief Describe a device configuration
  */
-typedef struct _gxPLDeviceConfig {
+struct _gxPLDeviceConfig {
   
   char * filename;
   xVector items; /**< vector of gxPLDeviceConfigItem */
   xVector listener; /**< vector of listener_elmt (config changed) */
-} gxPLDeviceConfig;
+};
 
 /*
  * @brief Describe a device
  */
-typedef struct _gxPLDevice {
+struct _gxPLDevice {
   
   gxPLId id;
   char * version;
@@ -69,7 +69,7 @@ typedef struct _gxPLDevice {
       unsigned int havefilter: 1;
     };
   };
-} gxPLDevice;
+};
 
 /* internal public functions ================================================ */
 

@@ -17,14 +17,14 @@
 /*
  * @brief xPL Application
  */
-typedef struct _gxPLApplication {
+struct _gxPLApplication {
 
   gxPLSetting * setting;
   gxPLIo * io;  /**< abstract structure can not be used directly on top level */
   xVector msg_listener;
   xVector device;
   gxPLIoAddr net_info;
-} gxPLApplication;
+};
 
 
 /* private api functions ==================================================== */

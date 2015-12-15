@@ -21,7 +21,8 @@
 #include <avrio/defs.h>
 #include <avrio/vector.h>
 #include <avrio/dlist.h>
-#include <avrio/serial.h>
+#include <avrio/tc.h>
+#include <avrio/dpin.h>
 #include <avrio/assert.h>
 #include <avrio/log.h>
 #include <avrio/delay.h>

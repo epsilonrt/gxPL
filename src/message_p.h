@@ -1,10 +1,10 @@
 /**
  * @file
  * gxPLMessage internal include
- * 
+ *
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
- * Licensed under the Apache License, Version 2.0 (the "License") 
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #ifndef _GXPL_MESSAGE_PRIVATE_HEADER_
 #define _GXPL_MESSAGE_PRIVATE_HEADER_
@@ -15,7 +15,7 @@
 /*
  * @brief Describe a xPL message
  */
-typedef struct _gxPLMessage {
+struct _gxPLMessage {
 
   gxPLMessageType type;
   int hop;
@@ -38,7 +38,7 @@ typedef struct _gxPLMessage {
       unsigned int isgrouped: 1;
     };
   };
-} gxPLMessage;
+};
 
 /* ========================================================================== */
 #endif /* _GXPL_MESSAGE_PRIVATE_HEADER_ defined */

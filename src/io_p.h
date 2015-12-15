@@ -49,11 +49,11 @@ typedef struct _gxPLIoOps {
 /*
  * @brief xPL Hardware Abstraction Layer
  */
-typedef struct _gxPLIo {
+struct _gxPLIo {
   void * pdata; /**< Private data used internally by layer io */
   gxPLIoOps * ops;
   gxPLSetting * setting; /**< pointer to the top-level configuration */
-} gxPLIo;
+};
 
 /* internal private functions (low level service) =========================== */
 

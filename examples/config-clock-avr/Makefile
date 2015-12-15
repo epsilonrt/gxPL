@@ -29,8 +29,7 @@ AVRIO_TOPDIR = $(AVRIO_ROOT)
 # Nom de la carte cible (voir le fichier avrio/boards.txt pour la liste)
 # Si BOARD est vide, il faut un fichier board.mk pour définir les propriétés de
 # la carte dans le répertoire où se trouve ce Makefile !
-#BOARD = UNO
-BOARD = XNET_NODE
+BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
@@ -60,13 +59,13 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
-#VIEW_GCC_LINE = ON
+VIEW_GCC_LINE = ON
 
 # Disable the deletion of variables and functions "unnecessary"
 # The linker checks of a function or variable is called, if it is not the case, 
@@ -124,14 +123,14 @@ PRINTF_VERSION = STANDARD
 SCANF_VERSION = STANDARD
 
 # ON/OFF
-MATH_LIB_ENABLE = OFF
+MATH_LIB_ENABLE = ON
 
 #---------------- Additional Compiler/Assembler Options ----------------
 CFLAGS   += -fno-strict-aliasing
 CPPFLAGS += 
 ASFLAGS  += 
 #---------------- Additional Linker Options ----------------
-LDFLAGS  +=
+LDFLAGS  += -nodefaultlibs -Wl,--gc-sections -lm -lgcc -lc -lgcc
 
 #---------------- Programming Options (avrdude) ----------------
 # Programming hardware
@@ -147,7 +146,7 @@ LDFLAGS  +=
 #AVRDUDE_PORT = usb
 
 # AVR Dragon
-AVRDUDE_PROGRAMMER = dragon_isp
+#AVRDUDE_PROGRAMMER = dragon_isp
 #AVRDUDE_PROGRAMMER = dragon_jtag
 #AVRDUDE_PROGRAMMER = dragon_dw
 AVRDUDE_PORT = usb
