@@ -43,6 +43,8 @@ AVRIO_ARDUINO = OFF
 
 # Utilisation de la chaîne de compilation interne à AvrIO
 USE_INTERNAL_TOOLCHAIN = OFF
+# Utilisation de la chaîne de compilation Avr Studio 7
+USE_AVRSTUDIO7_TOOLCHAIN = ON
 
 #                               ~~~~AVRIO~~~~
 #----------------------------------------------------------------------------
@@ -59,10 +61,10 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = s
+DEBUG_OPT = 0
 
 # Enabling Debug information (ON / OFF)
-#DEBUG = ON
+DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
 VIEW_GCC_LINE = ON
@@ -130,7 +132,7 @@ CFLAGS   += -fno-strict-aliasing
 CPPFLAGS += 
 ASFLAGS  += 
 #---------------- Additional Linker Options ----------------
-LDFLAGS  += -nodefaultlibs -Wl,--gc-sections -lm -lgcc -lc -lgcc
+LDFLAGS  += 
 
 #---------------- Programming Options (avrdude) ----------------
 # Programming hardware
@@ -147,7 +149,7 @@ LDFLAGS  += -nodefaultlibs -Wl,--gc-sections -lm -lgcc -lc -lgcc
 
 # AVR Dragon
 #AVRDUDE_PROGRAMMER = dragon_isp
-#AVRDUDE_PROGRAMMER = dragon_jtag
+AVRDUDE_PROGRAMMER = dragon_jtag
 #AVRDUDE_PROGRAMMER = dragon_dw
 AVRDUDE_PORT = usb
 
@@ -162,8 +164,8 @@ AVRDUDE_WRITE_EEPROM_ENABLE = OFF
 #---------------- Debugging Options ----------------
 
 # Set the DEBUG_UI to either gdb or insight.
-# DEBUG_UI = gdb
-DEBUG_UI = insight
+DEBUG_UI = gdb
+#DEBUG_UI = insight
 
 # Set the debugging back-end to either avarice, simulavr.
 DEBUG_BACKEND = avarice
@@ -171,6 +173,8 @@ DEBUG_BACKEND = avarice
 
 # When using avarice settings for the JTAG
 JTAG_DEV = usb
+
+AVARICE_OPT = --dragon
 
 #------------------------------------------------------------------------------
 ifeq ($(GXPL_ROOT),)

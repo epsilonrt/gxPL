@@ -28,7 +28,7 @@
   <Project Name="gxpl-test-avr-message" Path="test/avr/message/gxpl-test-avr-message.project" Active="No"/>
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock-avr/gxpl-config-clock-avr.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxpl-hub" ConfigName="Debug"/>
       <Project Name="gxpl-logger" ConfigName="Debug"/>
@@ -62,7 +62,7 @@
       <Project Name="gxpl-test-avr-message" ConfigName="Debug"/>
       <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxpl-hub" ConfigName="Release"/>
       <Project Name="gxpl-logger" ConfigName="Release"/>
