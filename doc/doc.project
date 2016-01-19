@@ -39,6 +39,8 @@
     <File Name="main_page_footer.dox"/>
     <File Name="main_page_header.dox"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -69,6 +71,7 @@
       <CustomBuild Enabled="yes">
         <Target Name="View in x-www-browser">make x-browser &amp;</Target>
         <Target Name="DistClean">make distclean</Target>
+        <Target Name="Archive">make tar</Target>
         <RebuildCommand>make rebuild DEBUG=ON</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
         <BuildCommand>make all DEBUG=ON</BuildCommand>
@@ -109,6 +112,7 @@
       <CustomBuild Enabled="yes">
         <Target Name="View in x-www-browser">make x-browser &amp;</Target>
         <Target Name="DistClean">make distclean</Target>
+        <Target Name="Archive">make tar</Target>
         <RebuildCommand>make rebuild</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
         <BuildCommand>make</BuildCommand>
@@ -130,6 +134,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>
