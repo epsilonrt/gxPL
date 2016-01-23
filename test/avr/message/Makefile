@@ -162,9 +162,10 @@ AVRDUDE_WRITE_EEPROM_ENABLE = OFF
 
 #---------------- Debugging Options ----------------
 
-# Set the DEBUG_UI to either gdb or insight.
-# DEBUG_UI = gdb
-DEBUG_UI = insight
+# Set the DEBUG_UI to either gdb, cgdb or insight.
+#DEBUG_UI = gdb
+DEBUG_UI = cgdb
+#DEBUG_UI = insight
 
 # Set the debugging back-end to either avarice, simulavr.
 DEBUG_BACKEND = avarice
@@ -172,6 +173,8 @@ DEBUG_BACKEND = avarice
 
 # When using avarice settings for the JTAG
 JTAG_DEV = usb
+
+AVARICE_OPT = --dragon
 
 #------------------------------------------------------------------------------
 ifeq ($(GXPL_ROOT),)

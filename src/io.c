@@ -196,21 +196,20 @@ gxPLIoUnregister (const char * iolayer) {
 /*constructor/destructor ==================================================== */
 
 // -----------------------------------------------------------------------------
-int __gxpl_init
+void __gxpl_init
 gxPLIoInit (void) {
 
   if (iDListInit (&iolist, prvIoDestroy) == 0) {
 
-    return iDListInitSearch (&iolist, prvIoKey, prvNameMatch);
+    (void) iDListInitSearch (&iolist, prvIoKey, prvNameMatch);
   }
-  return -1;
 }
 
 // -----------------------------------------------------------------------------
-int __gxpl_exit
+void __gxpl_exit
 gxPLIoExit (void) {
 
-  return iDListDestroy (&iolist);
+  (void) iDListDestroy (&iolist);
 }
 
 /* ========================================================================== */

@@ -62,6 +62,8 @@
         <Target Name="Fuse">make fuse</Target>
         <Target Name="Lock">make lock</Target>
         <Target Name="DistClean">make distclean</Target>
+        <Target Name="Ice">make debug-ice</Target>
+        <Target Name="Debug">make debug</Target>
         <RebuildCommand>make rebuild</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
         <BuildCommand>make DEBUG=ON</BuildCommand>

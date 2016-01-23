@@ -12,6 +12,8 @@
 #include "version-git.h"
 
 /* constants ================================================================ */
+#define TERM_PORT         "tty1"
+#define TERM_BAUDRATE     115200
 #define HBEAT_INTERVAL 5
 
 static const gxPLId source = {
@@ -24,7 +26,7 @@ static const gxPLId source = {
 #define test(t) do { \
     if (!(t)) { \
       fprintf_P (stderr, PSTR("line %d in %s: %d failed !\n"),  __LINE__, \
-               __FUNCTION__, test_count); \
+                 __FUNCTION__, test_count); \
       exit (-1); \
     } \
   } while (0)
@@ -36,10 +38,12 @@ static bool hasHub;
 static int test_count;
 static int msg_count;
 
+
 /* private functions ======================================================== */
 static void prvSignalHandler (int sig) ;
 static void prvMessageHandler (gxPLApplication * app, gxPLMessage * msg, void * p);
 static void prvHeartbeatMessageNew (void);
+static int iTermInit (void);
 
 /* main ===================================================================== */
 int
@@ -49,6 +53,8 @@ main (int argc, char **argv) {
   gxPLSetting * setting;
   char hello[] = ".";
 
+  iTermInit();
+  
   // Gets the available io layer list
   test_count++;
   iolist = gxPLIoLayerList();
@@ -56,7 +62,7 @@ main (int argc, char **argv) {
 
   // retrieved the requested configuration from the command line
   test_count++;
-  setting = gxPLSettingNew ("s0", "xbeezb", gxPLConnectViaHub);
+  setting = gxPLSettingNew ("tty0", "xbeezb", gxPLConnectViaHub);
   test (setting);
 
   // verify that the requested io layer is available
@@ -79,11 +85,11 @@ main (int argc, char **argv) {
   printf ("Starting test service on %s...\n", gxPLIoInterfaceGet (app));
   printf ("  listen on  %s", gxPLIoLocalAddrGet (app));
   if (gxPLIoInfoGet (app)->port >= 0) {
-    
+
     printf (":%d\n", gxPLIoInfoGet (app)->port);
   }
   else {
-    
+
     putchar ('\n');
   }
   printf ("  bcast  on  %s\n", gxPLIoBcastAddrGet (app));
@@ -103,6 +109,25 @@ main (int argc, char **argv) {
 
 
 /* private functions ======================================================== */
+
+// -----------------------------------------------------------------------------
+static int
+iTermInit (void) {
+  xSerialIos term_setting = {
+    .baud = TERM_BAUDRATE, .dbits = SERIAL_DATABIT_8, .parity = SERIAL_PARITY_NONE,
+    .sbits = SERIAL_STOPBIT_ONE, .flow = SERIAL_FLOW_NONE
+  };
+
+  FILE * tc = xFileOpen (TERM_PORT, O_RDWR | O_NONBLOCK, &term_setting);
+  if (!tc) {
+    return -1;
+  }
+  stdout = tc;
+  stdin = tc;
+  sei();
+  return 0;
+}
+
 #if 0
 // -----------------------------------------------------------------------------
 // signal handler

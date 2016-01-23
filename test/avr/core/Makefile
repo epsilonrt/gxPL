@@ -60,7 +60,7 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON
@@ -162,9 +162,10 @@ AVRDUDE_WRITE_EEPROM_ENABLE = OFF
 
 #---------------- Debugging Options ----------------
 
-# Set the DEBUG_UI to either gdb or insight.
-# DEBUG_UI = gdb
-DEBUG_UI = insight
+# Set the DEBUG_UI to either gdb, cgdb or insight.
+#DEBUG_UI = gdb
+DEBUG_UI = cgdb
+#DEBUG_UI = insight
 
 # Set the debugging back-end to either avarice, simulavr.
 DEBUG_BACKEND = avarice
@@ -172,6 +173,9 @@ DEBUG_BACKEND = avarice
 
 # When using avarice settings for the JTAG
 JTAG_DEV = usb
+
+AVARICE_OPT = --dragon  
+#AVARICE_OPT = --mkII --jtag-bitrate 2000
 
 #------------------------------------------------------------------------------
 ifeq ($(GXPL_ROOT),)

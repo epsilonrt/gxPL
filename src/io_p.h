@@ -27,10 +27,10 @@
 #define __gxplio_exit __attribute__ ((destructor(GXPLIO_PRIORITY)))
 
 #else /* __AVR__ defined */
-#define __gxpl_init __attribute__ ((section (".init5")))
-#define __gxpl_exit __attribute__ ((section (".fini5")))
-#define __gxplio_init __attribute__ ((section (".init7")))
-#define __gxplio_exit __attribute__ ((section (".fini7")))
+#define __gxpl_init __attribute__ ((naked)) __attribute__ ((section (".init5")))
+#define __gxpl_exit __attribute__ ((naked)) __attribute__ ((section (".fini5")))
+#define __gxplio_init __attribute__ ((naked)) __attribute__ ((section (".init7")))
+#define __gxplio_exit __attribute__ ((naked)) __attribute__ ((section (".fini7")))
 #endif  /* __AVR__ defined */
 
 /* structures =============================================================== */

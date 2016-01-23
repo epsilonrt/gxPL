@@ -759,17 +759,17 @@ ops = {
 /* public functions ========================================================= */
 
 // -----------------------------------------------------------------------------
-int __gxplio_init
+void __gxplio_init
 gxPLUdpInit (void) {
 
-  return gxPLIoRegister (IO_NAME, &ops);
+  (void) gxPLIoRegister (IO_NAME, &ops);
 }
 
 // -----------------------------------------------------------------------------
-int __gxplio_exit
+void __gxplio_exit
 gxPLUdpExit (void) {
 
-  return gxPLIoUnregister (IO_NAME);
+  (void) gxPLIoUnregister (IO_NAME);
 }
 
 #endif /* __unix__ defined */
