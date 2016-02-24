@@ -16,7 +16,7 @@
 #define test(t) do { \
     if (!t) { \
       fprintf_P (stderr, PSTR("line %d in %s: %d failed !\n"),  __LINE__, __FUNCTION__, test_count); \
-      exit (EXIT_FAILURE); \
+      exit (-1); \
     } \
   } while (0)
 
@@ -234,7 +234,7 @@ main (int argc, char **argv) {
   test (ret == 0);
   cstr = gxPLMessagePairGet(m, "command");
   test (cstr);
-  printf ("%s -> %s\n", buf, cstr);
+  printf (PSTR("%s -> %s\n"), buf, cstr);
   ret = strcmp (cstr, buf);
   test (ret == 0);
 
@@ -279,7 +279,7 @@ main (int argc, char **argv) {
   test_count++;
   str = gxPLMessageToString (m);
   test (str);
-  printf ("unicast message:\n%s", str);
+  printf (PSTR("unicast message:\n%s"), str);
   
   // Decode the message
   test_count++;
@@ -292,7 +292,7 @@ main (int argc, char **argv) {
   test_count++;
   char * str2 = gxPLMessageToString (m);
   test (str2);
-  printf ("received message:\n%s", str2);
+  printf (PSTR("received message:\n%s"), str2);
 
   test_count++;
   ret = strcmp (str1, str2);
@@ -317,7 +317,7 @@ main (int argc, char **argv) {
   test_count++;
   str = gxPLMessageToString (m);
   test (str);
-  printf ("broadcast message:\n%s", str);
+  printf (PSTR("broadcast message:\n%s"), str);
   
   // Decode the message
   test_count++;
@@ -330,7 +330,7 @@ main (int argc, char **argv) {
   test_count++;
   str2 = gxPLMessageToString (m);
   test (str2);
-  printf ("received message:\n%s", str2);
+  printf (PSTR("received message:\n%s"), str2);
 
   test_count++;
   ret = strcmp (str1, str2);
@@ -352,7 +352,7 @@ main (int argc, char **argv) {
   // Delete the message
   gxPLMessageDelete (m);
 
-  printf ("All tests (%d) were successful !\n", test_count);
+  printf (PSTR("All tests (%d) were successful !\n"), test_count);
   return 0;
 }
 /* ========================================================================== */

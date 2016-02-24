@@ -1,6 +1,11 @@
 /**
  * @file
  * Simple configurable xPL device device that sends a time update periodically
+ * The available options are:
+ *    -i / --interface xxx : interface or device used to access the network
+ *    -n / --net       xxx : hardware abstraction layer to access the network
+ *    -d / --debug         : enable debugging
+ *    -b / --baudrate      : serial baudrate (if iolayer use serial port)
  *
  * Copyright 2005 (c), Gerald R Duprey Jr
  * Copyright 2015 (c), Pascal JEAN aka epsilonRT

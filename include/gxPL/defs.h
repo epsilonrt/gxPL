@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <sysio/defs.h>
 #include <sysio/log.h>
+#include <sysio/dlist.h>
 #include <sysio/vector.h>
 #include <sysio/serial.h>
 #include <sysio/delay.h>

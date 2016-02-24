@@ -29,8 +29,7 @@ AVRIO_TOPDIR = $(AVRIO_ROOT)
 # Nom de la carte cible (voir le fichier avrio/boards.txt pour la liste)
 # Si BOARD est vide, il faut un fichier board.mk pour définir les propriétés de
 # la carte dans le répertoire où se trouve ce Makefile !
-#BOARD = UNO
-BOARD = XNET_NODE
+BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
@@ -60,7 +59,7 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON

@@ -96,10 +96,10 @@
       <File Name="include/gxPL/defs.h"/>
       <File Name="include/gxPL/io.h"/>
       <File Name="include/gxPL/message.h"/>
-      <File Name="include/gxPL/util.h"/>
       <File Name="include/gxPL/device.h"/>
       <File Name="include/gxPL/hub.h"/>
       <File Name="include/gxPL/bridge.h"/>
+      <File Name="include/gxPL/util.h"/>
     </VirtualDirectory>
     <File Name="include/gxPL.h"/>
   </VirtualDirectory>

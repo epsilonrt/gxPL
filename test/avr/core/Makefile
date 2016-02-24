@@ -29,8 +29,7 @@ AVRIO_TOPDIR = $(AVRIO_ROOT)
 # Nom de la carte cible (voir le fichier avrio/boards.txt pour la liste)
 # Si BOARD est vide, il faut un fichier board.mk pour définir les propriétés de
 # la carte dans le répertoire où se trouve ce Makefile !
-#BOARD = UNO
-BOARD = XNET_NODE
+BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------

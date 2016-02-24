@@ -142,9 +142,9 @@ prvBridgeSetting setting = {
 /* private functions ======================================================== */
 // -----------------------------------------------------------------------------
 static int
-prvBaudrateFromString (int * baudrate, const char * str) {
+prvBaudrateFromString (long * baudrate, const char * str) {
   char * endptr;
-  int b = strtol (str, &endptr, 10);
+  long b = strtol (str, &endptr, 10);
 
   if (*endptr != '\0') {
 

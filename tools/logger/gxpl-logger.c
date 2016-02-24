@@ -187,7 +187,7 @@ prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
   }
 
   // Source Info
-  fprintf (logfile, ", source = %s - %s. %s, target = ",
+  fprintf (logfile, ", source = %s-%s.%s, target = ",
            gxPLMessageSourceVendorIdGet (message),
            gxPLMessageSourceDeviceIdGet (message),
            gxPLMessageSourceInstanceIdGet (message));
@@ -199,7 +199,7 @@ prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
   }
   else {
 
-    fprintf (logfile, " %s - %s. %s",
+    fprintf (logfile, " %s-%s.%s",
              gxPLMessageTargetVendorIdGet (message),
              gxPLMessageTargetDeviceIdGet (message),
              gxPLMessageTargetInstanceIdGet (message));
