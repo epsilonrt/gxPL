@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <avr/version.h>
 #include <gxPL/message.h>
 #include <gxPL/util.h>
 
@@ -26,10 +27,14 @@ static int test_count;
 /* main ===================================================================== */
 int
 main (int argc, char **argv) {
-  int ret;
+  static volatile unsigned long libc_version;
+  static volatile int ret;
   gxPLMessage * m = NULL;
   char * str = NULL;
   const char * cstr = NULL;
+
+  libc_version = __AVR_LIBC_VERSION__;
+  test (libc_version >= 10800);
 
   test_count++;
   m = gxPLMessageNew (gxPLMessageTrigger);

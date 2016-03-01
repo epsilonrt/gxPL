@@ -30,6 +30,7 @@ AVRIO_TOPDIR = $(AVRIO_ROOT)
 # Si BOARD est vide, il faut un fichier board.mk pour définir les propriétés de
 # la carte dans le répertoire où se trouve ce Makefile !
 BOARD = DVK90CAN1_XBEE
+#BOARD = XNET_NODE
 
 # Configuration de AvrIO
 # -------------------------------
@@ -62,7 +63,7 @@ DEBUG_FORMAT = dwarf-2
 DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
-#DEBUG = ON
+DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
 #VIEW_GCC_LINE = ON
