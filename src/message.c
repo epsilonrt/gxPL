@@ -64,7 +64,7 @@ prvPairFromLine (char ** line) {
     if (pair) {
       return pair;
     }
-    PINFO ("unable to find a '=' in this line: %s", p);
+    PWARNING ("unable to find a '=' in this line: %s", p);
   }
   return NULL;
 }
@@ -108,7 +108,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
              (line == NULL) || (strlen (p) != 8)) {
 
           // The string does not contain a xPL Message !
-          PINFO ("Unknown message header '%s' - bad message", p);
+          PWARNING ("Unknown message header '%s' - bad message", p);
           m->iserror = 1;
           break;
         }
@@ -127,7 +127,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          PINFO ("Unknown message type '%s' - bad message", p);
+          PWARNING ("Unknown message type '%s' - bad message", p);
           m->iserror = 1;
           break;
         }
@@ -145,7 +145,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "{") != 0) {
 
-          PINFO ("incorrectly formatted message", p);
+          PWARNING ("incorrectly formatted message", p);
           m->iserror = 1;
           break;
         }
@@ -175,7 +175,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
             // invalid hop value
             gxPLPairDelete (pair);
-            PINFO ("invalid hop count");
+            PWARNING ("invalid hop count");
             m->iserror = 1;
             break;
           }
@@ -185,7 +185,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          PINFO ("unable to find hop count");
+          PWARNING ("unable to find hop count");
           m->iserror = 1;
           break;
         }
@@ -211,7 +211,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
             // illegal source value
             gxPLPairDelete (pair);
-            PINFO ("invalid source");
+            PWARNING ("invalid source");
             m->iserror = 1;
             break;
           }
@@ -221,7 +221,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          PINFO ("unable to find source");
+          PWARNING ("unable to find source");
           m->iserror = 1;
           break;
         }
@@ -250,7 +250,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
             if (gxPLIdFromString (&m->target, pair->value) != 0) {
 
               // illegal target value
-              PINFO ("invalid target");
+              PWARNING ("invalid target");
               gxPLPairDelete (pair);
               break;
             }
@@ -268,7 +268,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
         }
         else {
 
-          PINFO ("unable to find target");
+          PWARNING ("unable to find target");
           m->iserror = 1;
           break;
         }
@@ -285,7 +285,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "}") != 0) {
 
-          PINFO ("incorrectly formatted message", p);
+          PWARNING ("incorrectly formatted message", p);
           m->iserror = 1;
           break;
         }
@@ -303,19 +303,19 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
           class = strsep (&type, ".");
           if (type == NULL) {
 
-            PINFO ("unable to find a '.' in this line: %s", p);
+            PWARNING ("unable to find a '.' in this line: %s", p);
             m->iserror = 1;
             break;
           }
           if (gxPLMessageSchemaClassSet (m, class) != 0) {
 
-            PINFO ("invalid schema class");
+            PWARNING ("invalid schema class");
             m->iserror = 1;
             break;
           }
           if (gxPLMessageSchemaTypeSet (m, type) != 0) {
 
-            PINFO ("invalid schema type");
+            PWARNING ("invalid schema type");
             m->iserror = 1;
             break;
           }
@@ -339,7 +339,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "{") != 0) {
 
-          PINFO ("Message improperly formatted: %s", p);
+          PWARNING ("Message improperly formatted: %s", p);
           m->iserror = 1;
           break;
         }
@@ -360,7 +360,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
             gxPLPairDelete (pair);
           }
           m->iserror = 1;
-          PINFO ("unable to append a pair in the message body");
+          PWARNING ("unable to append a pair in the message body");
           break;
         }
         else {
@@ -380,7 +380,7 @@ gxPLMessageFromString (gxPLMessage * m, char * str) {
 
         if (strcmp (p, "}") != 0) {
 
-          PINFO ("Message improperly formatted: %s", p);
+          PWARNING ("Message improperly formatted: %s", p);
           m->iserror = 1;
           break;
         }

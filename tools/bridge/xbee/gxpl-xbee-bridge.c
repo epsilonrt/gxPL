@@ -2,11 +2,10 @@
  * @file
  * Implementation of an xPL Ethernet to XBee ZB (API without escape) Bridge using gxPLib
  *
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015-2016 (c), Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
-#include "config.h"
 #include <stdio.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -149,7 +148,7 @@ prvBaudrateFromString (long * baudrate, const char * str) {
   if (*endptr != '\0') {
 
     vLog (LOG_ERR, "bad value for baudrate %s, was setting to default (%d)",
-          str, DEFAULT_XBEE_BAUDRATE);
+          str, GXPL_DEFAULT_BAUDRATE);
     return -1;
   }
   *baudrate = b;
@@ -228,7 +227,7 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
           setting->in->xbee.ios.dbits = SERIAL_DATABIT_8;
           setting->in->xbee.ios.parity = SERIAL_PARITY_NONE;
           setting->in->xbee.ios.sbits = SERIAL_STOPBIT_ONE;
-          setting->in->xbee.ios.flow = DEFAULT_XBEE_FLOW;
+          setting->in->xbee.ios.flow = GXPL_DEFAULT_FLOW;
           setting->in->xbee.ios.flag = 0;
           setting->in->iosflag = 1;
           PDEBUG ("set baudrate to %d", setting->in->xbee.ios.baud);
@@ -309,7 +308,7 @@ prvPrintUsage (void) {
           "                 (default: ~/.gxpl/" DEFAULT_CONFIG_FILE ")\n");
 
   printf ("  -B baudrate  - use this baudrate for the XBee interface\n"
-          "                 (default: %d)\n", DEFAULT_XBEE_BAUDRATE);
+          "                 (default: %d)\n", GXPL_DEFAULT_BAUDRATE);
 
   printf ("  -p panid     - use this PAN ID for the Zigbee network\n"
           "                 (default: 0)\n");
@@ -317,7 +316,7 @@ prvPrintUsage (void) {
   printf ("  -m maxhop    - messages with hop count less than or equal to maxhop\n"
           "                 cross the bridge (default: 1)\n");
 
-  printf ("  -b           - enable broadcast for inside nework\n");
+  printf ("  -b           - enable broadcast for inside network\n");
   printf ("  -D           - do not daemonize -- run from the console\n");
   printf ("  -d           - enable debugging messages\n");
   printf ("  -h           - print this message\n\n");

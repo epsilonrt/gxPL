@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <avrio/xbee.h>
 #include <avrio/task.h>
+#include <avrio/mutex.h>
 #include <gxPL/util.h>
 
 #define GXPL_IO_INTERNALS
@@ -34,12 +35,24 @@ typedef struct xbeezb_data {
   int max_payload;
 
   volatile int fid; // frame id
+
+  xTaskHandle task;
+  xMutex mutex;
 } xbeezb_data;
 
 /* macros =================================================================== */
 #define dp ((xbeezb_data *)io->pdata)
 
 /* private functions ======================================================== */
+
+// -----------------------------------------------------------------------------
+static void
+prvAlarmTask (xTaskHandle t) {
+  xbeezb_data * d = (xbeezb_data *) pvTaskGetUserData (t);
+
+  vMutexUnlock (&d->mutex);
+}
+
 
 // -----------------------------------------------------------------------------
 // gxPLNetFamilyZigbee16: xx:xx
@@ -52,13 +65,13 @@ prvZbAddrToString (uint8_t * zbaddr, uint8_t zbaddr_size) {
 
   if (zbaddr_size == 8) {
 
-    sprintf (buffer, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
-             zbaddr[0], zbaddr[1], zbaddr[2], zbaddr[3],
-             zbaddr[4], zbaddr[5], zbaddr[6], zbaddr[7]);
+    sprintf_P (buffer, PSTR ("%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x"),
+               zbaddr[0], zbaddr[1], zbaddr[2], zbaddr[3],
+               zbaddr[4], zbaddr[5], zbaddr[6], zbaddr[7]);
   }
   else if (zbaddr_size == 2) {
 
-    sprintf (buffer, "%02x:%02x", zbaddr[0], zbaddr[1]);
+    sprintf_P (buffer, PSTR ("%02x:%02x"), zbaddr[0], zbaddr[1]);
   }
   return buffer;
 }
@@ -103,11 +116,12 @@ prvZbAddrFromString (gxPLIoAddr * zbaddr, const char * str) {
 static void
 prvSetDefaultIos (gxPLIo * io) {
   static const xSerialIos default_ios  = {
-    .baud = DEFAULT_XBEE_BAUDRATE,
+    .baud = GXPL_DEFAULT_BAUDRATE,
     .dbits = SERIAL_DATABIT_8,
     .parity = SERIAL_PARITY_NONE,
     .sbits = SERIAL_STOPBIT_ONE,
-    .flow = DEFAULT_XBEE_FLOW
+    .flow = GXPL_DEFAULT_FLOW,
+    .eol = SERIAL_BINARY
   };
   memcpy (&io->setting->xbee.ios, &default_ios, sizeof (xSerialIos));
 }
@@ -115,7 +129,7 @@ prvSetDefaultIos (gxPLIo * io) {
 // -----------------------------------------------------------------------------
 static void
 prvSetDefaultIface (gxPLIo * io) {
-  const char default_iface[]  = "ser";
+  const char default_iface[]  = DEFAULT_XBEE_PORT;
 
   strcpy (io->setting->iface, default_iface);
 }
@@ -181,26 +195,49 @@ prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 }
 
 // -----------------------------------------------------------------------------
+static void
+prvAlarm (gxPLIo * io, unsigned int timeout_ms) {
+
+  vTaskStop (dp->task);
+  vMutexUnlock (&dp->mutex);
+  vMutexLock (&dp->mutex);
+
+  if (timeout_ms > 0) {
+
+    vTaskSetInterval (dp->task, xTaskConvertTicks (timeout_ms));
+    vTaskStart (dp->task);
+  }
+}
+
+// -----------------------------------------------------------------------------
+static int
+prvWaitPacket (gxPLIo * io, xXBeePkt ** pkt, unsigned int timeout_ms) {
+
+  if (*pkt == NULL) {
+    int ret = 0;
+
+    prvAlarm (io, timeout_ms);
+    while ( (*pkt == NULL) && (ret == 0) && (xMutexTryLock (&dp->mutex) != 0)) {
+
+      // loop until AT response was received (or timeout or error)
+      ret = iXBeePoll (dp->xbee, 0);
+    }
+  }
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
 static int
 prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
-  unsigned long now, end;
   int ret = 0;
 
-  gxPLTimeMs (&now);
-  end = now + timeout_ms;
-
-  while ( (now < end) && (dp->rxpkt == NULL) && (ret == 0)) {
-
-    // loop until AT response was received (or timeout or error)
-    ret = iXBeePoll (dp->xbee, 0);
-    gxPLTimeMs (&now);
-  }
+  ret = prvWaitPacket (io, &dp->rxpkt, timeout_ms);
 
   if (ret == 0) {
 
     if (dp->rxpkt) {
 
-      *available_data = iXBeePktDataLen (dp->rxpkt);
+      *available_data = iXBeePktDataLen (dp->rxpkt) - dp->bytes_read;
     }
     else {
 
@@ -216,8 +253,7 @@ prvSendLocalAt (gxPLIo * io,
                 const char cmd[],
                 const uint8_t * params,
                 uint8_t param_len,
-                int timeout_ms) {
-  unsigned long now, end;
+                unsigned int timeout_ms) {
   int ret;
 
   // Clear previous AT response
@@ -226,15 +262,7 @@ prvSendLocalAt (gxPLIo * io,
 
   int frame_id = iXBeeSendAt (dp->xbee, cmd, params, param_len);
 
-  gxPLTimeMs (&now);
-  end = now + timeout_ms;
-  do {
-
-    // loop until AT response was received (or timeout)
-    ret = iXBeePoll (dp->xbee, 0);
-    gxPLTimeMs (&now);
-  }
-  while ( (now < end) && (dp->atpkt == NULL) && (ret == 0));
+  ret = prvWaitPacket (io, &dp->atpkt, timeout_ms);
 
   if (ret == 0) {
 
@@ -316,8 +344,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       prvSetDefaultIface (io);
     }
 
-#warning TODO broche de RESET XBee
-    xbee = xXBeeNew (XBEE_SERIES_S2, NULL);
+    xbee = xXBeeNew (XBEE_SERIES_S2, io->setting->xbee.reset);
     assert (xbee);
 
     if (iXBeeOpen (xbee, io->setting->iface, &io->setting->xbee.ios) != 0) {
@@ -332,6 +359,25 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     dp->xbee = xbee;
     vXBeeSetUserContext (xbee, io);
     vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
+
+    dp->mutex = MUTEX_INITIALIZER;
+    dp->task = xTaskCreate (0, prvAlarmTask);
+    assert (dp->task != AVRIO_KERNEL_ERROR);
+
+    if ( (io->setting->xbee.reset) || (io->setting->xbee.sw_reset)) {
+
+      if (io->setting->xbee.sw_reset) {
+        // Software RESET FR
+        ret = prvSendLocalAt (io, XBEE_CMD_RESET_SOFT, NULL, 0, 1000);
+        if (ret != 0) {
+
+          PERROR ("XBee read %d", ret);
+          gxPLXBeeZbClose (io);
+          return -1;
+        }
+      }
+      delay_ms (3000);
+    }
 
     // Gets and checks firmware version
     ret = prvSendLocalAt (io, XBEE_CMD_VERS_FIRMWARE, NULL, 0, 1000);
@@ -431,7 +477,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       ret = iXBeePktParamGetULongLong (&panid, dp->atpkt, 0);
       if (ret == 0) {
 
-        PINFO ("Starting PAN ID 0x%lu", panid);
+        PINFO ("Operating PAN ID: %lu", panid);
       }
     }
 
@@ -447,7 +493,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     if (iXBeePktParamGetUShort (&word, dp->atpkt, 0) == 0) {
 
       dp->max_payload = word;
-      PDEBUG ("RF payload %d bytes", dp->max_payload);
+      PDEBUG ("RF payload: %d bytes max.", dp->max_payload);
     }
 
     vXBeeSetCB (dp->xbee, XBEE_CB_DATA, prvZbDataCB);
@@ -468,7 +514,7 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
   if (dp->rxpkt) {
     uint8_t * data = pucXBeePktData (dp->rxpkt);
 
-    int bytes_to_read = MIN (iXBeePktDataLen (dp->rxpkt), count);
+    int bytes_read = MIN (iXBeePktDataLen (dp->rxpkt), count);
     if (source)  {
 
       // Get and copy the source address
@@ -479,16 +525,16 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
       memcpy (source->addr, pucXBeePktAddrSrc64 (dp->rxpkt), source->addrlen);
     }
 
-    memcpy (buffer, &data[dp->bytes_read], bytes_to_read);
-    dp->bytes_read += bytes_to_read;
+    memcpy (buffer, &data[dp->bytes_read], bytes_read);
+    dp->bytes_read += bytes_read;
 
     if (dp->bytes_read >= iXBeePktDataLen (dp->rxpkt)) {
-
+      // the received packet has been read, you can delete it !
       vXBeeFreePkt (dp->xbee, dp->rxpkt);
       dp->rxpkt = NULL;
       dp->bytes_read = 0;
     }
-    return bytes_to_read;
+    return bytes_read;
   }
   return 0;
 }
@@ -636,12 +682,20 @@ ops = {
 };
 
 /* public functions ========================================================= */
+#include <avrio/led.h>
 
 // -----------------------------------------------------------------------------
 void __gxplio_init
 gxPLXBeeZbInit (void) {
-
+#ifdef DEBUG
+  vLedInit();
+  vLedSet (LED_LED0);
+  if (gxPLIoRegister (IO_NAME, &ops) == 0) {
+    vLedSet (LED_LED1);
+  }
+#else
   (void) gxPLIoRegister (IO_NAME, &ops);
+#endif
 }
 
 // -----------------------------------------------------------------------------

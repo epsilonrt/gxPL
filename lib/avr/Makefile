@@ -7,7 +7,7 @@
 # Target Name (without extension).
 TARGET = gxPL
 
-# Relative path from the root directory of the user's project
+# Chemin relatif du répertoire racine du projet de l'utilisateur
 PROJECT_TOPDIR = ../..
 
 # User Project
@@ -30,7 +30,8 @@ AVRIO_TOPDIR = $(AVRIO_ROOT)
 # Si BOARD est vide, il faut un fichier board.mk pour définir les propriétés de
 # la carte dans le répertoire où se trouve ce Makefile !
 #BOARD = UNO
-BOARD = XNET_NODE
+#BOARD = XNET_NODE
+BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
@@ -60,7 +61,7 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON
@@ -118,13 +119,13 @@ EXTRA_LIBDIRS =
 EXTRA_LIBS =
 
 # STANDARD, MIN or FLOAT
-PRINTF_VERSION = STANDARD
+PRINTF_VERSION = FLOAT
 
 # STANDARD, MIN or FLOAT
 SCANF_VERSION = STANDARD
 
 # ON/OFF
-MATH_LIB_ENABLE = OFF
+MATH_LIB_ENABLE = ON
 
 #---------------- Additional Compiler/Assembler Options ----------------
 CFLAGS   += -fno-strict-aliasing
@@ -134,86 +135,50 @@ ASFLAGS  +=
 LDFLAGS  +=
 
 #---------------- Install Options ----------------
-prefix=/usr/local/lib/avr
+#prefix=/usr/local/lib/avr
+prefix=$(PROJECT_TOPDIR)/local/lib/avr
 
 INSTALL_LIBDIR=$(prefix)/lib
 INSTALL_INCDIR=$(prefix)/include
 
-#---------------- Programming Options (avrdude) ----------------
-# Programming hardware
-# Type: avrdude -c ?
-# to get a full listing.
-#
-# STK200 progcd rammer on parallel port
-#AVRDUDE_PROGRAMMER = stk200
-#AVRDUDE_PORT = lpt1
-
-# JTAG ICE MkII
-#AVRDUDE_PROGRAMMER  = jtag2
-#AVRDUDE_PORT = usb
-
-# AVR Dragon
-AVRDUDE_PROGRAMMER = dragon_isp
-#AVRDUDE_PROGRAMMER = dragon_jtag
-#AVRDUDE_PROGRAMMER = dragon_dw
-AVRDUDE_PORT = usb
-
-# Arduino OnBoard Programmer
-#AVRDUDE_PROGRAMMER = arduino
-#AVRDUDE_PORT = /dev/ttyACM0
-#AVRDUDE_PORT = COM4
-
-# ON/OFF
-AVRDUDE_WRITE_EEPROM_ENABLE = OFF
-
-#---------------- Debugging Options ----------------
-
-# Set the DEBUG_UI to either gdb, cgdb or insight.
-#DEBUG_UI = gdb
-DEBUG_UI = cgdb
-#DEBUG_UI = insight
-
-# Set the debugging back-end to either avarice, simulavr.
-DEBUG_BACKEND = avarice
-#DEBUG_BACKEND = simulavr
-
-# When using avarice settings for the JTAG
-JTAG_DEV = usb
-
-AVARICE_OPT = --dragon
-
 #------------------------------------------------------------------------------
+MSG_INSTALL = [INSTALL]
+MSG_UNINSTALL = [UNINSTALL]
+
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT := $(PROJECT_TOPDIR)
 endif
+
+all: lib
 
 include $(GXPL_ROOT)/gxpl.mk
 include $(GXPL_ROOT)/avrio.mk
 
 #---------------- Specific targets ----------------
 install: uninstall lib
-# static and shared library
-	@echo "$(MSG_INSTALL) $(TARGET) lib and headers in $(prefix)"
+# static library
+	@-install -d -m 0755 $(INSTALL_LIBDIR)/
+	@echo "$(MSG_INSTALL) $(TARGET) lib and headers in $(prefix) $(DEBUG)"
 	@-install -m 0755 $(TARGET_LIB_PATH).a $(INSTALL_LIBDIR)
 ifeq ($(DEBUG),)
-	@avr-strip --strip-unneeded $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).a
+	@echo "          Release version, discard debug symbols from library..."
+	@avr-strip --strip-unneeded $(INSTALL_LIBDIR)/lib$(TARGET).a
+else
+	@echo "          Debug version, keep debug symbols from library..."
 endif
-	@-install -m 0755 $(TARGET_LIB_PATH).so $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION)
-ifeq ($(DEBUG),)
-	@avr-strip --strip-unneeded $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION)
-endif
-	@ln -f -s $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION) $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so
 
 # header files
 	@-install -d -m 0755 $(INSTALL_INCDIR)/
 	@-install -d -m 0755 $(INSTALL_INCDIR)/gxPL
 	@-install -m 0644 $(GXPL_ROOT)/include/gxPL.h $(INSTALL_INCDIR)
-	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/*.h $(INSTALL_INCDIR)/gxPL
+	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/defs.h $(INSTALL_INCDIR)/gxPL
+	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/message.h $(INSTALL_INCDIR)/gxPL
+	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/util.h $(INSTALL_INCDIR)/gxPL
+	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/io.h $(INSTALL_INCDIR)/gxPL
+	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/device.h $(INSTALL_INCDIR)/gxPL
 
 uninstall:
 	@echo "$(MSG_UNINSTALL) $(TARGET) lib and headers from $(prefix)"
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.*
 	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).a
 	@-rm -f $(INSTALL_INCDIR)/gxPL.h
 	@-rm -fr $(INSTALL_INCDIR)/gxPL

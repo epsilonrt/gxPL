@@ -23,7 +23,7 @@
 #endif
 
 /* private variables ======================================================== */
-static uint8_t ucBufferEe[DEFAULT_AVR8_EEFILE_MAX] EEMEM;
+static uint8_t ucBufferEe[DEFAULT_CONFIG_SIZE_MAX] EEMEM;
 
 /* api functions ============================================================ */
 xVector *

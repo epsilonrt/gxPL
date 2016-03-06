@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target Name (without extension).
-TARGET = gxpl-test-avr-core
+TARGET = gxpl-test-avr-io
 
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
@@ -76,7 +76,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = $(TARGET).c avrio/memdebug.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =

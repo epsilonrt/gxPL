@@ -18,6 +18,9 @@
       fprintf (stderr, "line %d in %s: test %d failed !\n",  __LINE__, __FUNCTION__, test_count); \
       exit (EXIT_FAILURE); \
     } \
+    else { \
+      printf ("test %d success !\n", test_count); \
+    } \
   } while (0)
 
 /* private variables ======================================================== */
@@ -230,7 +233,7 @@ main (int argc, char **argv) {
   test_count++;
   char buf[64];
   sprintf (buf, "HelloWorld0x%X---%s", 1234, "Ok");
-  ret = gxPLMessagePairAddFormat (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
+  ret = gxPLMessagePairSetFormat (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
   test (ret == 0);
   cstr = gxPLMessagePairGet(m, "command");
   test (cstr);

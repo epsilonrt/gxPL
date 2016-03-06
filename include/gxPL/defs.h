@@ -18,6 +18,9 @@
 #include <sysio/vector.h>
 #include <sysio/serial.h>
 #include <sysio/delay.h>
+#if defined(ARCH_ARM_RASPBERRYPI)
+#include <sysio/doutput.h>
+#endif
 #elif defined(__AVR__)
 #include <avrio/defs.h>
 #include <avrio/vector.h>
@@ -101,6 +104,16 @@ typedef struct _gxPLBridge gxPLBridge;
  * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
 #define GXPL_GETOPT "i:n:b:dD"
+
+/**
+ * @brief default baudrate for serial iolayer
+ */
+#define GXPL_DEFAULT_BAUDRATE             38400
+
+/**
+ * @brief default baudrate for serial iolayer
+ */
+#define GXPL_DEFAULT_FLOW                 SERIAL_FLOW_RTSCTS
 
 /**
  * @brief xPL Connection mode
@@ -201,8 +214,14 @@ typedef struct _gxPLIoXBeeSetting {
     struct {
       uint8_t coordinator: 1;
       uint8_t new_panid: 1;
+      uint8_t sw_reset: 1;
     };
   };
+#if defined(__AVR__)
+  xDPin * reset;
+#elif defined(ARCH_ARM_RASPBERRYPI)
+  xDout * reset;
+#endif
 } gxPLIoXBeeSetting;
 
 /**

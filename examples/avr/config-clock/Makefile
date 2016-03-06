@@ -8,7 +8,10 @@
 TARGET = gxpl-config-clock-avr
 
 # Relative path from the root directory of the user's project
-PROJECT_TOPDIR = ../..
+PROJECT_TOPDIR = ../../..
+
+# Default path where the library has been installed
+PREFIX ?= $(PROJECT_TOPDIR)/local/lib/avr
 
 # User Project
 # USER_PROJECT = GXPL
@@ -33,7 +36,7 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = 
+AVRIO_CONFIG  = __ASSERT_USE_STDERR
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -61,13 +64,13 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
-DEBUG = ON
+#DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
-VIEW_GCC_LINE = ON
+#VIEW_GCC_LINE = ON
 
 # Disable the deletion of variables and functions "unnecessary"
 # The linker checks of a function or variable is called, if it is not the case, 
@@ -105,9 +108,12 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/avr
 
 #---------------- Library Options ----------------
+# Enable linking with gxPL library (ON/OFF)
+#USE_GXPL_LIB = ON
+
 # List any extra directories to look for libraries here.
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
@@ -164,7 +170,8 @@ AVRDUDE_WRITE_EEPROM_ENABLE = OFF
 #---------------- Debugging Options ----------------
 
 # Set the DEBUG_UI to either gdb or insight.
-DEBUG_UI = gdb
+#DEBUG_UI = gdb
+DEBUG_UI = cgdb
 #DEBUG_UI = insight
 
 # Set the debugging back-end to either avarice, simulavr.
@@ -174,7 +181,9 @@ DEBUG_BACKEND = avarice
 # When using avarice settings for the JTAG
 JTAG_DEV = usb
 
-AVARICE_OPT = --dragon
+AVARICE_OPT = --dragon 
+#AVARICE_OPT = --mkII
+AVARICE_BITRATE = --jtag-bitrate 2MHz
 
 #------------------------------------------------------------------------------
 ifeq ($(GXPL_ROOT),)

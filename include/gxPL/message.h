@@ -404,6 +404,15 @@ int gxPLMessagePairSet (gxPLMessage * message, const char * name, const char * v
 int gxPLMessagePairAddFormat (gxPLMessage * message, const char * name, const char * format, ...);
 
 /**
+ * @brief Sets the value according to a format 
+ * @param message pointer to the message
+ * @param name the name
+ * @param format format as described in the sprintf() function man page
+ * @return 0, -1 if an error occurs
+ */
+int gxPLMessagePairSetFormat (gxPLMessage * message, const char * name, const char * format, ...);
+
+/**
  * @brief Set a series of NameValue pairs for a message
  * @param message pointer to the message
  * @return 0, -1 if an error occurs

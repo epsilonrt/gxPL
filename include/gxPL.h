@@ -13,8 +13,10 @@
 #include <gxPL/message.h>
 #include <gxPL/util.h>
 #include <gxPL/device.h>
+#ifndef  __AVR__
 #include <gxPL/hub.h>
 #include <gxPL/bridge.h>
+#endif
 
 __BEGIN_C_DECLS
 /* ========================================================================== */
@@ -389,18 +391,26 @@ const char * gxPLIoLayerGet (const gxPLApplication * app);
  * It takes a parameter specifying a request code; the effect of a call depends
  * completely on the request code. Request codes are often device-specific.
  *
+ * -  \b gxPLIoFuncPoll
+ *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncPoll, int * available_bytes, int timeout_ms)
+ *    returns available bytes for the last received packet
+ * 
  * -  \b gxPLIoFuncGetBcastAddr
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetBcastAddr, gxPLIoAddr * bcast_addr)
  *    returns broadcast address used
+ * 
  * -  \b gxPLIoFuncGetNetInfo
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncGetNetInfo, gxPLIoAddr * local_addr)
  *    returns network informations
+ * 
  * -  \b gxPLIoFuncNetAddrToString
  *    \code int gxPLIoCtl (gxPLApplication * app, gxPLIoFuncNetAddrToString, gxPLIoAddr * net_addr, char ** str_addr)
  *    converts a network address in a gxPLIoAddr to a dots-and-numbers format string
+ * 
  * -  \b gxPLIoFuncNetAddrFromString
  *    \code int gxPLIoCtl (gxPLIo * io, gxPLIoFuncNetAddrFromString, gxPLIoAddr * net_addr, const char * str_addr)
  *    converts from a dots-and-numbers string into a gxPLIoAddr
+ * 
  * -  \b gxPLIoFuncGetLocalAddrList
  *    \code int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddrList, const xVector ** addr_list)
  *    returns binded adresses list

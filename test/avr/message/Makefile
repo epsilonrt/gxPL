@@ -10,6 +10,9 @@ TARGET = gxpl-test-avr-message
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
 
+# Default path where the library has been installed
+PREFIX ?= $(PROJECT_TOPDIR)/local/lib/avr
+
 # User Project
 # USER_PROJECT = GXPL
 
@@ -34,7 +37,8 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = 
+AVRIO_CONFIG  = AVRIO_LOGFILE=stdout
+AVRIO_CONFIG += AVRIO_LOGLEVEL=LOG_DEBUG
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -63,7 +67,7 @@ DEBUG_FORMAT = dwarf-2
 DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
-DEBUG = ON
+#DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
 #VIEW_GCC_LINE = ON
@@ -104,27 +108,30 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/avr
 
 #---------------- Library Options ----------------
+# Enable linking with gxPL library (ON/OFF)
+#USE_GXPL_LIB = ON
+
 # List any extra directories to look for libraries here.
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_LIBDIRS =
+EXTRA_LIBDIRS = 
 
 # List any extra libraries here.
 #     Each library must be seperated by a space.
 EXTRA_LIBS =
 
 # STANDARD, MIN or FLOAT
-PRINTF_VERSION = STANDARD
+PRINTF_VERSION = FLOAT
 
 # STANDARD, MIN or FLOAT
 SCANF_VERSION = STANDARD
 
 # ON/OFF
-MATH_LIB_ENABLE = OFF
+MATH_LIB_ENABLE = ON
 
 #---------------- Additional Compiler/Assembler Options ----------------
 CFLAGS   += -fno-strict-aliasing
@@ -147,8 +154,8 @@ LDFLAGS  +=
 #AVRDUDE_PORT = usb
 
 # AVR Dragon
-AVRDUDE_PROGRAMMER = dragon_isp
-#AVRDUDE_PROGRAMMER = dragon_jtag
+#AVRDUDE_PROGRAMMER = dragon_isp
+AVRDUDE_PROGRAMMER = dragon_jtag
 #AVRDUDE_PROGRAMMER = dragon_dw
 AVRDUDE_PORT = usb
 

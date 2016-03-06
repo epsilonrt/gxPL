@@ -104,11 +104,11 @@ prvZbAddrFromString (gxPLIoAddr * zbaddr, const char * str) {
 static void
 prvSetDefaultIos (gxPLIo * io) {
   const xSerialIos default_ios  = {
-    .baud = DEFAULT_XBEE_BAUDRATE,
+    .baud = GXPL_DEFAULT_BAUDRATE,
     .dbits = SERIAL_DATABIT_8,
     .parity = SERIAL_PARITY_NONE,
     .sbits = SERIAL_STOPBIT_ONE,
-    .flow = DEFAULT_XBEE_FLOW,
+    .flow = GXPL_DEFAULT_FLOW,
     .flag = 0
   };
   memcpy (&io->setting->xbee.ios, &default_ios, sizeof (xSerialIos));
@@ -253,7 +253,7 @@ prvIoPoll (gxPLIo * io, int * available_data, int timeout_ms) {
 
     if (dp->rxpkt) {
 
-      *available_data = iXBeePktDataLen (dp->rxpkt);
+      *available_data = iXBeePktDataLen (dp->rxpkt) - dp->bytes_read;
     }
     else {
 
@@ -517,7 +517,7 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
   if (dp->rxpkt) {
     uint8_t * data = pucXBeePktData (dp->rxpkt);
 
-    int bytes_to_read = MIN (iXBeePktDataLen (dp->rxpkt), count);
+    int bytes_read = MIN (iXBeePktDataLen (dp->rxpkt), count);
     if (source)  {
 
       // Get and copy the source address
@@ -528,8 +528,8 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
       memcpy (source->addr, pucXBeePktAddrSrc64 (dp->rxpkt), source->addrlen);
     }
 
-    memcpy (buffer, &data[dp->bytes_read], bytes_to_read);
-    dp->bytes_read += bytes_to_read;
+    memcpy (buffer, &data[dp->bytes_read], bytes_read);
+    dp->bytes_read += bytes_read;
 
     if (dp->bytes_read >= iXBeePktDataLen (dp->rxpkt)) {
 
@@ -537,7 +537,7 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
       dp->rxpkt = NULL;
       dp->bytes_read = 0;
     }
-    return bytes_to_read;
+    return bytes_read;
   }
   return 0;
 }

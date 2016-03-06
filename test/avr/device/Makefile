@@ -107,6 +107,9 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 EXTRA_INCDIRS =
 
 #---------------- Library Options ----------------
+# Enable linking with gxPL library (ON/OFF)
+USE_GXPL_LIB = ON
+
 # List any extra directories to look for libraries here.
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.

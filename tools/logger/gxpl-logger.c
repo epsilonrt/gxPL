@@ -15,7 +15,6 @@
 
 #include <gxPL.h>
 #include "version-git.h"
-#include "config.h"
 
 /* constants ================================================================ */
 #define LOGGER_VERSION VERSION_SHORT

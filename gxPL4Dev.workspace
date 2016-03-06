@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="gxPL4Dev" Database="">
+<CodeLite_Workspace Name="gxPL4Dev" Database="" SWTLW="No">
   <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
@@ -11,7 +11,16 @@
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
   <Project Name="gxpl-test-avr-core" Path="test/avr/core/gxpl-test-avr-core.project" Active="No"/>
   <Project Name="gxpl-test-avr-device" Path="test/avr/device/gxpl-test-avr-device.project" Active="No"/>
-  <Project Name="gxpl-test-avr-message" Path="test/avr/message/gxpl-test-avr-message.project" Active="Yes"/>
+  <Project Name="gxpl-test-avr-message" Path="test/avr/message/gxpl-test-avr-message.project" Active="No"/>
+  <Project Name="gxpl-clock-avr" Path="examples/avr/clock/gxpl-clock-avr.project" Active="No"/>
+  <Project Name="gxpl-config-clock-avr" Path="examples/avr/config-clock/gxpl-config-clock-avr.project" Active="No"/>
+  <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
+  <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
+  <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="Yes"/>
+  <Project Name="gxpl-test-avr-io" Path="test/avr/io/gxpl-test-avr-io.project" Active="No"/>
+  <Project Name="gxpl-test-io" Path="test/io/gxpl-test-io.project" Active="No"/>
+  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
+  <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -26,6 +35,15 @@
       <Project Name="gxpl-test-avr-core" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-message" ConfigName="Debug"/>
+      <Project Name="gxpl-clock-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-clock" ConfigName="Debug"/>
+      <Project Name="gxpl-config-clock" ConfigName="Debug"/>
+      <Project Name="gxpl-xbee-bridge" ConfigName="Debug"/>
+      <Project Name="gxpl-test-avr-io" ConfigName="Debug"/>
+      <Project Name="gxpl-test-io" ConfigName="Debug"/>
+      <Project Name="gxpl-tools" ConfigName="Debug"/>
+      <Project Name="gxpl-examples" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -40,6 +58,15 @@
       <Project Name="gxpl-test-avr-core" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-message" ConfigName="Release"/>
+      <Project Name="gxpl-clock-avr" ConfigName="Release"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Release"/>
+      <Project Name="gxpl-clock" ConfigName="Release"/>
+      <Project Name="gxpl-config-clock" ConfigName="Release"/>
+      <Project Name="gxpl-xbee-bridge" ConfigName="Release"/>
+      <Project Name="gxpl-test-avr-io" ConfigName="Release"/>
+      <Project Name="gxpl-test-io" ConfigName="Release"/>
+      <Project Name="gxpl-tools" ConfigName="Release"/>
+      <Project Name="gxpl-examples" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

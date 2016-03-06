@@ -126,6 +126,7 @@ gxPLIoIoCtl (gxPLIo * io, int c, va_list ap) {
 }
 
 /* internal public functions ================================================ */
+
 // -----------------------------------------------------------------------------
 xVector *
 gxPLIoLayerList (void) {

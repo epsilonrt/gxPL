@@ -99,7 +99,7 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
       setting->xbee.ios.dbits = SERIAL_DATABIT_8;
       setting->xbee.ios.parity = SERIAL_PARITY_NONE;
       setting->xbee.ios.sbits = SERIAL_STOPBIT_ONE;
-      setting->xbee.ios.flow = DEFAULT_XBEE_FLOW;
+      setting->xbee.ios.flow = GXPL_DEFAULT_FLOW;
       setting->xbee.ios.flag = 0;
       setting->iosflag = 1;
     }

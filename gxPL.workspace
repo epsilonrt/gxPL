@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="gxPL" Database="" SWTLW="No">
-  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
+  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="Yes"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
-  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="Yes"/>
+  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
   <Project Name="gxpl-logger" Path="tools/logger/gxpl-logger.project" Active="No"/>
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
@@ -12,13 +12,14 @@
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
   <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
-  <Project Name="gxpl-config-clock-avr" Path="examples/config-clock-avr/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-template" Path="examples/template/gxpl-template.project" Active="No"/>
   <Project Name="git-version" Path="util/git-version/git-version.project" Active="No"/>
   <Project Name="gxpl-prj" Path="util/gxpl-prj/gxpl-prj.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="script/init.d/hub/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge-service" Path="script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
   <Project Name="doc" Path="doc/doc.project" Active="No"/>
+  <Project Name="gxpl-config-clock-avr" Path="examples/avr/config-clock/gxpl-config-clock-avr.project" Active="No"/>
+  <Project Name="gxpl-clock-avr" Path="examples/avr/clock/gxpl-clock-avr.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="gxPLib" ConfigName="Debug"/>
@@ -38,6 +39,8 @@
       <Project Name="git-version" ConfigName="Debug"/>
       <Project Name="gxpl-prj" ConfigName="Debug"/>
       <Project Name="doc" ConfigName="Debug"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-clock-avr" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="gxPLib" ConfigName="Release"/>
@@ -57,6 +60,8 @@
       <Project Name="git-version" ConfigName="Release"/>
       <Project Name="gxpl-prj" ConfigName="Release"/>
       <Project Name="doc" ConfigName="Release"/>
+      <Project Name="gxpl-config-clock-avr" ConfigName="Release"/>
+      <Project Name="gxpl-clock-avr" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

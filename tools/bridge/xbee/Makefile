@@ -70,7 +70,7 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/unix
 
 #---------------- Library Options ----------------
 
@@ -109,7 +109,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-#GXPL_DEBUG_TEST = ON
+GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)

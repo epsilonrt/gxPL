@@ -22,12 +22,12 @@
 void
 gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   
-  strcpy (setting->iolayer, DEFAULT_AVR8_IO_LAYER);
-  setting->xbee.ios.baud = DEFAULT_XBEE_BAUDRATE;
+  strcpy (setting->iolayer, DEFAULT_IO_LAYER);
+  setting->xbee.ios.baud = GXPL_DEFAULT_BAUDRATE;
   setting->xbee.ios.dbits = SERIAL_DATABIT_8;
   setting->xbee.ios.parity = SERIAL_PARITY_NONE;
   setting->xbee.ios.sbits = SERIAL_STOPBIT_ONE;
-  setting->xbee.ios.flow = DEFAULT_XBEE_FLOW;
+  setting->xbee.ios.flow = GXPL_DEFAULT_FLOW;
   setting->iosflag = 1;
 }
 

@@ -71,7 +71,7 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/unix
 
 #---------------- Library Options ----------------
 
@@ -92,7 +92,7 @@ EXTRA_LIBS =
 MATH_LIB_ENABLE = ON
 
 # Enable linking with  sysio library (ON/OFF)
-USE_SYSIO_LIB = OFF
+USE_SYSIO_LIB = ON
 
 # Compiler flag to set the C Standard level.
 

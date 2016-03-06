@@ -1,107 +1,76 @@
 ###############################################################################
-# Copyright © 2015 Pascal JEAN aka epsilonRT                                  #
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 
-# Target Name (without extension).
-TARGET = gxPL
+# Target file name (without extension).
+TARGET = gxpl-test-io
 
-# Choix de l'architecture matérielle du système
+# Relative path of the project root directory
+PROJECT_TOPDIR = ../..
+
+# Target architecture
+#ARCH = ARCH_ARM_RASPBERRYPI
 ARCH = ARCH_GENERIC_LINUX
 
-#---------------- Install Options ----------------
-prefix=/usr/local
-
-INSTALL_LIBDIR=$(prefix)/lib
-INSTALL_INCDIR=$(prefix)/include
-
-# Chemin relatif du répertoire racine de gxPL
-GXPL_ROOT = ../..
-
-# Chemin relatif du répertoire racine du projet de l'utilisateur
-PROJECT_TOPDIR = .
-
-# Permet de générer un fichier version-git.h permettant de récupérer les informations sur la version
+# Generates a file to retrieve information on the GIT Version
 GIT_VERSION = ON
 
-# Niveau d'optimisation de GCC =  [0, 1, 2, 3, s].
-#     0 = pas d'optimisation (pour debug).
-#     s = optimisation de la taille du code (pour release).
-#     (Note: 3 n'est pas toujours le meilleur niveau. Voir la FAQ avr-libc.)
+# Optimization level, can be [0, 1, 2, 3, s]. 0 turns off optimization.
+# (Note: 3 is not always the best optimization level)
 OPT = s
 
-# Format informations Debug
-#     Les formats natifs pour AVR-GCC -g sont dwarf-2 [default] ou stabs.
-#     AVR Studio 4.10 nécessite dwarf-2.
+# Debugging information format
 DEBUG_FORMAT = dwarf-2
 
-# Niveau d'optimisation de GCC =  [0, 1, 2, 3, s] pour le debug
-#     0 = pas d'optimisation (pour debug).
-#     s = optimisation de la taille du code (pour release).
-#     (Note: 3 n'est pas toujours le meilleur niveau. Voir la FAQ avr-libc.)
+# Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
+# (Note: 3 is not always the best optimization level)
 DEBUG_OPT = 0
 
-# Activation des informations Debug (ON/OFF)
-# Si défini sur ON, aucune information de debug ne sera générée
+# Enabling Debug information (ON / OFF)
 #DEBUG = ON
 
-# Affiche la ligne de compilation GCC ou non (ON/OFF)
+# Displays the GCC compile line or not (ON / OFF)
 #VIEW_GCC_LINE = ON
 
-# Désactive la suppression des variables et fonctions "inutiles"
-# Le linker vérifie d'une fonction ou une variable est appellée, si ce n'est pas
-# le cas, il supprime la variable ou la fonction
-# Cela peut être problèmatique dans certains cas (bootloarder !)
-DISABLE_DELETE_UNUSED_SECTIONS = ON
+# Disable the deletion of variables and functions "unnecessary"
+# The linker checks of a function or variable is called, if it is not the case, 
+# it removes the variable or function. This can be problematic in some cases (bootloarder!)
+DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
-# Liste des fichiers source C. (Les dépendances sont automatiquement générées.)
-# Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
-# recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
-# d'accès complet du fichier mais seulement le nom du projet
-SRC  = 
+# List C source files here. (C dependencies are automatically generated.)
+SRC  = $(TARGET).c
 
-# Liste des fichiers source C++ (Les dépendances sont automatiquement générées.)
-# Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
-# recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
-# d'accès complet du fichier mais seulement le nom du projet (avrio, avrx, ...)
+# List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
 
-# Liste des fichiers source assembleur
-#   L'extenson doit toujours être .S (en majuscule). En effet, les fichiers .s
-#   ne sont pas consédérés comme des fichiers sources mais comme des fichiers
-#   générés par le compilateur et seront supprimés lors d'un make clean.
-#   Cela est valable aussi sous DOS/Windows (bien que le système d'exploitation
-#   ne soit pas sensible à la casse).
+# List Assembler source files here.
+# Make them always end in a capital .S.  Files ending in a lowercase .s
+# will not be considered source files but generated files (assembler
+# output from the compiler), and will be deleted upon "make clean"!
+# Even though the DOS/Win* filesystem matches both .s and .S the same,
+# it will preserve the spelling of the filenames, and gcc itself does
+# care about how the name is spelled on its command-line.
 ASRC =
 
-# Assembler source files
-# The path to the source files of the system was added to the search path of
-# the compiler, it is not necessary to specify the full path of the file, but
-# only one from the project root.
-# The extension  should always be *. S (uppercase). In fact, *. S files are
-# considered  as files generated by the compiler and will be removed in the
-# next  "make clean". This also applies to DOS / Windows (although the operating
-# system is not case sensitive).ASRC =
-
 # Place -D or -U options here for C sources
-CDEFS += -DLOG_ASSERT
+CDEFS +=
 
 # Place -D or -U options here for ASM sources
 ADEFS +=
 
 # Place -D or -U options here for C++ sources
-CPPDEFS += -DLOG_ASSERT
+CPPDEFS +=
 
 # Enable gcc warning (without -W)
-CWARNINGS   = all strict-prototypes
-CPPWARNINGS = all
+WARNINGS = all strict-prototypes no-unused-but-set-variable
 
 # List any extra directories to look for include files here.
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/unix
 
 #---------------- Library Options ----------------
 
@@ -112,7 +81,7 @@ STATIC_LINKER = OFF
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_LIBDIRS =
+EXTRA_LIBDIRS = gxPL
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
@@ -131,11 +100,21 @@ USE_SYSIO_LIB = ON
 #     gnu99 = c99 plus GCC extensions
 CSTANDARD = -std=gnu99
 
-# Compiler, assembler flags allowing to set miscellaneous options
-CFLAGS = -fPIC
-CPPFLAGS = -fPIC
-ASFLAGS =
-LDFLAGS =
+#---------------- Install Options ----------------
+prefix=/usr/local
+INSTALL_BINDIR=$(prefix)/bin
+VERSION=1.0.0
+
+#---------------- gxPL Options ----------------
+# Enable debug a gxPL test (ON / OFF). 
+# If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
+# are recompiled. GXPL_ROOT and ARCH must be defined
+GXPL_DEBUG_TEST = ON
+
+ifeq ($(GXPL_ROOT),)
+GXPL_ROOT = $(PROJECT_TOPDIR)
+endif
+#-----------------------------------------------
 
 #-------------------------------------------------------------------------------
 # Define programs and commands.
@@ -158,41 +137,29 @@ COPY = cp
 #-------------------------------------------------------------------------------
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
-RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
-RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
-#$(warning $(RPI_CPU))
-#$(warning $(RPI_REV))
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
 VPATH+=:$(3RDPARTY_ROOT)
-
-ifneq ($(RPI_CPU),)
-override ARCH = ARCH_ARM_RASPBERRYPI
-CDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
-CPPDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
-else
-ifeq ($(ARCH),ARCH_ARM_RASPBERRYPI)
-override ARCH = ARCH_GENERIC_LINUX
-$(warning this system is not a Raspberry Pi, I compile for linux standard system)
-endif
-endif
-
 CDEFS += -D_REENTRANT -D$(ARCH)
+
 CPPDEFS += -D_REENTRANT -D$(ARCH)
 
 EXTRA_LIBS += pthread rt
 LDFLAGS += -pthread
 
+ifeq ($(GXPL_DEBUG_TEST),ON)
 ifeq ($(GXPL_ROOT),)
-$(error GXPL_ROOT not defined, double-check that !)
+$(error GXPL_DEBUG_TEST is On and GXPL_ROOT is not defined, double-check that !)
 else
 include $(GXPL_ROOT)/gxpl.mk
+endif
+else
+EXTRA_LIBS += gxPL
 endif
 
 include $(GXPL_ROOT)/sysio.mk
 
-VERSION = $(shell cat version-git.mk)
-
 ifeq ($(PROJECT_TOPDIR),)
+
 else
 VPATH+=:$(PROJECT_TOPDIR)
 EXTRA_INCDIRS += $(PROJECT_TOPDIR)
@@ -225,7 +192,7 @@ endif
 CFLAGS += $(CDEFS)
 CFLAGS += -Wa,-adhlns=$(addprefix $(OBJDIR)/, $*.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRA_INCDIRS))
-CFLAGS += $(patsubst %,-W%,$(CWARNINGS))
+CFLAGS += $(patsubst %,-W%,$(WARNINGS))
 CFLAGS += $(CSTANDARD)
 ifeq ($(DISABLE_DELETE_UNUSED_SECTIONS),OFF)
 CFLAGS += -ffunction-sections
@@ -249,7 +216,7 @@ CPPFLAGS += $(CPPDEFS)
 CPPFLAGS += -Wall
 CPPFLAGS += -Wa,-adhlns=$(addprefix $(OBJDIR)/, $*.lst)
 CPPFLAGS += $(patsubst %,-I%,$(EXTRA_INCDIRS))
-CPPFLAGS += $(patsubst %,-W%,$(CPPWARNINGS))
+CPPFLAGS += $(patsubst %,-W%,$(WARNINGS))
 ifeq ($(DISABLE_DELETE_UNUSED_SECTIONS),OFF)
 CPPFLAGS += -ffunction-sections
 CPPFLAGS += -fdata-sections
@@ -285,12 +252,12 @@ endif
 LDFLAGS += $(patsubst %,-L%,$(EXTRA_LIBDIRS))
 LDFLAGS += $(patsubst %,-l%,$(EXTRA_LIBS))
 LDFLAGS += $(MATH_LIB)
-LDFLAGS += -Wl,-Map=$(TARGET_LIB_PATH).map,--cref
+LDFLAGS += -Wl,-Map=$(TARGET_PATH).map,--cref
 LDFLAGS += $(EXTMEMOPTS)
 ifeq ($(DISABLE_DELETE_UNUSED_SECTIONS),OFF)
 LDFLAGS += -Wl,--gc-sections
-LDFLAGS += -Wl,--relax
 endif
+LDFLAGS += -Wl,--relax
 ifeq ($(DEBUG),ON)
 LD_CFLAGS += -g$(DEBUG_FORMAT)
 endif
@@ -302,8 +269,7 @@ MSG_COMPILING = [CC]\t\t
 MSG_COMPILING_CPP = [CPP]\t\t
 MSG_ASSEMBLING = [ASM]\t\t
 MSG_LINKING = [LINK]\t\t
-MSG_CREATING_LIBRARY = [STATIC]\t
-MSG_CREATING_SHARED_LIBRARY = [SHARED]\t
+MSG_CREATING_LIBRARY = [LIB]\t\t
 MSG_CLEANING = [CLEAN]\t\t
 MSG_EXTENDED_LISTING = [LISTING]\t
 MSG_SYMBOL_TABLE = [SYMBOL]\t
@@ -330,56 +296,34 @@ ALL_ASFLAGS = -I. -x assembler-with-cpp $(ASFLAGS)
 ifeq ($(VIEW_GCC_LINE),ON)
 else
 CC := @$(CC)
-AR := @$(AR)
+OBJCOPY := @$(OBJCOPY)
+OBJDUMP := @$(OBJDUMP)
 endif
 
 
 # Default target.
-all: build
-build: version-git libstatic libshared
-rebuild: clean_list build
-clean: clean_list_lib
-distclean: distclean_list clean_list_lib
-
-version-git:
-	@$(GXPL_ROOT)/util/git-version/git-version $@.mk
-
-libstatic: $(TARGET_LIB_PATH).a
-libshared: $(TARGET_LIB_PATH).so
+all: build sizeafter cleanver
+build: elf lss sym
+rebuild: sizebefore clean_list build sizeafter
+clean: clean_list
+distclean: distclean_list clean_list
 
 install: uninstall build
-# static and shared library
-	@echo "$(MSG_INSTALL) $(TARGET) lib and headers in $(prefix)"
-	@-install -m 0755 $(TARGET_LIB_PATH).a $(INSTALL_LIBDIR)
-ifeq ($(DEBUG),)
-	@strip --strip-unneeded $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).a
-endif
-	@-install -m 0755 $(TARGET_LIB_PATH).so $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION)
-ifeq ($(DEBUG),)
-	@strip --strip-unneeded $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION)
-endif
-	@ln -f -s $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.$(VERSION) $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so
-
-# header files
-	@-install -d -m 0755 $(INSTALL_INCDIR)/
-	@-install -d -m 0755 $(INSTALL_INCDIR)/gxPL
-	@-install -m 0644 $(GXPL_ROOT)/include/gxPL.h $(INSTALL_INCDIR)
-	@-install -m 0644 $(GXPL_ROOT)/include/gxPL/*.h $(INSTALL_INCDIR)/gxPL
-
-	@-ldconfig
+	@echo "$(MSG_INSTALL) $(TARGET)"
+	-install -m 0755 $(TARGET) $(INSTALL_BINDIR)
 
 uninstall:
-	@echo "$(MSG_UNINSTALL) $(TARGET) lib and headers from $(prefix)"
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).so.*
-	@-rm -f $(INSTALL_LIBDIR)/$(TARGET_LIB_PATH).a
-	@-rm -f $(INSTALL_INCDIR)/gxPL.h
-	@-rm -fr $(INSTALL_INCDIR)/gxPL
+	@echo "$(MSG_UNINSTALL) $(TARGET)"
+	-rm -f $(INSTALL_BINDIR)/$(TARGET)
 
-version-git.h:
-	@$(GXPL_ROOT)/util/git-version/git-version $@
+elf: version-git.h $(TARGET)
+lss: $(TARGET_PATH).lss
+sym: $(TARGET_PATH).sym
 
-version-git.mk: version
+lib: version-git.h $(TARGET_LIB_PATH).a
+cleanlib: clean_list_lib
+rebuildlib: clean_list_lib $(TARGET_LIB_PATH).a
+distcleanlib: distclean_list clean_list_lib
 
 # Include the dependency files.
 DEPFILES := $(foreach dep,$(OBJ:.o=.o.d),$(dir $(dep)).dep/$(notdir $(dep)))
@@ -394,6 +338,16 @@ $(OBJDIRS):
 $(DEPDIRS):
 	@-$(MAKEDIR) $@
 
+version-git.h:
+ifeq ($(GIT_VERSION),ON)
+	@git-version $@
+endif
+
+version-git.mk:
+ifeq ($(GIT_VERSION),ON)
+	@git-version $@
+endif
+
 sizebefore:
 	@if test -f $(TARGET); then echo "$(MSG_SIZE)"; $(SIZE) $(TARGET); 2>/dev/null; fi
 
@@ -401,6 +355,11 @@ sizeafter:
 	@if test -f $(TARGET); then echo "$(MSG_SIZE)"; $(SIZE) $(TARGET); 2>/dev/null; fi
 
 size: sizebefore
+
+cleanver:
+ifeq ($(GIT_VERSION),ON)
+	@test -s .version || $(REMOVE) version-git.h .version
+endif
 
 # Create extended listing file from ELF output file.
 %.lss: $(TARGET)
@@ -417,11 +376,11 @@ size: sizebefore
 .PRECIOUS : $(OBJ)
 %.a: $(OBJ)
 	@echo "$(MSG_CREATING_LIBRARY) $@"
-	$(AR) $@ $(OBJ)
+	@$(AR) $@ $(OBJ)
 
 %.so: $(OBJ)
-	@echo "$(MSG_CREATING_SHARED_LIBRARY) $@"
-	$(CC) -shared -Wl,-soname,$@ -o $@ $(OBJ) $(LDFLAGS)
+	@echo "$(MSG_CREATING_LIBRARY) $@"
+	$(CC) -shared $^ -o $@
 
 # Link: create ELF output file from object files.
 $(TARGET): $(OBJ)
@@ -429,14 +388,16 @@ $(TARGET): $(OBJ)
 	$(CC) $(LD_CFLAGS) $^ --output $@ $(LDFLAGS)
 
 # Compile: create object files from C source files.
-$(OBJDIR)/%.o : %.c Makefile version-git.h
+$(OBJDIR)/%.o : %.c Makefile
 	@echo "$(MSG_COMPILING) $<"
-	$(CC) -c $(ALL_CFLAGS) $< -o $@
+	$(CC) -c $(ALL_CFLAGS) -fPIC $< -o $@
+
 
 # Compile: create object files from C++ source files.
-$(OBJDIR)/%.o : %.cpp Makefile version-git.h
+$(OBJDIR)/%.o : %.cpp Makefile
 	@echo "$(MSG_COMPILING_CPP) $<"
 	$(CC) -c $(ALL_CPPFLAGS) $< -o $@
+
 
 # Compile: create assembler files from C source files.
 %.s : %.c
@@ -449,7 +410,7 @@ $(OBJDIR)/%.o : %.cpp Makefile version-git.h
 
 
 # Assemble: create object files from assembler source files.
-$(OBJDIR)/%.o : %.S Makefile version-git.h
+$(OBJDIR)/%.o : %.S Makefile
 	@echo "$(MSG_ASSEMBLING) $<"
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
@@ -461,10 +422,6 @@ $(OBJDIR)/%.o : %.S Makefile version-git.h
 clean_list_lib:
 	@echo "$(MSG_CLEANING) $(TARGET)"
 	@$(REMOVE) $(TARGET_LIB_PATH).a
-	@$(REMOVE) $(TARGET_LIB_PATH).so
-	@$(REMOVE) $(TARGET_LIB_PATH).map
-	@$(REMOVEDIR) $(DEPDIRS)
-	@$(REMOVEDIR) $(OBJDIRS)
 
 clean_list :
 	@echo "$(MSG_CLEANING) $(TARGET)"
@@ -478,12 +435,13 @@ clean_list :
 distclean_list :
 	@$(REMOVE) *.bak
 	@$(REMOVE) *~
-	@$(REMOVE) version-git.*
-	@$(REMOVEDIR) $(OBJDIR)
+ifeq ($(GIT_VERSION),ON)
+	@$(REMOVE) version-git.h version-git.mk .version
+endif
 
 # Listing of phony targets.
 .PHONY : all size sizebefore sizeafter build rebuild lib elf \
-lss sym clean distclean cleanlib clean_list clean_list_lib version-git
+lss sym clean distclean cleanlib clean_list clean_list_lib
 
 # Make docs pictures
 FIG2DEV                 = fig2dev
