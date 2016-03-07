@@ -543,8 +543,9 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 static int
 gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
                 const gxPLIoAddr * target) {
-  const uint8_t * dst64;
-  const uint8_t * dst16;
+  const uint8_t * dst64 = NULL;
+  const uint8_t * dst16 = NULL;
+  int fid = -1;
 
   if (target) {
 
@@ -584,18 +585,19 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
     dst16 = pucXBeeAddr16Unknown();
   }
 
-  // Try to send the message
-  dp->fid = iXBeeZbSend (dp->xbee, buffer, count, dst64, dst16, 0, 0);
+  fid = iXBeeZbSend (dp->xbee, buffer, count, dst64, dst16, 0, 0);
 
-  if (dp->fid < 0) {
+  if (fid < 0) {
 
-    PERROR ("XBee deliver %d", dp->fid);
-    dp->fid = 0;
-    return -1;
+    PERROR ("XBee deliver %d", fid);
   }
-  PDEBUG ("Send frame #%d", dp->fid);
+  else {
+    
+    dp->fid = fid;
+    PDEBUG ("Send frame #%d", fid);
+  }
 
-  return dp->fid;
+  return fid;
 }
 
 // -----------------------------------------------------------------------------

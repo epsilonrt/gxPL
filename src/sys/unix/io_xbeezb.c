@@ -232,7 +232,7 @@ static int
 prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 
   PINFO ("%s joined zigbee network",
-        prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
+         prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
   vXBeeFreePkt (xbee, pkt);
   return 0;
 }
@@ -333,7 +333,7 @@ gxPLXBeeZbClose (gxPLIo * io) {
 
   if (io->pdata) {
     int ret;
-    
+
     vXBeeFreePkt (dp->xbee, dp->atpkt);
     dp->atpkt = NULL;
     vXBeeFreePkt (dp->xbee, dp->rxpkt);
@@ -374,9 +374,9 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
     io->pdata = calloc (1, sizeof (xbeezb_data));
     assert (io->pdata);
-    
+
     dp->xbee = xbee;
-    vXBeeSetUserContext(xbee, io);
+    vXBeeSetUserContext (xbee, io);
     vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
 
     // Gets and checks firmware version
@@ -444,8 +444,8 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
           // current and setting PAN ID differs: change to new PAN ID
           PINFO ("Write new PAN ID in XBee: 0x%" PRIx64
-                ", new PAN ID will be operational in a few seconds (usually 6)..." ,
-                io->setting->xbee.panid);
+                 ", new PAN ID will be operational in a few seconds (usually 6)..." ,
+                 io->setting->xbee.panid);
           ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, (uint8_t *) &new_panid, 8, 1000);
           if (ret != 0) {
 
@@ -480,7 +480,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       if (ret == 0) {
 
         PINFO ("Starting Zigbee network, current operating PAN ID 0x%"
-              PRIx64, panid);
+               PRIx64, panid);
       }
     }
 
@@ -546,8 +546,9 @@ gxPLXBeeZbRecv (gxPLIo * io, void * buffer, int count, gxPLIoAddr * source) {
 static int
 gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
                 const gxPLIoAddr * target) {
-  const uint8_t * dst64;
-  const uint8_t * dst16;
+  const uint8_t * dst64 = NULL;
+  const uint8_t * dst16 = NULL;
+  int fid = -1;
 
   if (target) {
 
@@ -587,18 +588,21 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
     dst16 = pucXBeeAddr16Unknown();
   }
 
+
   // Try to send the message
-  dp->fid = iXBeeZbSend (dp->xbee, buffer, count, dst64, dst16, 0, 0);
+  fid = iXBeeZbSend (dp->xbee, buffer, count, dst64, dst16, 0, 0);
 
-  if (dp->fid < 0) {
+  if (fid < 0) {
 
-    PERROR ("Unable to deliver the message, error: %d", dp->fid);
-    dp->fid = 0;
-    return -1;
+    PERROR ("Unable to deliver the message, error: %d", fid);
   }
-  PDEBUG ("Send ZigBee frame #%d (%d bytes)", dp->fid, count);
+  else {
+    
+    dp->fid = fid;
+    PDEBUG ("Send ZigBee frame #%d (%d bytes)", fid, count);
+  }
 
-  return dp->fid;
+  return fid;
 }
 
 // -----------------------------------------------------------------------------
