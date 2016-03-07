@@ -91,7 +91,7 @@ EXTRA_LIBS =
 MATH_LIB_ENABLE = ON
 
 # Enable linking with  sysio library (ON/OFF)
-USE_SYSIO_LIB = ON
+#USE_SYSIO_LIB = ON
 
 # Compiler flag to set the C Standard level.
 
@@ -138,7 +138,6 @@ COPY = cp
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
-VPATH+=:$(3RDPARTY_ROOT)
 RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
 RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
 #$(warning $(RPI_CPU))

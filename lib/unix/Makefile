@@ -163,7 +163,6 @@ RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
 #$(warning $(RPI_CPU))
 #$(warning $(RPI_REV))
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
-VPATH+=:$(3RDPARTY_ROOT)
 
 ifneq ($(RPI_CPU),)
 override ARCH = ARCH_ARM_RASPBERRYPI

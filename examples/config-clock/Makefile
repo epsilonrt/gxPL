@@ -138,7 +138,6 @@ COPY = cp
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
-VPATH+=:$(3RDPARTY_ROOT)
 RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
 RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
 #$(warning $(RPI_CPU))

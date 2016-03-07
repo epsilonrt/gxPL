@@ -138,7 +138,6 @@ COPY = cp
 # !!!!!!!!!!!!!!!!!         DO NOT EDIT BELOW THIS LINE        !!!!!!!!!!!!!!!!!
 #-------------------------------------------------------------------------------
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
-VPATH+=:$(3RDPARTY_ROOT)
 CDEFS += -D_REENTRANT -D$(ARCH)
 
 CPPDEFS += -D_REENTRANT -D$(ARCH)

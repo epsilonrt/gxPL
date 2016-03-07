@@ -12,6 +12,7 @@
 #define GXPL_INTERNALS
 #include <gxPL/io.h>
 #include "version-git.h"
+#include "config.h"
 
 /* constants ================================================================ */
 #ifdef __AVR__
@@ -27,6 +28,7 @@
 #else
 #define PROGMEM
 #endif
+#define CONFIG_HBEAT_BASIC_EXTENSION  1
 
 static const char success[] PROGMEM = "Success\n";
 static const char hbeat_basic[] PROGMEM =
@@ -40,6 +42,9 @@ static const char hbeat_basic[] PROGMEM =
   "{\n"
   "interval=5\n"
   "version=" VERSION_SHORT "\n"
+#if CONFIG_HBEAT_BASIC_EXTENSION
+  "remote-addr=%s\n"
+#endif
   "}\n";
 static const char hbeat_basic_end[] PROGMEM =
   "xpl-stat\n"
@@ -52,6 +57,9 @@ static const char hbeat_basic_end[] PROGMEM =
   "{\n"
   "interval=5\n"
   "version=" VERSION_SHORT "\n"
+#if CONFIG_HBEAT_BASIC_EXTENSION
+  "remote-addr=%s\n"
+#endif
   "}\n";
 static const char hbeat_app[] PROGMEM =
   "xpl-stat\n"
@@ -162,8 +170,13 @@ main (int argc, char **argv) {
     SPRINTF (hbeat_end, hbeat_app_end, addr.port, str);
   }
   else {
+#if CONFIG_HBEAT_BASIC_EXTENSION
+    SPRINTF (hbeat, hbeat_basic, str);
+    SPRINTF (hbeat_end, hbeat_basic_end, str);
+#else
     SPRINTF (hbeat, hbeat_basic);
     SPRINTF (hbeat_end, hbeat_basic_end);
+#endif
     putchar ('\n');
   }
 
@@ -200,7 +213,6 @@ main (int argc, char **argv) {
     putchar ('.');
     ret = prvIoCtl (io, gxPLIoFuncPoll, &available_bytes, 1000);
     assert (ret == 0);
-    delay_ms (100);
     count++;
     FFLUSH (stdout);
   }
