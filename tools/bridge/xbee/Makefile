@@ -91,7 +91,7 @@ EXTRA_LIBS =
 MATH_LIB_ENABLE = ON
 
 # Enable linking with  sysio library (ON/OFF)
-#USE_SYSIO_LIB = ON
+USE_SYSIO_LIB = ON
 
 # Compiler flag to set the C Standard level.
 
@@ -109,7 +109,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-GXPL_DEBUG_TEST = ON
+#GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)
