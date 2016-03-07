@@ -76,23 +76,25 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
     now = gxPLTime();
     gxPLIdCopy (&src->id, gxPLMessageSourceIdGet (message));
 
-    // When the bridge receives a hbeat.app or config.app message
-    // the bridge should extract the "remote-addr" value from the message body
-    const char * str_addr = gxPLMessagePairGet (message, "remote-addr");
-
-    if (str_addr) {
-
-      // remote-ip matches with local address, converts to gxPLIoAddr
-      if (gxPLIoCtl (bridge->in, gxPLIoFuncNetAddrFromString, &src->addr, str_addr) != 0) {
-
-        PERROR ("unable to convert %s to remote address", str_addr);
-        return;
-      }
-    }
-
     if (strcmp (gxPLMessageSchemaTypeGet (message), "basic") == 0) {
       int interval;
       const char * str_interval;
+
+      /* When the bridge receives a hbeat with remote-addr field (extension of
+       * hbeat.basic schema) the bridge should extract the "remote-addr" value
+       * from the message body
+       */
+      const char * str_addr = gxPLMessagePairGet (message, "remote-addr");
+
+      if (str_addr) {
+
+        // remote-ip matches with local address, converts to gxPLIoAddr
+        if (gxPLIoCtl (bridge->in, gxPLIoFuncNetAddrFromString, &src->addr, str_addr) != 0) {
+
+          PERROR ("unable to convert %s to remote address", str_addr);
+          return;
+        }
+      }
 
       // Gets heartbeat interval for update
       str_interval = gxPLMessagePairGet (message, "interval");
@@ -118,8 +120,8 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
           return;
         }
         PINFO ("New client %s.%s.%s, processing %d clients",
-              src->id.vendor, src->id.device, src->id.instance,
-              iVectorSize (&bridge->clients));
+               src->id.vendor, src->id.device, src->id.instance,
+               iVectorSize (&bridge->clients));
       }
 
       client->hbeat_period_max = interval * 60 * 2 + 60;
@@ -132,9 +134,9 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
 
         iVectorRemove (&bridge->clients, c);
         PINFO ("Delete client %s.%s.%s after receiving his"
-              " heartbeat end, processing %d clients",
-              src->id.vendor, src->id.device, src->id.instance,
-              iVectorSize (&bridge->clients));
+               " heartbeat end, processing %d clients",
+               src->id.vendor, src->id.device, src->id.instance,
+               iVectorSize (&bridge->clients));
       }
     }
 
@@ -147,21 +149,28 @@ prvHandleInnerMessage (gxPLApplication * app, gxPLMessage * message, void * udat
   if (gxPLAppSetting (bridge->in)->broadcast) {
 
     // Deliver this message to all inside clients
-    PINFO ( "IN  --- IN  > Broadcast");
+    PINFO ("IN  --- IN  > Broadcast");
     gxPLAppSendMessage (bridge->in, message, NULL);
   }
   else if (client) {
 
-    // if inside broadcast is disabled, echoes hbeat.basic message to the client only
-    PINFO ( "IN  --- IN  > Deliver");
-    gxPLAppSendMessage (bridge->in, message, &client->addr);
+    if (client->addr.family != gxPLNetFamilyUnknown) {
+
+      // if inside broadcast is disabled, echoes hbeat.basic message to the client only
+      PINFO ("IN  --- IN  > Deliver");
+      gxPLAppSendMessage (bridge->in, message, &client->addr);
+    }
+    else {
+
+      PERROR ("IN  --- IN  > Broadcast disable, unable to find the address of the client to respond.");
+    }
   }
 
   if (gxPLMessageHopGet (message) <= bridge->max_hop) {
 
     // Broadcasts this message outside
     gxPLMessageHopInc (message);
-    PINFO ( "OUT <-- IN  > Deliver");
+    PINFO ("OUT <-- IN  > Deliver");
     gxPLAppSendMessage (bridge->out, message, NULL);
   }
 }
@@ -180,7 +189,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
     if (gxPLAppSetting (bridge->in)->broadcast) {
 
       // Deliver this message to all inside clients
-      PINFO ( "OUT --> IN  > Broadcast");
+      PINFO ("OUT --> IN  > Broadcast");
       gxPLAppSendMessage (bridge->in, message, NULL);
     }
     else {
@@ -194,7 +203,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
       int allow = iVectorFindFirstIndex (&bridge->allow, s);
       if (allow >= 0) {
 
-        PINFO ( "OUT --> IN  > %s.%s allowed to cross", s->class, s->type);
+        PINFO ("OUT --> IN  > %s.%s allowed to cross", s->class, s->type);
       }
 
       for (int i = 0; i < iVectorSize (&bridge->clients); i++) {
@@ -203,7 +212,7 @@ prvHandleOuterMessage (gxPLApplication * app, gxPLMessage * message, void * udat
         if ( (gxPLIdCmp (&client->id, gxPLMessageTargetIdGet (message)) == 0) ||
              (allow >= 0)) {
 
-          PINFO ( "OUT --> IN  > Deliver");
+          PINFO ("OUT --> IN  > Deliver");
           gxPLAppSendMessage (bridge->in, message, &client->addr);
         }
       }
@@ -307,11 +316,11 @@ gxPLBridgeClose (gxPLBridge * bridge) {
 
     ret = gxPLAppClose (bridge->in);
     if (ret != 0) {
-      PNOTICE ( "Unable to close inner application");
+      PNOTICE ("Unable to close inner application");
     }
     ret = gxPLAppClose (bridge->out);
     if (ret != 0) {
-      PNOTICE ( "Unable to close outer application");
+      PNOTICE ("Unable to close outer application");
     }
 
     vVectorDestroy (&bridge->clients);
@@ -365,14 +374,14 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
   if (i != 0) {
 
     ret = i;
-    PNOTICE ( "Unable to poll inner application");
+    PNOTICE ("Unable to poll inner application");
   }
 
   i = gxPLAppPoll (bridge->out, timeout_ms);
   if (i != 0) {
 
     ret = i;
-    PNOTICE ( "Unable to poll outer application");
+    PNOTICE ("Unable to poll outer application");
   }
   bridge->timeout += timeout_ms;
 
@@ -389,9 +398,9 @@ gxPLBridgePoll (gxPLBridge * bridge, int timeout_ms) {
       if ( (now - client->hbeat_last) > client->hbeat_period_max) {
 
         PINFO ("Delete client %s.%s.%s after heartbeat timeout, "
-              "processing %d clients",
-              client->id.vendor, client->id.device, client->id.instance,
-              iVectorSize (&bridge->clients) - 1);
+               "processing %d clients",
+               client->id.vendor, client->id.device, client->id.instance,
+               iVectorSize (&bridge->clients) - 1);
 
         iVectorRemove (&bridge->clients, i);
       }
