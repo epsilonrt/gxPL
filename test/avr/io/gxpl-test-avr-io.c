@@ -98,7 +98,7 @@ main (int argc, char **argv) {
           ++test_count, AVR_IOLAYER_NAME, AVR_IOLAYER_PORT);
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
   assert (setting);
-  setting->debug = 1;
+  setting->log = LOG_DEBUG;
   setting->xbee.reset = &xResetPin;
   PSUCCESS();
 

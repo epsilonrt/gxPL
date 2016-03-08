@@ -114,7 +114,7 @@ main (int argc, char **argv) {
           ++test_count, iolayer, ioport);
   setting = gxPLSettingNew (ioport, iolayer, gxPLConnectViaHub);
   assert (setting);
-  setting->debug = 1;
+  setting->log = LOG_DEBUG;
   setting->xbee.reset = &xResetPin;
   PSUCCESS();
 

@@ -184,6 +184,7 @@ prvConfigSetPanID (gxPLDevice * device, uint64_t panid) {
 static void
 prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
   int c;
+  int loglvl = LOG_NOTICE;
 
   static const char short_options[] = "i:o:f:m:B:p:bDdh" GXPL_GETOPT;
   static struct option long_options[] = {
@@ -199,6 +200,10 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
     {"help",        no_argument,        NULL, 'h' },
     {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
   };
+
+#ifdef DEBUG
+  vLogSetMask (LOG_UPTO (LOG_DEBUG));
+#endif
 
   do  {
 
@@ -262,10 +267,8 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
         break;
 
       case 'd':
-        vLogSetMask (LOG_UPTO (LOG_DEBUG));
-        setting->in->debug = 1;
-        setting->out->debug = 1;
-        PDEBUG ("enable debugging");
+        loglvl++;
+        PDEBUG ("enable log %d", loglvl);
         break;
 
       case 'D':
@@ -286,6 +289,8 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
     }
   }
   while (c != -1);
+  setting->in->log = MIN(LOG_DEBUG,loglvl);
+  setting->out->log = MIN(LOG_DEBUG,loglvl);
 }
 
 // -----------------------------------------------------------------------------

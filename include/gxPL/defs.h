@@ -235,7 +235,7 @@ typedef struct _gxPLSetting {
   union {
     uint16_t flag;
     struct {
-      uint16_t debug: 1;      /**< debug enabled */
+      uint16_t log: 3;      /**< log level 0 - 7 */
       uint16_t malloc: 1;     /**< this configuration has been allocated on the heap and should be released. */
       uint16_t nodaemon: 1;   /**< do not daemonize */
       uint16_t iosflag: 1;    /**< true if io setting was configured */

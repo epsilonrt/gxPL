@@ -228,14 +228,11 @@ gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
 // -----------------------------------------------------------------------------
 gxPLApplication *
 gxPLAppOpen (gxPLSetting * setting) {
+  assert (setting);
   gxPLApplication * app = calloc (1, sizeof (gxPLApplication));
   assert (app);
 
-  if (setting->debug) {
-
-    vLogSetMask (LOG_UPTO (GXPL_LOG_DEBUG_LEVEL));
-  }
-
+  vLogSetMask (LOG_UPTO (setting->log));
   app->io = gxPLIoOpen (setting);
 
   if (app->io) {

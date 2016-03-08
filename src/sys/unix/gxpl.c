@@ -48,6 +48,10 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   char * backup = malloc (sizeof (char *) * argc);
   memcpy (backup, argv, sizeof (char *) * argc);
   char * baudrate = NULL;
+  int loglvl = LOG_NOTICE;
+#ifdef DEBUG
+  vLogSetMask (LOG_UPTO (LOG_DEBUG));
+#endif
 
   opterr = 0; // ignore unknown options
   do  {
@@ -72,9 +76,8 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
         break;
 
       case 'd':
-        vLogSetMask (LOG_UPTO (GXPL_LOG_DEBUG_LEVEL));
-        setting->debug = 1;
-        PDEBUG ("enable debugging");
+        loglvl++;
+        PDEBUG ("enable log %d", loglvl);
         break;
 
       case 'D':
@@ -87,6 +90,8 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
     }
   }
   while (c != -1);
+
+  setting->log = MIN(LOG_DEBUG,loglvl);
 
   if ( (strncmp (setting->iolayer, "xbee", 4) == 0) && (baudrate)) {
     int b;
