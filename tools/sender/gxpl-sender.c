@@ -65,7 +65,7 @@ main (int argc, char * argv[]) {
   }
 
   // Send the message
-  if (setting->debug) {
+  if (setting->log > LOG_NOTICE) {
     char * str = gxPLMessageToString (message);
     printf ("<<< Transmitted message >>>\n%s>>> ", str);
     free (str);
@@ -75,7 +75,7 @@ main (int argc, char * argv[]) {
     fprintf (stderr, "Unable to send xPL message\n");
     exit (EXIT_FAILURE);
   }
-  if (setting->debug) {
+  if (setting->log > LOG_NOTICE) {
     printf ("Success, %d bytes transmitted\n ", ret);
   }
 
