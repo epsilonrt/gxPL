@@ -703,4 +703,11 @@ gxPLDeviceHeartbeatLast (const gxPLDevice * device) {
   return device->hbeat_last;
 }
 
+// -----------------------------------------------------------------------------
+gxPLSetting *
+gxPLDeviceSetting (gxPLDevice * device) {
+  
+  return gxPLAppSetting (gxPLDeviceParentGet (device));
+}
+
 /* ========================================================================== */

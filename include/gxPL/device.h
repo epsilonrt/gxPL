@@ -15,12 +15,12 @@ __BEGIN_C_DECLS
 
 /**
  * @defgroup gxPLDeviceDoc Devices
- * gxPLDevice xPL corresponds to a device. This is the basic network element. 
- * It is identified by vendor ID, device and instance. A device signals its 
+ * gxPLDevice xPL corresponds to a device. This is the basic network element.
+ * It is identified by vendor ID, device and instance. A device signals its
  * arrival and departure on the network by transmitting a heartbeat message. \n
  * It starts working after having had an echo to his heartbeat. \n
  * gxPL provides two types of devices: simple devices and configurable devices. \n
- * A device must be instantiated from an application using the 
+ * A device must be instantiated from an application using the
  * \ref gxPLAppAddDevice() or \ref gxPLAppAddConfigurableDevice().
  * @{
  */
@@ -29,7 +29,7 @@ __BEGIN_C_DECLS
 
 /**
  * @brief Listener for a device
- * The end-user can add listener functions that will be called each time the 
+ * The end-user can add listener functions that will be called each time the
  * device will receive messages addressed or broadcast it. \n
  */
 typedef void (* gxPLDeviceListener) (gxPLDevice *, gxPLMessage *, void *);
@@ -68,6 +68,16 @@ gxPLMessage * gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type);
  * @return number of bytes send, -1 if error occurs
  */
 int gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message);
+
+/**
+ * @brief Returns device setting
+ * 
+ * @warning this setting is shared with all devices connected to the parent 
+ * xPL application.
+ * @param device pointer on the device
+ * @return the setting or NULL if error occurs
+ */
+gxPLSetting * gxPLDeviceSetting (gxPLDevice * device);
 
 /**
  * @}
@@ -270,11 +280,11 @@ int gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg);
 
 /**
  * @defgroup gxPLDeviceGroupDoc Groups
- * When a device or application is configured, the management station may wish 
+ * When a device or application is configured, the management station may wish
  * to configure the device to be logically grouped with other units. \n
- * xPL provides a powerful mechanism for this to happen in the form of the 
+ * xPL provides a powerful mechanism for this to happen in the form of the
  * special "group=" configuration tag. \n
- * A device may be part of one or more groups. If the device is configurable, 
+ * A device may be part of one or more groups. If the device is configurable,
  * the groups will be changed by the manager.
  * @{
  */
@@ -336,12 +346,12 @@ int gxPLDeviceGroupHave (const gxPLDevice * device);
 
 /**
  * @defgroup gxPLDeviceFilterDoc Filters
- * Filters provide an incredibly powerful method of addressing devices and 
- * applications. Filters are only applied to incoming broadcast messages, and 
+ * Filters provide an incredibly powerful method of addressing devices and
+ * applications. Filters are only applied to incoming broadcast messages, and
  * are intended to reduce the number of messages that a device will act upon. \n
- * If multiple filters are present, only one of the filters needs to match for 
+ * If multiple filters are present, only one of the filters needs to match for
  * the message to be processed. \n
- * Message Filters may also be specified via a configuration message. 
+ * Message Filters may also be specified via a configuration message.
  * @{
  */
 
@@ -357,20 +367,20 @@ int gxPLDeviceFilterAdd (gxPLDevice * device, gxPLMessageType type,
 
 /**
  * @brief Adds a filter to the device from a string
- * 
+ *
  * the format of the string is as follows:
  * @code
  * filter = [msgtype].[vendor].[device].[instance].[class].[type]
  * @endcode
  * for example:
- * - xpl-cmnd.wmute.k400.bedroom.drapes.basic 
+ * - xpl-cmnd.wmute.k400.bedroom.drapes.basic
  * - xpl-cmnd.wmute.k400.bedroom.drapes.*
  * - xpl-cmnd.wmute.k400.bedroom.*.*
  * - xpl-cmnd.wmute.k400.*.drapes.basic
  * - .
- * 
+ *
  * @param device pointer on the device
- * @param filter_name new filter as a string, will be modified by the function 
+ * @param filter_name new filter as a string, will be modified by the function
  * unusable after the call.
  * @return 0, -1 if an error occurs
  */
@@ -413,7 +423,7 @@ int gxPLDeviceFilterClearAll (gxPLDevice * device);
  * @brief Convert a filter to a string
  * For display purposes.
  * @param filter the filter
- * @return a string in a static buffer that is overwritten with each call to 
+ * @return a string in a static buffer that is overwritten with each call to
  * the function.
  */
 const char * gxPLDeviceFilterToString (const gxPLFilter * filter);
@@ -424,17 +434,17 @@ const char * gxPLDeviceFilterToString (const gxPLFilter * filter);
 
 /**
  * @defgroup gxPLDeviceConfigDoc Configurable devices
- * xPL provides a powerful yet simple mechanism for device configuration, 
- * intended to suit the requirements of devices ranging from embedded 
+ * xPL provides a powerful yet simple mechanism for device configuration,
+ * intended to suit the requirements of devices ranging from embedded
  * micro-controllers through to powerful PC applications. \n
- * When a device is started for the first time, it should begin sending out 
- * config.basic or config.app messages at intervals of 1 minute. These messages 
- * contain the same information as their hbeat.basic and hbeat.app counterparts, 
- * and are used to alert an xPL Configuration Manager that the device is 
- * waiting to be configured. If a device has previously been configured, and was 
- * able to retain that configuration information locally, it should not go into 
- * configuration mode, but should instead go directly to sending out regular 
- * heartbeat messages, indicating that it is ready for operation. 
+ * When a device is started for the first time, it should begin sending out
+ * config.basic or config.app messages at intervals of 1 minute. These messages
+ * contain the same information as their hbeat.basic and hbeat.app counterparts,
+ * and are used to alert an xPL Configuration Manager that the device is
+ * waiting to be configured. If a device has previously been configured, and was
+ * able to retain that configuration information locally, it should not go into
+ * configuration mode, but should instead go directly to sending out regular
+ * heartbeat messages, indicating that it is ready for operation.
  * @{
  */
 
@@ -442,7 +452,7 @@ const char * gxPLDeviceFilterToString (const gxPLFilter * filter);
 
 /**
  * @brief Device configuration changed listener
- * The end-user can add listener functions that will be called each time the 
+ * The end-user can add listener functions that will be called each time the
  * device configuration will change. \n
  */
 typedef void (* gxPLDeviceConfigListener) (gxPLDevice *, void *);
@@ -464,7 +474,7 @@ typedef struct  _gxPLDeviceConfigItem {
 
 /**
  * @brief Add a device config changed listener
- * 
+ *
  * @param device pointer on the configurable device
  * @param listener
  * @param udata pointer to the data passed to the listener
@@ -476,7 +486,7 @@ int gxPLDeviceConfigListenerAdd (gxPLDevice * device,
 
 /**
  * @brief Remove a config changed listener
- * 
+ *
  * @param device pointer on the configurable device
  * @param listener
  * @return 0, -1 if an error occurs
@@ -499,7 +509,7 @@ int gxPLDeviceConfigItemAdd (gxPLDevice * device, const char * name,
 
 /**
  * @brief Remove a configurable
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @return 0, -1 if an error occurs
@@ -508,7 +518,7 @@ int gxPLDeviceConfigItemRemove (gxPLDevice * device, const char * name);
 
 /**
  * @brief Remove all configurables
- * 
+ *
  * @param device pointer on the configurable device
  * @return 0, -1 if an error occurs
  */
@@ -525,7 +535,7 @@ int gxPLDeviceConfigItemClearAll (gxPLDevice * device);
 
 /**
  * @brief Search for a configurable
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @return the item, NULL if not found or error occurs
@@ -535,7 +545,7 @@ gxPLDeviceConfigItem * gxPLDeviceConfigItemFind (const gxPLDevice * device,
 
 /**
  * @brief Return the number of values for a given configurable
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @return 0, -1 if an error occurs
@@ -582,7 +592,7 @@ int gxPLDeviceConfigValueSetAt (gxPLDevice * device, const char * name,
 
 /**
  * @brief Clear values for a given configurable
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @return 0, -1 if an error occurs
@@ -591,7 +601,7 @@ int gxPLDeviceConfigValueClearAll (gxPLDevice * device, const char * name);
 
 /**
  * @brief Return the value of the first/only index for an item
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @return the value, NULL if none or error occurs
@@ -600,7 +610,7 @@ const char * gxPLDeviceConfigValueGet (gxPLDevice * device, const char * name);
 
 /**
  * @brief Return the value at the given index
- * 
+ *
  * @param device pointer on the configurable device
  * @param name name of the item
  * @param index index of the value to set
@@ -610,7 +620,7 @@ const char * gxPLDeviceConfigValueGetAt (gxPLDevice * device, const char * name,
 
 /**
  * @brief Return the installed config file, if any
- * 
+ *
  * see \ref gxPLAppAddConfigurableDevice()
  * @param device pointer on the configurable device
  * @return filename, NULL if error occurs
@@ -632,9 +642,11 @@ int gxPLDeviceConfigSave (const gxPLDevice * device);
  * @}
  */
 
-# ifndef __DOXYGEN__
+# ifdef __DOXYGEN__
 // -----------------------------------------------------------------------------
 
+#else
+// -----------------------------------------------------------------------------
 /*
  * @brief Return the installed config file, if any
  * the file name can not be changed if the device is not configured yet.
@@ -642,6 +654,7 @@ int gxPLDeviceConfigSave (const gxPLDevice * device);
  * @return 0, -1 if an error occurs
  */
 int gxPLDeviceConfigFilenameSet (gxPLDevice * device, const char * filename);
+
 
 // -----------------------------------------------------------------------------
 # endif /* __DOXYGEN__ not defined */
