@@ -453,12 +453,23 @@ gxPLAppIsHubEchoMessage (const gxPLApplication * app, const gxPLMessage * msg,
       }
     }
     else if (strcmp (gxPLMessageSchemaTypeGet (msg), "basic") == 0) {
-      if (my_id) {
-        if (gxPLIdCmp (my_id, gxPLMessageSourceIdGet (msg)) == 0) {
+#if CONFIG_HBEAT_BASIC_EXTENSION
+      const char * remote_addr = gxPLMessagePairGet (msg, "remote-addr");
+      if (remote_addr) {
+        if (strcmp (gxPLIoLocalAddrGet (app), remote_addr) == 0) {
 
           return true;
         }
       }
+      else
+#endif
+
+        if (my_id) {
+          if (gxPLIdCmp (my_id, gxPLMessageSourceIdGet (msg)) == 0) {
+
+            return true;
+          }
+        }
     }
   }
   return false;
@@ -621,9 +632,9 @@ gxPLAppConnectionType (const gxPLApplication * app) {
 }
 
 // -----------------------------------------------------------------------------
-gxPLSetting * 
+gxPLSetting *
 gxPLAppSetting (gxPLApplication * app) {
-  
+
   return app->setting;
 }
 
