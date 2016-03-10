@@ -30,6 +30,9 @@
   <Dependencies/>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
+  <VirtualDirectory Name="gxpl-test-avr-io">
+    <File Name="Makefile"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -50,7 +53,7 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+      <Debugger IsRemote="yes" RemoteHostName="localhost" RemoteHostPort="4242" DebuggerPath="/opt/avr8-gnu-toolchain-linux_x86_64/bin/avr-gdb" IsExtended="no">
         <DebuggerSearchPaths/>
         <PostConnectCommands/>
         <StartupCommands/>
@@ -59,10 +62,10 @@
       <PostBuild/>
       <CustomBuild Enabled="yes">
         <Target Name="Program">make program</Target>
-        <Target Name="Fuse">make fuse</Target>
         <Target Name="Lock">make lock</Target>
-        <Target Name="DistClean">make distclean</Target>
         <Target Name="Ice">make debug-ice</Target>
+        <Target Name="Fuse">make fuse</Target>
+        <Target Name="DistClean">make distclean</Target>
         <Target Name="Debug">make debug</Target>
         <RebuildCommand>make rebuild</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
@@ -77,7 +80,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -103,8 +106,8 @@
       <PostBuild/>
       <CustomBuild Enabled="yes">
         <Target Name="Program">make program</Target>
-        <Target Name="Fuse">make fuse</Target>
         <Target Name="Lock">make lock</Target>
+        <Target Name="Fuse">make fuse</Target>
         <Target Name="Distclean">make distclean</Target>
         <RebuildCommand>make rebuild</RebuildCommand>
         <CleanCommand>make clean</CleanCommand>
@@ -119,7 +122,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -127,8 +130,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="gxpl-test-avr-io">
-    <File Name="Makefile"/>
-    <File Name="gxpl-test-avr-io.c"/>
-  </VirtualDirectory>
 </CodeLite_Project>

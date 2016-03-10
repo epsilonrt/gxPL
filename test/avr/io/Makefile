@@ -36,7 +36,7 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = __ASSERT_USE_STDERR
+#AVRIO_CONFIG  = __ASSERT_USE_STDERR
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -91,7 +91,8 @@ CPPSRC =
 ASRC = 
 
 # Place -D or -U options here for C sources
-CDEFS +=
+#CDEFS += -DNSTDOUT -DNLOG -DNSTDIN
+CDEFS += -DNLOG
 
 # Place -D or -U options here for ASM sources
 ADEFS +=

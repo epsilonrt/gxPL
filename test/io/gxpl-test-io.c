@@ -14,102 +14,33 @@
 #include "version-git.h"
 #include "config.h"
 
-/* constants ================================================================ */
 #ifdef __AVR__
+/* constants ================================================================ */
 #define AVR_IOLAYER_NAME      "xbeezb"
 #define AVR_IOLAYER_PORT      "tty1"
 
-#define AVR_TERM_PORT         "tty0"
-#define AVR_TERM_BAUDRATE     500000
-#define AVR_TERM_FLOW         SERIAL_FLOW_RTSCTS
-
 #define AVR_XBEE_RESET_PORT   PORTB
 #define AVR_XBEE_RESET_PIN    7
-#else
-#define PROGMEM
-#endif
-#define CONFIG_HBEAT_BASIC_EXTENSION  1
 
-static const char success[] PROGMEM = "Success\n";
-static const char hbeat_basic[] PROGMEM =
-  "xpl-stat\n"
-  "{\n"
-  "hop=1\n"
-  "source=epsirt-test.io\n"
-  "target=*\n"
-  "}\n"
-  "hbeat.basic\n"
-  "{\n"
-  "interval=5\n"
-  "version=" VERSION_SHORT "\n"
-#if CONFIG_HBEAT_BASIC_EXTENSION
-  "remote-addr=%s\n"
-#endif
-  "}\n";
-static const char hbeat_basic_end[] PROGMEM =
-  "xpl-stat\n"
-  "{\n"
-  "hop=1\n"
-  "source=epsirt-test.io\n"
-  "target=*\n"
-  "}\n"
-  "hbeat.end\n"
-  "{\n"
-  "interval=5\n"
-  "version=" VERSION_SHORT "\n"
-#if CONFIG_HBEAT_BASIC_EXTENSION
-  "remote-addr=%s\n"
-#endif
-  "}\n";
-static const char hbeat_app[] PROGMEM =
-  "xpl-stat\n"
-  "{\n"
-  "hop=1\n"
-  "source=epsirt-test.io\n"
-  "target=*\n"
-  "}\n"
-  "hbeat.app\n"
-  "{\n"
-  "interval=5\n"
-  "port=%d\n"
-  "remote-ip=%s\n"
-  "version=" VERSION_SHORT "\n"
-  "}\n";
-static const char hbeat_app_end[] PROGMEM =
-  "xpl-stat\n"
-  "{\n"
-  "hop=1\n"
-  "source=epsirt-test.io\n"
-  "target=*\n"
-  "}\n"
-  "hbeat.end\n"
-  "{\n"
-  "interval=5\n"
-  "port=%d\n"
-  "remote-ip=%s\n"
-  "version=" VERSION_SHORT "\n"
-  "}\n";
+#define AVR_UTEST_TERM_PORT         "tty0"
+#define AVR_UTEST_TERM_BAUDRATE     500000
+#define AVR_UTEST_TERM_FLOW         SERIAL_FLOW_NONE
 
-/* macros =================================================================== */
-#ifndef __AVR__
-#define vTermInit()
-#define PSUCCESS() printf(success)
-#define PRINTF(fmt,...) printf(fmt,##__VA_ARGS__)
-#define SPRINTF(str,fmt,...) sprintf(str,fmt,##__VA_ARGS__)
-#define FFLUSH fflush
-#else
-static void vTermInit (void);
-#define PSUCCESS() printf_P (success)
-#define PRINTF(fmt,...) printf_P(PSTR(fmt),##__VA_ARGS__)
-#define SPRINTF(str,fmt,...) sprintf_P(str,fmt,##__VA_ARGS__)
-#define FFLUSH iFileFlush
-#endif
+#define AVR_UTEST_LED_PORT          PORTA
+#define AVR_UTEST_LED_DDR           DDRA
 
 /* private variables ======================================================== */
-static int test_count;
+static xDPin xResetPin = { .port = &AVR_XBEE_RESET_PORT, .pin = AVR_XBEE_RESET_PIN };
+
+#endif
+
+#define UTEST_COUNTER test_count
+#include <gxPL/utest.h>
+
+/* private variables ======================================================== */
 static char rpkt[256];
-static char hbeat[256];
-static char hbeat_end[256];
+static char hbeat[200];
+static char hbeat_end[200];
 
 /* api functions ============================================================ */
 gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type);
@@ -117,6 +48,8 @@ gxPLSetting * gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectTy
 
 /* private functions ======================================================== */
 static int prvIoCtl (gxPLIo * io, int c, ...);
+static void prvCopyAppHbeat (const char * addr, int port);
+static void prvCopyBasicHbeat (const char * addr);
 
 /* main ===================================================================== */
 int
@@ -129,84 +62,88 @@ main (int argc, char **argv) {
   gxPLIo * io;
 
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
-  vTermInit();
-  PRINTF ("\ngxPLIo test\n"
-          "Press any key to proceed...\n");
-  getchar();
+  UTEST_INIT();
+  UTEST_PRINTF ("\ngxPLIo test\n");
+  UTEST_PMEM_BEFORE();
+  UTEST_PRINTF ("Press any key to proceed...\n");
+  UTEST_WAIT();
 
   // retrieved the requested configuration
 #ifndef __AVR__
-  PRINTF ("\nTest %d: create new default setting > ",
-          ++test_count);
+  // TEST 1
+  UTEST_NEW ("create new default setting from command line args > ");
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
 #else
-  PRINTF ("\nTest %d: create new default setting for %s layer on %s > ",
-          ++test_count, AVR_IOLAYER_NAME, AVR_IOLAYER_PORT);
+  UTEST_NEW ("create new default setting for %s layer on %s > ",
+           AVR_IOLAYER_NAME, AVR_IOLAYER_PORT);
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
+  setting->xbee.reset = &xResetPin;
+  setting->log = LOG_NOTICE;
 #endif
   assert (setting);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
+  // TEST 2
   // opens the io layer
-  PRINTF ("\nTest %d: open io layer...\n", ++test_count);
+  UTEST_NEW ("open io layer...\n");
   io = gxPLIoOpen (setting);
   assert (io);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
+  // TEST 3
   // Get network informations
-  PRINTF ("\nTest %d: read local network address > ", ++test_count);
+  UTEST_NEW ("read local network address > ");
   ret = prvIoCtl (io, gxPLIoFuncGetNetInfo, &addr);
   assert (ret == 0);
   assert (addr.addrlen > 0);
-  PSUCCESS();
-  PRINTF ("\tlocal network address     : ");
+  UTEST_SUCCESS();
+  UTEST_PRINTF ("\tlocal network address     : ");
   ret = prvIoCtl (io, gxPLIoFuncNetAddrToString, &addr, &str);
   assert (ret == 0);
   assert (str);
-  PRINTF ("%s", str);
+  UTEST_PRINTF ("%s", str);
+
+  // Create heartbeat messages
   if (addr.family & gxPLNetFamilyInet) {
-    PRINTF (":%d\n", addr.port);
-    SPRINTF (hbeat, hbeat_app, addr.port, str);
-    SPRINTF (hbeat_end, hbeat_app_end, addr.port, str);
+    UTEST_PRINTF (":%d\n", addr.port);
+    prvCopyAppHbeat (str, addr.port);
   }
   else {
-#if CONFIG_HBEAT_BASIC_EXTENSION
-    SPRINTF (hbeat, hbeat_basic, str);
-    SPRINTF (hbeat_end, hbeat_basic_end, str);
-#else
-    SPRINTF (hbeat, hbeat_basic);
-    SPRINTF (hbeat_end, hbeat_basic_end);
-#endif
     putchar ('\n');
+    prvCopyBasicHbeat (str);
   }
 
-  PRINTF ("\nTest %d: convert previous string to network address > ", ++test_count);
+  // TEST 4
+  UTEST_NEW ("convert previous string to network address > ");
   ret = prvIoCtl (io, gxPLIoFuncNetAddrFromString, &addr1, str);
   assert (ret == 0);
   ret = memcmp (&addr, &addr1, sizeof (gxPLIoAddr));
   assert (str);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
-  PRINTF ("\nTest %d: read broadcast network address > ", ++test_count);
+  // TEST 5
+  UTEST_NEW ("read broadcast network address > ");
   ret = prvIoCtl (io, gxPLIoFuncGetBcastAddr, &addr);
   assert (ret == 0);
   assert (addr.addrlen > 0);
-  PSUCCESS();
-  PRINTF ("\tbroadcast network address : ");
+  UTEST_SUCCESS();
+  UTEST_PRINTF ("\tbroadcast network address : ");
   ret = prvIoCtl (io, gxPLIoFuncNetAddrToString, &addr, &str);
   assert (ret == 0);
   assert (str);
-  PRINTF ("%s\n", str);
+  UTEST_PRINTF ("%s\n", str);
 
-  PRINTF ("\nPress any key to send heartbeat message...\n");
-  getchar();
+  UTEST_PRINTF ("\nPress any key to send heartbeat message...\n");
+  UTEST_WAIT();
 
-  PRINTF ("\nTest %d: send heartbeat message > ", ++test_count);
+  // TEST 6
+  UTEST_NEW ("send heartbeat message > ");
   ret = gxPLIoSend (io, hbeat, strlen (hbeat), NULL);
   assert (ret > 0);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
-  PRINTF ("\nTest %d: wait response from hub", ++test_count);
+  // TEST 7
+  UTEST_NEW ("wait response from hub");
   available_bytes = 0;
   int count = 0;
   do {
@@ -214,40 +151,48 @@ main (int argc, char **argv) {
     ret = prvIoCtl (io, gxPLIoFuncPoll, &available_bytes, 1000);
     assert (ret == 0);
     count++;
-    FFLUSH (stdout);
+    UTEST_FFLUSH (stdout);
   }
   while ( (available_bytes == 0) && (count < 10));
   assert (available_bytes > 0);
-  FFLUSH (stdout);
-  PRINTF (" > %d bytes received\n", available_bytes);
+  UTEST_FFLUSH (stdout);
+  UTEST_PRINTF (" > %d bytes received\n", available_bytes);
 
-  PRINTF ("\nTest %d: read received packet > ", ++test_count);
+  // TEST 8
+  UTEST_NEW ("read received packet > ");
   assert (available_bytes < sizeof (rpkt));
   ret = gxPLIoRecv (io, rpkt, available_bytes, &addr);
   assert (ret > 0);
-  PSUCCESS();
-  PRINTF (">>>\n%s<<<\n", rpkt);
+  UTEST_SUCCESS();
+  UTEST_PRINTF (">>>\n%s<<<\n", rpkt);
 
-  PRINTF ("\nTest %d: send heartbeat-end message > ", ++test_count);
+  // TEST 9
+  UTEST_NEW ("send heartbeat-end message > ");
   ret = gxPLIoSend (io, hbeat_end, strlen (hbeat_end), NULL);
   assert (ret > 0);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
-  PRINTF ("\nTest %d: close io layer...\n", ++test_count);
+  // TEST 10
+  UTEST_PRINTF ("\nPress any key to close...\n");
+  UTEST_WAIT();
+
+  UTEST_NEW ("close io layer...\n");
   ret = gxPLIoClose (io);
   assert (ret == 0);
-  PSUCCESS();
+  UTEST_SUCCESS();
 
   if (setting->malloc) {
 
     free (setting);
-    PRINTF ("setting memory was freed\n");
+    UTEST_PRINTF ("setting memory was freed\n");
   }
 
-  PRINTF ("\n\n******************************************\n");
-  PRINTF ("**** All tests (%d) were successful ! ****\n", test_count);
-  PRINTF ("******************************************\n");
-  FFLUSH (stdout);
+  UTEST_PRINTF ("\n\n******************************************\n");
+  UTEST_PRINTF ("**** All tests (%d) were successful ! ****\n", test_count);
+  UTEST_PRINTF ("******************************************\n");
+  UTEST_PMEM_AFTER();
+  UTEST_FFLUSH (stdout);
+  UTEST_STOP();
   return 0;
 }
 
@@ -266,27 +211,56 @@ prvIoCtl (gxPLIo * io, int c, ...) {
   return ret;
 }
 
-#ifdef __AVR__
 // -----------------------------------------------------------------------------
-static int
-iTermInit (void) {
-  xSerialIos term_setting = {
-    .baud = AVR_TERM_BAUDRATE, .dbits = SERIAL_DATABIT_8,
-    .parity = SERIAL_PARITY_NONE, .sbits = SERIAL_STOPBIT_ONE,
-    .flow = AVR_TERM_FLOW, .eol = SERIAL_CRLF
-  };
-
-  vLedInit();
-  FILE * tc = xFileOpen (AVR_TERM_PORT, O_RDWR, &term_setting);
-  if (!tc) {
-    return -1;
-  }
-  stdout = tc;
-  stderr = tc;
-  stdin = tc;
-  sei();
-  return 0;
-}
+static const char hbeat_basic[] PROGMEM =
+  "xpl-stat\n"
+  "{\n"
+  "hop=1\n"
+  "source=epsirt-test.io\n"
+  "target=*\n"
+  "}\n"
+  "hbeat.%s\n"
+  "{\n"
+  "interval=5\n"
+  "version=" VERSION_SHORT "\n"
+#if CONFIG_HBEAT_BASIC_EXTENSION
+  "remote-addr=%s\n"
 #endif
+  "}\n";
+
+static const char hbeat_app[] PROGMEM =
+  "xpl-stat\n"
+  "{\n"
+  "hop=1\n"
+  "source=epsirt-test.io\n"
+  "target=*\n"
+  "}\n"
+  "hbeat.%s\n"
+  "{\n"
+  "interval=5\n"
+  "port=%d\n"
+  "remote-ip=%s\n"
+  "version=" VERSION_SHORT "\n"
+  "}\n";
+
+// -----------------------------------------------------------------------------
+static void
+prvCopyAppHbeat (const char * addr, int port) {
+
+  sprintf_P (hbeat, hbeat_app, "app", port, addr);
+  sprintf_P (hbeat_end, hbeat_app, "end", port, addr);
+}
+// -----------------------------------------------------------------------------
+static void
+prvCopyBasicHbeat (const char * addr) {
+
+#if CONFIG_HBEAT_BASIC_EXTENSION
+  sprintf_P (hbeat, hbeat_basic, "basic", addr);
+  sprintf_P (hbeat_end, hbeat_basic, "end", addr);
+#else
+  sprintf_P (hbeat, hbeat_basic, "basic");
+  sprintf_P (hbeat_end, hbeat_basic, "end");
+#endif
+}
 
 /* ========================================================================== */
