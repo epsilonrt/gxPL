@@ -26,34 +26,6 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="3rdparty">
-    <VirtualDirectory Name="sysio">
-      <VirtualDirectory Name="src">
-        <VirtualDirectory Name="posix">
-          <File Name="3rdparty/sysio/src/posix/serial.c"/>
-          <File Name="3rdparty/sysio/src/posix/delay.c"/>
-          <File Name="3rdparty/sysio/src/posix/log.c"/>
-        </VirtualDirectory>
-        <File Name="3rdparty/sysio/src/xbee.c"/>
-        <File Name="3rdparty/sysio/src/serial.c"/>
-        <File Name="3rdparty/sysio/src/dlist.c"/>
-        <File Name="3rdparty/sysio/src/vector.c"/>
-        <File Name="3rdparty/sysio/src/xbee2.c"/>
-        <File Name="3rdparty/sysio/src/xbee1.c"/>
-        <File Name="3rdparty/sysio/src/xbee_private.h"/>
-      </VirtualDirectory>
-      <File Name="3rdparty/sysio/dlist.h"/>
-      <File Name="3rdparty/sysio/defs.h"/>
-      <File Name="3rdparty/sysio/vector.h"/>
-      <File Name="3rdparty/sysio/LICENCE"/>
-      <File Name="3rdparty/sysio/xbee.h"/>
-      <File Name="3rdparty/sysio/AUTHORS"/>
-      <File Name="3rdparty/sysio/LICENSE"/>
-      <File Name="3rdparty/sysio/sysio-version.txt"/>
-      <File Name="3rdparty/sysio/serial.h"/>
-      <File Name="3rdparty/sysio/log.h"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <VirtualDirectory Name="src">
     <VirtualDirectory Name="sys">
       <VirtualDirectory Name="unix">

@@ -23,7 +23,6 @@ static int heap_before;
 #ifdef __AVR__
 // -----------------------------------------------------------------------------
 #include <avr/pgmspace.h>
-#include <avrio/memdebug.h>
 
 /* macros =================================================================== */
 #define SPRINTF(str,fmt,...) sprintf_P(str,fmt,##__VA_ARGS__)
@@ -77,7 +76,6 @@ prvLedFlash (void) {
 
 #else /* __AVR__ not defined */
 // -----------------------------------------------------------------------------
-#include <malloc.h>
 #define UTEST_PRINTF(fmt,...) printf(fmt,##__VA_ARGS__)
 #define UTEST_NEW(fmt,...) UTEST_PRINTF("\nTest %d: "fmt,++UTEST_COUNTER,##__VA_ARGS__)
 #define UTEST_SUCCESS() UTEST_PRINTF("Success\n")
@@ -120,13 +118,7 @@ INLINE void
 UTEST_PMEM_BEFORE (void) {
 #if !defined(NLOG)
 
-#if defined(__AVR__)
-  heap_before = ulMemoryUsed();
-#else
-  struct mallinfo mi = mallinfo();
-  heap_before = mi.uordblks;
-#endif
-
+  heap_before = gxPLDynamicMemoryUsed();
   UTEST_PRINTF ("Dynamic memory used before %d bytes\n", heap_before);
 #endif
 }
@@ -135,14 +127,9 @@ UTEST_PMEM_BEFORE (void) {
 INLINE void
 UTEST_PMEM_AFTER (void) {
 #if !defined(NLOG)
-  static int heap_after;
-#if defined(__AVR__)
-  heap_after = ulMemoryUsed();
-#else
-  struct mallinfo mi = mallinfo();
-  heap_after = mi.uordblks;
-#endif
 
+  static int heap_after;
+  heap_after = gxPLDynamicMemoryUsed();
   UTEST_PRINTF ("Dynamic memory used: before %d - after %d - loss %d\n",
                 heap_before, heap_after, heap_after - heap_before);
 #endif

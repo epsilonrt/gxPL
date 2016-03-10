@@ -7,6 +7,9 @@
 # Target Name (without extension).
 TARGET = gxpl-test-avr-core
 
+# Enable logging messages (if OFF no display is performed)
+LOG = ON
+
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
 
@@ -36,7 +39,13 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = __ASSERT_USE_STDERR
+AVRIO_CONFIG  =
+
+ifeq ($(LOG),ON)
+AVRIO_CONFIG += __ASSERT_USE_STDERR
+else
+AVRIO_CONFIG += NLOG
+endif
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF

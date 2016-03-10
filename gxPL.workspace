@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="gxPL" Database="" SWTLW="No">
+<CodeLite_Workspace Name="gxPL" Database="">
   <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="Yes"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
@@ -21,7 +21,8 @@
   <Project Name="gxpl-config-clock-avr" Path="examples/avr/config-clock/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-clock-avr" Path="examples/avr/clock/gxpl-clock-avr.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxPLibAvr" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
@@ -43,6 +44,7 @@
       <Project Name="gxpl-clock-avr" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxPLibAvr" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>

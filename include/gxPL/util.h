@@ -280,7 +280,7 @@ int gxPLSchemaIsEmpty (const gxPLSchema * schema);
  */
 /**
  * @brief System time
- * This time can be an absolute time (a date) or relative to the system startup 
+ * This time can be an absolute time (a date) or relative to the system startup
  * (on embedded platform, for example)
  * @return time in seconds
  */
@@ -307,12 +307,45 @@ char * gxPLTimeStr (unsigned long t);
  */
 int gxPLTimeDelayMs (unsigned long ms);
 
+
 /**
  * @}
  */
 /**
  * @}
  */
+
+#if !defined(__DOXYGEN__)
+// -----------------------------------------------------------------------------
+
+#if defined(__AVR__)
+// -----------------------------------------------------------------------------
+#include <avrio/memdebug.h>
+
+INLINE int
+gxPLDynamicMemoryUsed (void) {
+  
+  return ulMemoryUsed();
+}
+#elif (__unix__)
+// -----------------------------------------------------------------------------
+#include <malloc.h>
+
+INLINE int
+gxPLDynamicMemoryUsed (void) {
+  
+  struct mallinfo mi = mallinfo();
+  return mi.uordblks;
+}
+#else /* __unix__ && __AVR__ not defined */
+// -----------------------------------------------------------------------------
+INLINE int
+gxPLDynamicMemoryUsed (void) {
+  return -1;
+}
+#endif /* __unix__ && __AVR__ not defined */
+// -----------------------------------------------------------------------------
+#endif /* !defined(__DOXYGEN__) */
 
 /* ========================================================================== */
 __END_C_DECLS

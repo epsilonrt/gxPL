@@ -68,9 +68,9 @@ main (int argc, char **argv) {
   UTEST_PRINTF ("Press any key to proceed...\n");
   UTEST_WAIT();
 
+  // TEST 1
   // retrieved the requested configuration
 #ifndef __AVR__
-  // TEST 1
   UTEST_NEW ("create new default setting from command line args > ");
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
 #else

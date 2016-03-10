@@ -7,6 +7,9 @@
 # Target Name (without extension).
 TARGET = gxpl-test-avr-io
 
+# Enable logging messages (if OFF no display is performed)
+LOG = OFF
+
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
 
@@ -36,7 +39,13 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-#AVRIO_CONFIG  = __ASSERT_USE_STDERR
+AVRIO_CONFIG  =
+
+ifeq ($(LOG),ON)
+AVRIO_CONFIG += __ASSERT_USE_STDERR
+else
+AVRIO_CONFIG += NLOG
+endif
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -76,7 +85,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c avrio/memdebug.c
+SRC  = $(TARGET).c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
@@ -91,8 +100,7 @@ CPPSRC =
 ASRC = 
 
 # Place -D or -U options here for C sources
-#CDEFS += -DNSTDOUT -DNLOG -DNSTDIN
-CDEFS += -DNLOG
+CDEFS += 
 
 # Place -D or -U options here for ASM sources
 ADEFS +=

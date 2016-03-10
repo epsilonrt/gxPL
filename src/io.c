@@ -16,15 +16,12 @@
 #define GXPL_IO_INTERNALS
 #include "io_p.h"
 
-/* macros =================================================================== */
-/* constants ================================================================ */
 /* structures =============================================================== */
 typedef struct ioitem {
   char * name;
   gxPLIoOps * ops;
 } ioitem;
 
-/* types ==================================================================== */
 /* private variables ======================================================== */
 static xDList iolist;
 
@@ -138,6 +135,7 @@ gxPLIoLayerList (void) {
   assert (list);
   list->malloc = 1;
 
+  // copy iolist pointers to vector
   if (iVectorInit (list, count, NULL, NULL) == 0) {
     if (iVectorInitSearch (list, prvIoNameKey, prvNameMatch) == 0) {
       if (count > 0) {
