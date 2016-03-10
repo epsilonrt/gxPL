@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <avr/pgmspace.h>
 #include <avrio/xbee.h>
 #include <avrio/task.h>
 #include <avrio/mutex.h>
@@ -37,22 +38,12 @@ typedef struct xbeezb_data {
   volatile int fid; // frame id
 
   xTaskHandle task;
-  xMutex mutex;
 } xbeezb_data;
 
 /* macros =================================================================== */
 #define dp ((xbeezb_data *)io->pdata)
 
 /* private functions ======================================================== */
-
-// -----------------------------------------------------------------------------
-static void
-prvAlarmTask (xTaskHandle t) {
-  xbeezb_data * d = (xbeezb_data *) pvTaskGetUserData (t);
-
-  vMutexUnlock (&d->mutex);
-}
-
 
 // -----------------------------------------------------------------------------
 // gxPLNetFamilyZigbee16: xx:xx
@@ -195,33 +186,27 @@ prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
 }
 
 // -----------------------------------------------------------------------------
-static void
-prvAlarm (gxPLIo * io, unsigned int timeout_ms) {
-
-  vTaskStop (dp->task);
-  vMutexUnlock (&dp->mutex);
-  vMutexLock (&dp->mutex);
-
-  if (timeout_ms > 0) {
-
-    vTaskSetInterval (dp->task, xTaskConvertTicks (timeout_ms));
-    vTaskStart (dp->task);
-  }
-}
-
-// -----------------------------------------------------------------------------
 static int
-prvWaitPacket (gxPLIo * io, xXBeePkt ** pkt, unsigned int timeout_ms) {
+prvWaitPacket (gxPLIo * io, xXBeePkt ** pkt, int timeout_ms) {
 
   if (*pkt == NULL) {
     int ret = 0;
+    bool xStarted;
 
-    prvAlarm (io, timeout_ms);
-    while ( (*pkt == NULL) && (ret == 0) && (xMutexTryLock (&dp->mutex) != 0)) {
+    if (timeout_ms > 0) {
+
+      ATOMIC_BLOCK (ATOMIC_RESTORESTATE) {
+        vTaskSetInterval (dp->task, xTaskConvertTicks (timeout_ms));
+        vTaskStart (dp->task);
+      }
+    }
+    do  {
 
       // loop until AT response was received (or timeout or error)
       ret = iXBeePoll (dp->xbee, 0);
+      xStarted = xTaskIsStarted (dp->task);
     }
+    while ( (*pkt == NULL) && (ret == 0) && xStarted);
   }
   return 0;
 }
@@ -360,8 +345,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     vXBeeSetUserContext (xbee, io);
     vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
 
-    dp->mutex = MUTEX_INITIALIZER;
-    dp->task = xTaskCreate (0, prvAlarmTask);
+    dp->task = xTaskCreate (0, NULL);
     assert (dp->task != AVRIO_KERNEL_ERROR);
 
     if ( (io->setting->xbee.reset) || (io->setting->xbee.sw_reset)) {
@@ -592,7 +576,7 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
     PERROR ("XBee deliver %d", fid);
   }
   else {
-    
+
     dp->fid = fid;
     PDEBUG ("Send frame #%d", fid);
   }
@@ -689,15 +673,8 @@ ops = {
 // -----------------------------------------------------------------------------
 void __gxplio_init
 gxPLXBeeZbInit (void) {
-#ifdef DEBUG
-  vLedInit();
-  vLedSet (LED_LED0);
-  if (gxPLIoRegister (IO_NAME, &ops) == 0) {
-    vLedSet (LED_LED1);
-  }
-#else
+
   (void) gxPLIoRegister (IO_NAME, &ops);
-#endif
 }
 
 // -----------------------------------------------------------------------------
