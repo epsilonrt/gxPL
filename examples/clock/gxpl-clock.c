@@ -20,7 +20,7 @@
 
 /* private variables ======================================================== */
 static gxPLApplication * app;
-static gxPLDevice * clk;
+static gxPLDevice * device;
 static gxPLMessage * message;
 
 /* private functions ======================================================== */
@@ -41,28 +41,28 @@ main (int argc, char * argv[]) {
   app = gxPLAppOpen (setting);
   if (app == NULL) {
 
-    fprintf (stderr, "Unable to start xPL");
+    PERROR ("Unable to start xPL");
     exit (EXIT_FAILURE);
   }
 
   // Initialize clock device
   // Create  a device for us
-  clk = gxPLAppAddDevice (app, "epsirt", "clock", NULL);
-  assert (clk);
+  device = gxPLAppAddDevice (app, "epsirt", "clock", NULL);
+  assert (device);
 
-  ret = gxPLDeviceVersionSet (clk, CLOCK_VERSION);
+  ret = gxPLDeviceVersionSet (device, CLOCK_VERSION);
   assert (ret == 0);
 
-  ret = gxPLDeviceReportOwnMessagesSet (clk, REPORT_OWN_MESSAGE);
+  ret = gxPLDeviceReportOwnMessagesSet (device, REPORT_OWN_MESSAGE);
   assert (ret == 0);
 
   // Add a responder for time setting
-  ret = gxPLDeviceListenerAdd (clk, prvMessageListener, gxPLMessageAny,
+  ret = gxPLDeviceListenerAdd (device, prvMessageListener, gxPLMessageAny,
                                "clock", NULL, NULL);
   assert (ret == 0);
 
   // Create a message to send
-  message = gxPLDeviceMessageNew (clk, gxPLMessageStatus);
+  message = gxPLDeviceMessageNew (device, gxPLMessageStatus);
   assert (message);
   // Setting up the message
   ret = gxPLMessageBroadcastSet (message, true);
@@ -75,7 +75,7 @@ main (int argc, char * argv[]) {
   signal (SIGINT, prvSignalHandler);
 
   // Enable the device
-  ret = gxPLDeviceEnable (clk, true);
+  ret = gxPLDeviceEnable (device, true);
   assert (ret == 0);
 
   // Main Loop of Clock Action
@@ -94,7 +94,7 @@ main (int argc, char * argv[]) {
 static void
 prvSendTick (void) {
   
-  if (gxPLDeviceIsHubConfirmed (clk) == true) {
+  if (gxPLDeviceIsHubConfirmed (device) == true) {
     static time_t last;
     time_t now = time (NULL);
 
@@ -111,7 +111,7 @@ prvSendTick (void) {
       gxPLMessagePairSet (message, "time", str);
 
       // Broadcast the message
-      gxPLDeviceMessageSend (clk, message);
+      gxPLDeviceMessageSend (device, message);
 
       // And reset when we last sent the clock update
       last = now;
@@ -124,7 +124,7 @@ prvSendTick (void) {
 static void
 prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) {
 
-  printf ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
+  PINFO ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
           gxPLMessageSourceVendorIdGet (msg),
           gxPLMessageSourceDeviceIdGet (msg),
           gxPLMessageSourceInstanceIdGet (msg),

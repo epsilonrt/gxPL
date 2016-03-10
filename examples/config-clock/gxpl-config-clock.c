@@ -199,7 +199,7 @@ prvConfigChanged (gxPLDevice * device, void * udata) {
 static void
 prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) {
 
-  printf ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
+  PINFO ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
           gxPLMessageSourceVendorIdGet (msg),
           gxPLMessageSourceDeviceIdGet (msg),
           gxPLMessageSourceInstanceIdGet (msg),
@@ -228,7 +228,7 @@ prvSignalHandler (int s) {
 static void
 prvSendTick (void) {
 
-  if ( (tick_rate > 0) && (started))  {
+  if ( (tick_rate > 0) && (started) && gxPLDeviceIsHubConfirmed (device))  {
     static time_t last;
     time_t now = time (NULL);
 
