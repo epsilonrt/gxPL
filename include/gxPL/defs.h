@@ -21,6 +21,7 @@
 #if defined(ARCH_ARM_RASPBERRYPI)
 #include <sysio/doutput.h>
 #endif
+#define GXPL_TARGET_STR "unix"
 #elif defined(__AVR__)
 #include <avrio/defs.h>
 #include <avrio/vector.h>
@@ -31,6 +32,7 @@
 #include <avrio/log.h>
 #include <avrio/delay.h>
 #define NAME_MAX 16
+#define GXPL_TARGET_STR "avr"
 #else
 #error This target platform is not supported.
 #endif
