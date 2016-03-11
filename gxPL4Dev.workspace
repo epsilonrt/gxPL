@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="gxPL4Dev" Database="">
-  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="Yes"/>
+  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
-  <Project Name="gxpl-test-message" Path="test/message/gxpl-test-message.project" Active="No"/>
-  <Project Name="gxpl-test-core" Path="test/core/gxpl-test-core.project" Active="No"/>
-  <Project Name="gxpl-test-device" Path="test/device/gxpl-test-device.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
-  <Project Name="gxpl-test-avr-core" Path="test/avr/core/gxpl-test-avr-core.project" Active="No"/>
-  <Project Name="gxpl-test-avr-device" Path="test/avr/device/gxpl-test-avr-device.project" Active="No"/>
-  <Project Name="gxpl-test-avr-message" Path="test/avr/message/gxpl-test-avr-message.project" Active="No"/>
   <Project Name="gxpl-clock-avr" Path="examples/avr/clock/gxpl-clock-avr.project" Active="No"/>
   <Project Name="gxpl-config-clock-avr" Path="examples/avr/config-clock/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-clock" Path="examples/clock/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/gxpl-config-clock.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="No"/>
-  <Project Name="gxpl-test-avr-io" Path="test/avr/io/gxpl-test-avr-io.project" Active="No"/>
-  <Project Name="gxpl-test-io" Path="test/io/gxpl-test-io.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
   <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
   <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
   <Project Name="gxpl-logger" Path="tools/logger/gxpl-logger.project" Active="No"/>
   <Project Name="gxpl-sender" Path="tools/sender/gxpl-sender.project" Active="No"/>
+  <Project Name="gxpl-test-io-unix" Path="test/io/unix/gxpl-test-io-unix.project" Active="No"/>
+  <Project Name="gxpl-test-io-avr" Path="test/io/avr/gxpl-test-io-avr.project" Active="No"/>
+  <Project Name="gxpl-test-message-unix" Path="test/message/unix/gxpl-test-message-unix.project" Active="No"/>
+  <Project Name="gxpl-test-message-avr" Path="test/message/avr/gxpl-test-message-avr.project" Active="No"/>
+  <Project Name="gxpl-test-core-avr" Path="test/core/avr/gxpl-test-core-avr.project" Active="No"/>
+  <Project Name="gxpl-test-core-unix" Path="test/core/unix/gxpl-test-core-unix.project" Active="No"/>
+  <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="Yes"/>
+  <Project Name="gxpl-test-device-avr" Path="test/device/avr/gxpl-test-device-avr.project" Active="No"/>
+  <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxPLibAvr" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
       <Project Name="gxpl-test-message" ConfigName="Debug"/>
       <Project Name="gxpl-test-core" ConfigName="Debug"/>
-      <Project Name="gxpl-test-device" ConfigName="Debug"/>
       <Project Name="gxpl-test-hub" ConfigName="Debug"/>
       <Project Name="gxpl-test-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-core" ConfigName="Debug"/>
-      <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-message" ConfigName="Debug"/>
       <Project Name="gxpl-clock-avr" ConfigName="Debug"/>
       <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
@@ -52,19 +52,26 @@
       <Project Name="gxpl-hub" ConfigName="Debug"/>
       <Project Name="gxpl-logger" ConfigName="Debug"/>
       <Project Name="gxpl-sender" ConfigName="Debug"/>
+      <Project Name="gxpl-test-io-unix" ConfigName="Debug"/>
+      <Project Name="gxpl-test-io-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-test-message-unix" ConfigName="Debug"/>
+      <Project Name="gxpl-test-message-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-test-core-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-test-core-unix" ConfigName="Debug"/>
+      <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
+      <Project Name="gxpl-test-device" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxPLibAvr" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
       <Project Name="gxpl-test-message" ConfigName="Release"/>
       <Project Name="gxpl-test-core" ConfigName="Release"/>
-      <Project Name="gxpl-test-device" ConfigName="Release"/>
       <Project Name="gxpl-test-hub" ConfigName="Release"/>
       <Project Name="gxpl-test-bridge" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-core" ConfigName="Release"/>
-      <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-message" ConfigName="Release"/>
       <Project Name="gxpl-clock-avr" ConfigName="Release"/>
       <Project Name="gxpl-config-clock-avr" ConfigName="Release"/>
@@ -79,6 +86,14 @@
       <Project Name="gxpl-hub" ConfigName="Release"/>
       <Project Name="gxpl-logger" ConfigName="Release"/>
       <Project Name="gxpl-sender" ConfigName="Release"/>
+      <Project Name="gxpl-test-io-unix" ConfigName="Release"/>
+      <Project Name="gxpl-test-io-avr" ConfigName="Release"/>
+      <Project Name="gxpl-test-message-unix" ConfigName="Release"/>
+      <Project Name="gxpl-test-message-avr" ConfigName="Release"/>
+      <Project Name="gxpl-test-core-avr" ConfigName="Release"/>
+      <Project Name="gxpl-test-core-unix" ConfigName="Release"/>
+      <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
+      <Project Name="gxpl-test-device" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

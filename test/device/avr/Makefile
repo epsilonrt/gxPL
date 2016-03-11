@@ -5,10 +5,10 @@
 ###############################################################################
 
 # Target Name (without extension).
-TARGET = gxpl-test-avr-io
+TARGET = gxpl-test-device-avr
 
 # Enable logging messages (if OFF no display is performed)
-LOG = OFF
+LOG = ON
 
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
@@ -39,7 +39,7 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  =
+AVRIO_CONFIG  = 
 
 ifeq ($(LOG),ON)
 AVRIO_CONFIG += __ASSERT_USE_STDERR
@@ -85,7 +85,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = test/device/gxpl-test-device.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
@@ -100,7 +100,7 @@ CPPSRC =
 ASRC = 
 
 # Place -D or -U options here for C sources
-CDEFS += 
+CDEFS +=
 
 # Place -D or -U options here for ASM sources
 ADEFS +=
@@ -119,7 +119,7 @@ EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/avr
 
 #---------------- Library Options ----------------
 # Enable linking with gxPL library (ON/OFF)
-#USE_GXPL_LIB = ON
+USE_GXPL_LIB = ON
 
 # List any extra directories to look for libraries here.
 #     Each directory must be seperated by a space.

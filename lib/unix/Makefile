@@ -463,7 +463,7 @@ clean_list_lib:
 	@$(REMOVE) $(TARGET_LIB_PATH).so
 	@$(REMOVE) $(TARGET_LIB_PATH).map
 	@$(REMOVEDIR) $(DEPDIRS)
-	@$(REMOVEDIR) $(OBJDIRS)
+	@$(REMOVEDIR) $(OBJDIR)
 
 clean_list :
 	@echo "$(MSG_CLEANING) $(TARGET)"
@@ -472,7 +472,7 @@ clean_list :
 	@$(REMOVE) $(TARGET_PATH).sym
 	@$(REMOVE) $(TARGET_PATH).lss
 	@$(REMOVEDIR) $(DEPDIRS)
-	@$(REMOVEDIR) $(OBJDIRS)
+	@$(REMOVEDIR) $(OBJDIR)
 
 distclean_list :
 	@$(REMOVE) *.bak

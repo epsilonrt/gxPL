@@ -72,7 +72,7 @@ main (int argc, char **argv) {
 
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
   UTEST_INIT();
-  UTEST_PRINTF ("\ngxPLCore test\n");
+  UTEST_PRINTF ("\ngxPLCore test (%s)\n", GXPL_TARGET_STR);
   UTEST_PMEM_BEFORE();
   UTEST_PRINTF ("Press any key to proceed...\n");
   UTEST_WAIT();

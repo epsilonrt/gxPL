@@ -1,30 +1,33 @@
 /**
- * @file
- * gxPLMessage test
- *
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
- * All rights reserved.
- * Licensed under the Apache License, Version 2.0 (the "License")
- */
+* @file
+* gxPLMessage test
+*
+* Copyright 2015 (c), Pascal JEAN aka epsilonRT
+* All rights reserved.
+* Licensed under the Apache License, Version 2.0 (the "License")
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gxPL/message.h>
 #include <gxPL/util.h>
 
-/* macros =================================================================== */
-#define test(t) do { \
-    if (!t) { \
-      fprintf (stderr, "line %d in %s: test %d failed !\n",  __LINE__, __FUNCTION__, test_count); \
-      exit (EXIT_FAILURE); \
-    } \
-    else { \
-      printf ("test %d success !\n", test_count); \
-    } \
-  } while (0)
+#ifdef __AVR__
+/* constants ================================================================ */
+#define AVR_UTEST_TERM_PORT         "tty0"
+#define AVR_UTEST_TERM_BAUDRATE     500000
+#define AVR_UTEST_TERM_FLOW         SERIAL_FLOW_NONE
+#endif
+
+#define UTEST_COUNTER test_count
+#include <gxPL/utest.h>
 
 /* private variables ======================================================== */
-static int test_count;
+static const gxPLId source = {
+  .vendor = "epsirt",
+  .device = "test",
+  .instance = "message"
+};
 
 /* main ===================================================================== */
 int
@@ -34,44 +37,57 @@ main (int argc, char **argv) {
   char * str = NULL;
   const char * cstr = NULL;
 
-  test_count++;
+  vLogSetMask (LOG_UPTO (LOG_DEBUG));
+  UTEST_INIT();
+  UTEST_PRINTF ("\ngxPLMessage test (%s)\n", GXPL_TARGET_STR);
+  UTEST_PMEM_BEFORE();
+  UTEST_PRINTF ("Press any key to proceed...\n");
+  UTEST_WAIT();
+
+  UTEST_NEW ("gxPLMessageNew() > ");
   m = gxPLMessageNew (gxPLMessageTrigger);
-  test (m);
+  assert (m);
+  UTEST_SUCCESS();
 
-  // Tests for type
-  test_count++;
+// Tests for type
+  UTEST_NEW ("gxPLMessageTypeGet() > ");
   ret = gxPLMessageTypeGet (m);
-  test (ret == gxPLMessageTrigger);
+  assert (ret == gxPLMessageTrigger);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTypeSet(m,gxPLMessageStatus) > ");
   ret = gxPLMessageTypeSet (m, gxPLMessageStatus);
-  test (ret == 0);
+  assert (ret == 0);
   ret = gxPLMessageTypeGet (m);
-  test (ret == gxPLMessageStatus);
+  assert (ret == gxPLMessageStatus);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTypeSet(m,gxPLMessageCommand) > ");
   ret = gxPLMessageTypeSet (m, gxPLMessageCommand);
-  test (ret == 0);
+  assert (ret == 0);
   ret = gxPLMessageTypeGet (m);
-  test (ret == gxPLMessageCommand);
+  assert (ret == gxPLMessageCommand);
+  UTEST_SUCCESS();
 
-  // Tests for hop
-  test_count++;
+// Tests for hop
+  UTEST_NEW ("gxPLMessageHopGet() > ");
   ret = gxPLMessageHopGet (m);
-  test (ret == 1);
-  
-  test_count++;
+  assert (ret == 1);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessageHopInc() > ");
   ret = gxPLMessageHopInc (m);
-  test (ret == 0);
+  assert (ret == 0);
   ret = gxPLMessageHopGet (m);
-  test (ret == 2);
+  assert (ret == 2);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageHopSet() > ");
   ret = gxPLMessageHopSet (m, 1);
-  test (ret == 0);
+  assert (ret == 0);
   ret = gxPLMessageHopGet (m);
-  test (ret == 1);
-
+  assert (ret == 1);
+  UTEST_SUCCESS();
 
   const char large_text[] = "012345678901234567890123456789";
   gxPLId source = { .vendor = "xpl", .device = "xplhal", .instance = "myhouse" };
@@ -79,283 +95,280 @@ main (int argc, char **argv) {
   gxPLId empty_id  = { .vendor = "", .device = "", .instance = "" };
   const gxPLId * pid;
 
-  // Tests for source
-  test_count++;
+// Tests for source
+  UTEST_NEW ("gxPLMessageSourceIdGet() > ");
   pid = gxPLMessageSourceIdGet (m);
-  test (pid);
-  
-  test_count++;
+  assert (pid);
   ret = gxPLIdCmp (&empty_id, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSourceIdSet() > ");
   ret = gxPLMessageSourceIdSet (m, &source);
-  test (ret == 0);
-  
-  test_count++;
+  assert (ret == 0);
   pid = gxPLMessageSourceIdGet (m);
-  test (pid);
-  
-  test_count++;
+  assert (pid);
   ret = gxPLIdCmp (&source, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSourceVendorIdSet() > ");
   ret = gxPLMessageSourceVendorIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&source, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSourceDeviceIdSet() > ");
   ret = gxPLMessageSourceDeviceIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&source, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSourceInstanceIdSet() > ");
   ret = gxPLMessageSourceInstanceIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&source, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  // Tests for target
-  test_count++;
+// Tests for target
+  UTEST_NEW ("gxPLMessageTargetIdGet() > ");
   pid = gxPLMessageTargetIdGet (m);
-  test (pid);
-  
-  test_count++;
+  assert (pid);
   ret = gxPLIdCmp (&empty_id, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTargetIdSet() > ");
   ret = gxPLMessageTargetIdSet (m, &target);
-  test (ret == 0);
-  
-  test_count++;
+  assert (ret == 0);
   pid = gxPLMessageTargetIdGet (m);
-  test (pid);
-  
-  test_count++;
+  assert (pid);
   ret = gxPLIdCmp (&target, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTargetVendorIdSet() > ");
   ret = gxPLMessageTargetVendorIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&target, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTargetDeviceIdSet() > ");
   ret = gxPLMessageTargetDeviceIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&target, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageTargetInstanceIdSet() > ");
   ret = gxPLMessageTargetInstanceIdSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLIdCmp (&target, pid);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  // Tests for schema
+// Tests for schema
   gxPLSchema schema = { .class = "x10", .type = "basic" };
   gxPLSchema empty_schema = { .class = "", .type = "" };
   const gxPLSchema * psch;
-  
-  test_count++;
+
+
+  UTEST_NEW ("gxPLMessageSchemaGet() > ");
   psch = gxPLMessageSchemaGet (m);
-  test (psch);
-  
-  test_count++;
+  assert (psch);
   ret = gxPLSchemaCmp (&empty_schema, psch);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSchemaCopy() > ");
   ret = gxPLMessageSchemaCopy (m, &schema);
-  test (ret == 0);
-  
-  test_count++;
+  assert (ret == 0);
   psch = gxPLMessageSchemaGet (m);
-  test (psch);
-  
-  test_count++;
+  assert (psch);
   ret = gxPLSchemaCmp (&schema, psch);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSchemaClassSet() > ");
   ret = gxPLMessageSchemaClassSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLSchemaCmp (&schema, psch);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessageSchemaTypeSet() > ");
   ret = gxPLMessageSchemaTypeSet (m, large_text);
-  test (ret == -1);
+  assert (ret == -1);
   ret = gxPLSchemaCmp (&schema, psch);
-  test (ret == 0);
-  
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  // Tests for body
-  test_count++;
-  ret = gxPLMessageBodySize(m);
-  test (ret == 0);
-  
-  test_count++;
-  ret = gxPLMessagePairAdd(m, "command", "dim");
-  test (ret == 0);
-
-  test_count++;
+// Tests for body
+  UTEST_NEW ("gxPLMessageBodySize() > ");
   ret = gxPLMessageBodySize (m);
-  test (ret == 1);
-  
-  test_count++;
-  ret = gxPLMessagePairExist(m, "command");
-  test (ret == true);
-  
-  test_count++;
-  ret = gxPLMessagePairExist(m, "none");
-  test (ret == false);
-  
-  test_count++;
-  cstr = gxPLMessagePairGet(m, "command");
-  test (cstr);
-  ret = strcmp (cstr, "dim");
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
-  ret = gxPLMessagePairSet(m, "command", "test");
-  test (ret == 0);
-  cstr = gxPLMessagePairGet(m, "command");
-  test (cstr);
+  UTEST_NEW ("gxPLMessagePairAdd() > ");
+  ret = gxPLMessagePairAdd (m, "command", "dim");
+  assert (ret == 0);
+  ret = gxPLMessageBodySize (m);
+  assert (ret == 1);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessagePairExist() > ");
+  ret = gxPLMessagePairExist (m, "command");
+  assert (ret == true);
+  ret = gxPLMessagePairExist (m, "none");
+  assert (ret == false);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessagePairGet() > ");
+  cstr = gxPLMessagePairGet (m, "command");
+  assert (cstr);
+  ret = strcmp (cstr, "dim");
+  assert (ret == 0);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessagePairSet() > ");
+  ret = gxPLMessagePairSet (m, "command", "test");
+  assert (ret == 0);
+  cstr = gxPLMessagePairGet (m, "command");
+  assert (cstr);
   ret = strcmp (cstr, "test");
-  test (ret == 0);
-  
-  test_count++;
+  assert (ret == 0);
+  UTEST_SUCCESS();
+
   char buf[64];
   sprintf (buf, "HelloWorld0x%X---%s", 1234, "Ok");
+
+  UTEST_NEW ("gxPLMessagePairSetFormat() > ");
   ret = gxPLMessagePairSetFormat (m, "command", "HelloWorld0x%X---%s", 1234, "Ok");
-  test (ret == 0);
-  cstr = gxPLMessagePairGet(m, "command");
-  test (cstr);
-  printf ("%s -> %s\n", buf, cstr);
+  assert (ret == 0);
+  cstr = gxPLMessagePairGet (m, "command");
+  assert (cstr);
+  UTEST_PRINTF ("%s -> %s\n", buf, cstr);
   ret = strcmp (cstr, buf);
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
-  ret = gxPLMessagePairSet(m, "command", "dim");
-  test (ret == 0);
-  cstr = gxPLMessagePairGet(m, "command");
-  test (cstr);
+  UTEST_NEW ("gxPLMessagePairSet() > ");
+  ret = gxPLMessagePairSet (m, "command", "dim");
+  assert (ret == 0);
+  cstr = gxPLMessagePairGet (m, "command");
+  assert (cstr);
   ret = strcmp (cstr, "dim");
-  test (ret == 0);
-  
-  test_count++;
-  ret = gxPLMessagePairAdd(m, "device", "a1");
-  test (ret == 0);
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  test_count++;
+  UTEST_NEW ("gxPLMessagePairAdd() > ");
+  ret = gxPLMessagePairAdd (m, "device", "a1");
+  assert (ret == 0);
   ret = gxPLMessageBodySize (m);
-  test (ret == 2);
-  
-  test_count++;
-  ret = gxPLMessagePairAdd(m, "level", "75");
-  test (ret == 0);
-
-  test_count++;
+  assert (ret == 2);
+  ret = gxPLMessagePairAdd (m, "level", "75");
+  assert (ret == 0);
   ret = gxPLMessageBodySize (m);
-  test (ret == 3);
+  assert (ret == 3);
+  UTEST_SUCCESS();
 
-  // Test Received
-  test_count++;
-  ret = gxPLMessageIsReceived(m);
-  test(ret == false);
-  ret = gxPLMessageReceivedSet(m, true);
-  test(ret == 0);
-  ret = gxPLMessageIsReceived(m);
-  test(ret == true);
-  ret = gxPLMessageReceivedSet(m, false);
-  test(ret == 0);
-  ret = gxPLMessageIsReceived(m);
-  test(ret == false);
+// Test Received
+  UTEST_NEW ("gxPLMessageIsReceived() > ");
+  ret = gxPLMessageIsReceived (m);
+  assert (ret == false);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessageReceivedSet() > ");
+  ret = gxPLMessageReceivedSet (m, true);
+  assert (ret == 0);
+  ret = gxPLMessageIsReceived (m);
+  assert (ret == true);
+  ret = gxPLMessageReceivedSet (m, false);
+  assert (ret == 0);
+  ret = gxPLMessageIsReceived (m);
+  assert (ret == false);
+  UTEST_SUCCESS();
 
   // Converts the message to a string and prints it
-  test_count++;
+  UTEST_NEW ("gxPLMessageToString() > ");
   str = gxPLMessageToString (m);
-  test (str);
-  printf ("unicast message:\n%s", str);
-  
-  // Decode the message
-  test_count++;
-  char * str1 = malloc (strlen(str) + 1);
-  test(str1);
-  strcpy (str1, str);
-  gxPLMessage * rm = gxPLMessageFromString(NULL, str);
-  test (rm);
+  assert (str);
+  UTEST_SUCCESS();
+  UTEST_PRINTF ("unicast message:\n%s", str);
 
-  test_count++;
+  // Decode the message
+  char * str1 = malloc (strlen (str) + 1);
+  assert (str1);
+  strcpy (str1, str);
+
+  UTEST_NEW ("gxPLMessageFromString() > ");
+  gxPLMessage * rm = gxPLMessageFromString (NULL, str);
+  assert (rm);
   char * str2 = gxPLMessageToString (m);
-  test (str2);
-  printf ("received message:\n%s", str2);
-
-  test_count++;
+  assert (str2);
   ret = strcmp (str1, str2);
-  test(ret == 0);
-  printf("the received message is the same as that which was sent\n\n");
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  gxPLMessageDelete(rm);
-  free(str);
-  free(str1);
-  free(str2);
-  
-  // Converts the message to a string and prints it
-  test_count++;
-  ret = gxPLMessageIsBroadcast(m);
-  test(ret == false);
-  ret = gxPLMessageBroadcastSet(m, true);
-  test(ret == 0);
-  ret = gxPLMessageIsBroadcast(m);
-  test(ret == true);
-  
+  gxPLMessageDelete (rm);
+  free (str);
+  free (str1);
+  free (str2);
+
+  UTEST_NEW ("gxPLMessageIsBroadcast() > ");
+  ret = gxPLMessageIsBroadcast (m);
+  assert (ret == false);
+  UTEST_SUCCESS();
+
+  UTEST_NEW ("gxPLMessageBroadcastSet() > ");
+  ret = gxPLMessageBroadcastSet (m, true);
+  assert (ret == 0);
+  ret = gxPLMessageIsBroadcast (m);
+  assert (ret == true);
+
   // Print the message
-  test_count++;
   str = gxPLMessageToString (m);
-  test (str);
-  printf ("broadcast message:\n%s", str);
-  
+  assert (str);
+  UTEST_PRINTF ("broadcast message:\n%s", str);
+
   // Decode the message
-  test_count++;
-  str1 = malloc (strlen(str) + 1);
-  test(str1);
+  str1 = malloc (strlen (str) + 1);
+  assert (str1);
   strcpy (str1, str);
-  rm = gxPLMessageFromString(NULL, str);
-  test (rm);
-
-  test_count++;
+  rm = gxPLMessageFromString (NULL, str);
+  assert (rm);
   str2 = gxPLMessageToString (m);
-  test (str2);
-  printf ("received message:\n%s", str2);
-
-  test_count++;
+  assert (str2);
+  UTEST_PRINTF ("received message:\n%s", str2);
   ret = strcmp (str1, str2);
-  test(ret == 0);
-  printf("the received message is the same as that which was sent\n\n");
+  assert (ret == 0);
+  UTEST_SUCCESS();
 
-  gxPLMessageDelete(rm);
-  free(str);
-  free(str1);
-  free(str2);
+  gxPLMessageDelete (rm);
+  free (str);
+  free (str1);
+  free (str2);
 
-  // Clear body
-  test_count++;
-  ret = gxPLMessageBodyClear(m);
-  test(ret == 0);
+  UTEST_NEW ("gxPLMessageBodyClear() > ");
+  ret = gxPLMessageBodyClear (m);
+  assert (ret == 0);
   ret = gxPLMessageBodySize (m);
-  test (ret == 0);
-  
+  assert (ret == 0);
+  UTEST_SUCCESS();
+
   // Delete the message
   gxPLMessageDelete (m);
 
-  printf ("All tests (%d) were successful !\n", test_count);
+  UTEST_PRINTF ("\n\n******************************************\n");
+  UTEST_PRINTF ("**** All tests (%d) were successful ! ****\n", test_count);
+  UTEST_PRINTF ("******************************************\n");
+  UTEST_PMEM_AFTER();
+  UTEST_FFLUSH (stdout);
+  UTEST_STOP();
   return 0;
 }
 /* ========================================================================== */

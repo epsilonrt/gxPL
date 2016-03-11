@@ -11,6 +11,7 @@
 #include <string.h>
 #define GXPL_INTERNALS
 #include <gxPL/io.h>
+#include <gxPL/util.h>
 #include "version-git.h"
 #include "config.h"
 
@@ -63,7 +64,7 @@ main (int argc, char **argv) {
 
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
   UTEST_INIT();
-  UTEST_PRINTF ("\ngxPLIo test\n");
+  UTEST_PRINTF ("\ngxPLIo test (%s)\n", GXPL_TARGET_STR);
   UTEST_PMEM_BEFORE();
   UTEST_PRINTF ("Press any key to proceed...\n");
   UTEST_WAIT();

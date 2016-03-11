@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target Name (without extension).
-TARGET = gxpl-test-avr-core
+TARGET = gxpl-test-core-avr
 
 # Enable logging messages (if OFF no display is performed)
 LOG = ON
@@ -85,7 +85,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = test/core/gxpl-test-core.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =

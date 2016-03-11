@@ -5,7 +5,7 @@
 ###############################################################################
 
 # Target Name (without extension).
-TARGET = gxpl-test-avr-message
+TARGET = gxpl-test-message-avr
 
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
@@ -78,7 +78,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = test/message/gxpl-test-message.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =

@@ -1,14 +1,14 @@
 ###############################################################################
-# Copyright © 2015 Pascal JEAN aka epsilonRT                                  #
+# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 
 # Target file name (without extension).
-TARGET = gxpl-sender
+TARGET = gxpl-test-io-unix
 
 # Relative path of the project root directory
-PROJECT_TOPDIR = ../..
+PROJECT_TOPDIR = ../../..
 
 # Target architecture
 #ARCH = ARCH_ARM_RASPBERRYPI
@@ -29,7 +29,7 @@ DEBUG_FORMAT = dwarf-2
 DEBUG_OPT = 0
 
 # Enabling Debug information (ON / OFF)
-# DEBUG = ON
+#DEBUG = ON
 
 # Displays the GCC compile line or not (ON / OFF)
 #VIEW_GCC_LINE = ON
@@ -40,7 +40,7 @@ DEBUG_OPT = 0
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = test/io/gxpl-test-io.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
@@ -70,7 +70,7 @@ WARNINGS = all strict-prototypes no-unused-but-set-variable
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_INCDIRS =
+EXTRA_INCDIRS = $(PROJECT_TOPDIR)/lib/unix
 
 #---------------- Library Options ----------------
 
@@ -81,7 +81,7 @@ STATIC_LINKER = OFF
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRA_LIBDIRS =
+EXTRA_LIBDIRS = gxPL
 
 # List any extra libraries here (without lib prefix).
 #     Each library must be seperated by a space.
@@ -109,7 +109,7 @@ VERSION=1.0.0
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
 # are recompiled. GXPL_ROOT and ARCH must be defined
-#GXPL_DEBUG_TEST = ON
+GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
 GXPL_ROOT = $(PROJECT_TOPDIR)
@@ -139,21 +139,8 @@ COPY = cp
 #-------------------------------------------------------------------------------
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
 VPATH+=:$(3RDPARTY_ROOT)
-RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
-RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
-#$(warning $(RPI_CPU))
-#$(warning $(RPI_REV))
-ifneq ($(RPI_CPU),)
-override ARCH = ARCH_ARM_RASPBERRYPI
-CDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
-CPPDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
-else
-ifeq ($(ARCH),ARCH_ARM_RASPBERRYPI)
-override ARCH = ARCH_GENERIC_LINUX
-$(warning this system is not a Raspberry Pi, I compile for linux standard system)
-endif
-endif
 CDEFS += -D_REENTRANT -D$(ARCH)
+
 CPPDEFS += -D_REENTRANT -D$(ARCH)
 
 EXTRA_LIBS += pthread rt
@@ -353,12 +340,12 @@ $(DEPDIRS):
 
 version-git.h:
 ifeq ($(GIT_VERSION),ON)
-	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
+	@git-version $@
 endif
 
 version-git.mk:
 ifeq ($(GIT_VERSION),ON)
-	@$(PROJECT_TOPDIR)/util/git-version/git-version $@
+	@git-version $@
 endif
 
 sizebefore:

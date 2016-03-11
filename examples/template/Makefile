@@ -430,7 +430,7 @@ clean_list :
 	@$(REMOVE) $(TARGET_PATH).sym
 	@$(REMOVE) $(TARGET_PATH).lss
 	@$(REMOVEDIR) $(DEPDIRS)
-	@$(REMOVEDIR) $(OBJDIRS)
+	@$(REMOVEDIR) $(OBJDIR)
 
 distclean_list :
 	@$(REMOVE) *.bak
