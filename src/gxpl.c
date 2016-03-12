@@ -69,7 +69,7 @@ prvDeviceDelete (void * d) {
 // Public
 // Stop (disable) all services, usually in preparation for shutdown, but
 // that isn't the only possible reason
-int gxPLAppDisableAllDevice (gxPLApplication * app) {
+int gxPLAppDisableAllDevices (gxPLApplication * app) {
   gxPLDevice * device;
 
   for (int i = 0; i < iVectorSize (&app->device); i++) {
@@ -284,10 +284,10 @@ gxPLAppClose (gxPLApplication * app) {
 
     // for each device, sends a goodbye heartbeat and removes all listeners,
     vVectorDestroy (&app->device);
+    // and close !
+    ret = gxPLIoClose (app->io);
     // then releases all message listeners
     vVectorDestroy (&app->msg_listener);
-    // an close !
-    ret = gxPLIoClose (app->io);
     if (app->setting->malloc) {
 
       free (app->setting);
@@ -694,16 +694,22 @@ gxPLGenerateUniqueId (const gxPLApplication * app, char * s, int size) {
 
   if (app->net_info.addrlen > 0) {
 
-    for (int i = 0; (i < app->net_info.addrlen) && (len < size); i++) {
+    // uses the last 4 bytes of the address and add a random sequence
+    for (int i = app->net_info.addrlen - 4;
+         (i < app->net_info.addrlen) && (len < size);
+         i++) {
 
       max = size - len + 1;
       len += snprintf (&s[len], max, "%02x", app->net_info.addr[i]);
     }
+
     if (len > size) {
 
       len = size;
     }
   }
+
+  // and add a random sequence
   if (len < size) {
     unsigned long ms;
 

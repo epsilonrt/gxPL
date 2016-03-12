@@ -2,7 +2,6 @@
 <CodeLite_Workspace Name="gxPL4Dev" Database="">
   <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
@@ -23,15 +22,15 @@
   <Project Name="gxpl-test-message-avr" Path="test/message/avr/gxpl-test-message-avr.project" Active="No"/>
   <Project Name="gxpl-test-core-avr" Path="test/core/avr/gxpl-test-core-avr.project" Active="No"/>
   <Project Name="gxpl-test-core-unix" Path="test/core/unix/gxpl-test-core-unix.project" Active="No"/>
-  <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="Yes"/>
-  <Project Name="gxpl-test-device-avr" Path="test/device/avr/gxpl-test-device-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="No"/>
+  <Project Name="gxpl-test-device-avr" Path="test/device/avr/gxpl-test-device-avr.project" Active="Yes"/>
+  <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxPLibAvr" ConfigName="Debug"/>
-      <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
       <Project Name="gxpl-test-message" ConfigName="Debug"/>
       <Project Name="gxpl-test-core" ConfigName="Debug"/>
@@ -60,12 +59,12 @@
       <Project Name="gxpl-test-core-unix" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
       <Project Name="gxpl-test-device" ConfigName="Debug"/>
+      <Project Name="gxPL" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxPLibAvr" ConfigName="Release"/>
-      <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
       <Project Name="gxpl-test-message" ConfigName="Release"/>
       <Project Name="gxpl-test-core" ConfigName="Release"/>
@@ -94,6 +93,7 @@
       <Project Name="gxpl-test-core-unix" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
       <Project Name="gxpl-test-device" ConfigName="Release"/>
+      <Project Name="gxPL" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

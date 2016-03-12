@@ -297,11 +297,11 @@ gxPLXBeeZbClose (gxPLIo * io) {
   if (io->pdata) {
     int ret;
 
+    ret = iXBeeClose (dp->xbee);
     vXBeeFreePkt (dp->xbee, dp->atpkt);
     dp->atpkt = NULL;
     vXBeeFreePkt (dp->xbee, dp->rxpkt);
     dp->rxpkt = NULL;
-    ret = iXBeeClose (dp->xbee);
     free (dp->xbee);
     free (io->pdata);
     io->pdata = NULL;

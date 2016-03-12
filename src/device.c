@@ -103,7 +103,7 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
 }
 
 // -----------------------------------------------------------------------------
-// Send an XPL Heartbeat immediatly
+// Send an xPL Heartbeat immediatly
 int
 prvHeartbeatMessageSendHello (gxPLDevice * device) {
   gxPLMessage * message;

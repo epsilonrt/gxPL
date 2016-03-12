@@ -11,10 +11,11 @@
 #include <gxPL/defs.h>
 __BEGIN_C_DECLS
 /* ========================================================================== */
-#include <stdio.h>
+#include <gxPL/stdio.h>
 
 /* private variables ======================================================== */
 static int UTEST_COUNTER;
+
 #ifndef NLOG
 static int heap_before;
 #endif
@@ -22,32 +23,16 @@ static int heap_before;
 /* constants ================================================================ */
 #ifdef __AVR__
 // -----------------------------------------------------------------------------
-#include <avr/pgmspace.h>
-
-/* macros =================================================================== */
-#define SPRINTF(str,fmt,...) sprintf_P(str,fmt,##__VA_ARGS__)
-#define UTEST_STOP() for(;;);
 
 #ifndef NLOG
 // -------------------------------------
-#include <avrio/file.h>
 
 /* macros =================================================================== */
-#define UTEST_PRINTF(fmt,...) printf_P(PSTR(fmt),##__VA_ARGS__)
-#define UTEST_NEW(fmt,...) UTEST_PRINTF("\nTest %d: "fmt,++UTEST_COUNTER,##__VA_ARGS__)
-#define UTEST_SUCCESS() UTEST_PRINTF ("Success\n")
-#define UTEST_FFLUSH(f) iFileFlush(f)
-#define UTEST_WAIT() getchar()
+#define UTEST_NEW(fmt,...) gxPLPrintf("\nTest %d: "fmt,++UTEST_COUNTER,##__VA_ARGS__)
+#define UTEST_SUCCESS() gxPLPrintf ("Success\n")
 
 #else /* NLOG defined */
 // -------------------------------------
-#include <avrio/delay.h>
-// -----------------------------------------------------------------------------
-INLINE void
-prvSetLed (int d) {
-
-  AVR_UTEST_LED_PORT = d & 0xFF;
-}
 
 // -----------------------------------------------------------------------------
 INLINE void
@@ -55,19 +40,16 @@ prvLedFlash (void) {
 
   for (;;) {
 
-    prvSetLed (UTEST_COUNTER);
+    vLedSetAll (UTEST_COUNTER);
     delay_ms (250);
-    prvSetLed (0);
+    vLedSetAll (0);
     delay_ms (250);
   }
 }
 
 /* macros =================================================================== */
+#define UTEST_NEW(fmt,...) vLedSetAll(++UTEST_COUNTER)
 #define UTEST_SUCCESS()
-#define UTEST_PRINTF(fmt,...)
-#define UTEST_FFLUSH(f)
-#define UTEST_WAIT() delay_ms(5000)
-#define UTEST_NEW(fmt,...) prvSetLed(++UTEST_COUNTER)
 
 #undef assert
 #define assert(n) if ((n) == 0) { prvLedFlash(); }
@@ -76,42 +58,12 @@ prvLedFlash (void) {
 
 #else /* __AVR__ not defined */
 // -----------------------------------------------------------------------------
-#define UTEST_PRINTF(fmt,...) printf(fmt,##__VA_ARGS__)
-#define UTEST_NEW(fmt,...) UTEST_PRINTF("\nTest %d: "fmt,++UTEST_COUNTER,##__VA_ARGS__)
-#define UTEST_SUCCESS() UTEST_PRINTF("Success\n")
-#define UTEST_FFLUSH(f) fflush(f)
-#define UTEST_WAIT() getchar()
-#define UTEST_STOP()
-#define sprintf_P(str,fmt,...) sprintf(str,fmt,##__VA_ARGS__)
-#define PROGMEM
+#define UTEST_NEW(fmt,...) gxPLPrintf("\nTest %d: "fmt,++UTEST_COUNTER,##__VA_ARGS__)
+#define UTEST_SUCCESS() gxPLPrintf("Success\n")
 // -----------------------------------------------------------------------------
 #endif
-
 
 /* internal public functions ================================================ */
-
-// -----------------------------------------------------------------------------
-INLINE void
-UTEST_INIT (void) {
-#if defined(__AVR__)
-#if defined(NLOG)
-  AVR_UTEST_LED_DDR = 0xFF;
-#else
-  xSerialIos term_setting = {
-    .baud = AVR_UTEST_TERM_BAUDRATE, .dbits = SERIAL_DATABIT_8,
-    .parity = SERIAL_PARITY_NONE, .sbits = SERIAL_STOPBIT_ONE,
-    .flow = AVR_UTEST_TERM_FLOW, .eol = SERIAL_CRLF
-  };
-
-  FILE * tc = xFileOpen (AVR_UTEST_TERM_PORT, O_RDWR, &term_setting);
-  if (tc) {
-    stdout = tc;
-    stderr = tc;
-    stdin = tc;
-  }
-#endif
-#endif
-}
 
 // -----------------------------------------------------------------------------
 INLINE void
@@ -119,7 +71,7 @@ UTEST_PMEM_BEFORE (void) {
 #if !defined(NLOG)
 
   heap_before = gxPLDynamicMemoryUsed();
-  UTEST_PRINTF ("Dynamic memory used before %d bytes\n", heap_before);
+  gxPLPrintf ("Dynamic memory used before %d bytes\n", heap_before);
 #endif
 }
 
@@ -130,7 +82,7 @@ UTEST_PMEM_AFTER (void) {
 
   static int heap_after;
   heap_after = gxPLDynamicMemoryUsed();
-  UTEST_PRINTF ("Dynamic memory used: before %d - after %d - loss %d\n",
+  gxPLPrintf ("Dynamic memory used: before %d - after %d - loss %d\n",
                 heap_before, heap_after, heap_after - heap_before);
 #endif
 }

@@ -22,6 +22,9 @@
 #include <sysio/doutput.h>
 #endif
 #define GXPL_TARGET_STR "unix"
+#ifndef PROGMEM
+#define PROGMEM
+#endif
 #elif defined(__AVR__)
 #include <avrio/defs.h>
 #include <avrio/vector.h>

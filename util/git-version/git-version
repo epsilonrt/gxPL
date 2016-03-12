@@ -7,7 +7,7 @@
 
 usage()
 {
-  echo "git-version filename.ext"
+  echo "$0 filename.ext"
   echo "    extension provided (.ext) must be .h (for build C/C++ Header) or .mk (for Makefile)"
   echo 
 }

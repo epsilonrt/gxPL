@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="gxPL" InternalType="">
+  <VirtualDirectory Name="util">
+    <VirtualDirectory Name="gxpl-prj">
+      <VirtualDirectory Name="template">
+        <VirtualDirectory Name="cpp">
+          <File Name="util/gxpl-prj/template/cpp/template.cpp"/>
+          <File Name="util/gxpl-prj/template/cpp/Makefile"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="c">
+          <File Name="util/gxpl-prj/template/c/Makefile"/>
+          <File Name="util/gxpl-prj/template/c/template.c"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+      <File Name="util/gxpl-prj/gxpl-prj"/>
+      <File Name="util/gxpl-prj/Makefile"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="rpi">
+      <File Name="util/rpi/rpi-cpu"/>
+      <File Name="util/rpi/rpi-rev"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="git-version">
+      <File Name="util/git-version/Makefile"/>
+      <File Name="util/git-version/git-version"/>
+    </VirtualDirectory>
+    <File Name="util/Makefile"/>
+  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -74,6 +99,7 @@
       <File Name="include/gxPL/util.h"/>
       <File Name="test/avr/io/gxpl-test-avr-io.c"/>
       <File Name="include/gxPL/utest.h"/>
+      <File Name="include/gxPL/stdio.h"/>
     </VirtualDirectory>
     <File Name="include/gxPL.h"/>
   </VirtualDirectory>
