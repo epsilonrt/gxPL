@@ -77,6 +77,16 @@ gxPLSetting * gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectTy
 gxPLApplication * gxPLAppOpen (gxPLSetting * setting);
 
 /**
+ * @brief Stop all devices
+ *
+ * Usually in preparation for shutdown, but that isn't the only possible reason.
+ * It is not necessary to call this function before calling gxPLAppClose()
+ * @param app
+ * @return
+ */
+int gxPLAppDisableAllDevices (gxPLApplication * app);
+
+/**
  * @brief Close a gxPLApplication object and release all ressources
  * @param app pointer to a gxPLApplication object
  * @return 0, -1 if an error occurs

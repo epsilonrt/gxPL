@@ -14,15 +14,6 @@
 __BEGIN_C_DECLS
 /* ========================================================================== */
 
-/**
- * @brief Stop all devices
- *
- * Usually in preparation for shutdown, but that isn't the only possible reason.
- * It is not necessary to call this function before calling gxPLAppClose()
- * @param app
- * @return
- */
-int gxPLAppDisableAllDevice (gxPLApplication * app);
 
 /**
  * @brief Create a new xPL device
