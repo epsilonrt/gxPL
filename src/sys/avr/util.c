@@ -31,8 +31,9 @@
 unsigned long
 gxPLTime (void) {
   unsigned long t;
+  
   (void) gxPLTimeMs (&t);
-  return t;
+  return t / 1000UL;
 }
 
 /* ----------------------------------------------------------------------------
