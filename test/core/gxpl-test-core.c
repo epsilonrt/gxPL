@@ -24,12 +24,9 @@
 #define AVR_XBEE_RESET_PORT   PORTB
 #define AVR_XBEE_RESET_PIN    7
 
-#define AVR_UTEST_TERM_PORT         "tty0"
-#define AVR_UTEST_TERM_BAUDRATE     500000
-#define AVR_UTEST_TERM_FLOW         SERIAL_FLOW_NONE
-
-#define AVR_UTEST_LED_PORT          PORTA
-#define AVR_UTEST_LED_DDR           DDRA
+#define AVR_TERMINAL_PORT         "tty0"
+#define AVR_TERMINAL_BAUDRATE     500000
+#define AVR_TERMINAL_FLOW         SERIAL_FLOW_NONE
 
 /* private variables ======================================================== */
 static xDPin xResetPin = { .port = &AVR_XBEE_RESET_PORT, .pin = AVR_XBEE_RESET_PIN };
@@ -64,18 +61,18 @@ main (int argc, char **argv) {
   long msg_count = 0;
 #endif
   long timeout;
-  static volatile const gxPLIoAddr * info;
+  const gxPLIoAddr * info;
   xVector * iolist;
 
   gxPLSetting * setting;
   char hello[] = ".";
 
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
-  UTEST_INIT();
-  UTEST_PRINTF ("\ngxPLCore test (%s)\n", GXPL_TARGET_STR);
+  gxPLStdIoOpen();
+  gxPLPrintf ("\ngxPLCore test (%s)\n", GXPL_TARGET_STR);
   UTEST_PMEM_BEFORE();
-  UTEST_PRINTF ("Press any key to proceed...\n");
-  UTEST_WAIT();
+  gxPLPrintf ("Press any key to proceed...\n");
+  gxPLWait();
 
   // TEST 1
   // Gets the available io layer list
@@ -88,11 +85,11 @@ main (int argc, char **argv) {
 
   // TEST 2
   // Prints all io layer available
-  UTEST_PRINTF ("%d io layers found:\n", ret);
+  gxPLPrintf ("%d io layers found:\n", ret);
   for (int i = 0; i < ret; i++) {
     const char * name = pvVectorGet (iolist, i);
     assert (name);
-    UTEST_PRINTF ("\tlayer[%d]: %s\n", i, name);
+    gxPLPrintf ("\tlayer[%d]: %s\n", i, name);
   }
 
   // TEST 3
@@ -100,14 +97,15 @@ main (int argc, char **argv) {
 #ifndef __AVR__
   UTEST_NEW ("create new default setting from command line args > ");
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
+  assert (setting);
 #else
   UTEST_NEW ("create new default setting for %s layer on %s > ",
              AVR_IOLAYER_NAME, AVR_IOLAYER_PORT);
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
+  assert (setting);
   setting->xbee.reset = &xResetPin;
   setting->log = LOG_DEBUG;
 #endif
-  assert (setting);
   UTEST_SUCCESS();
 
   // TEST 4
@@ -131,7 +129,7 @@ main (int argc, char **argv) {
   str = gxPLIoInterfaceGet (app);
   assert (str);
   UTEST_SUCCESS();
-  UTEST_PRINTF ("\tinterface:\t%s\n", str);
+  gxPLPrintf ("\tinterface:\t%s\n", str);
 
   // TEST 7
   UTEST_NEW ("read local network address > ");
@@ -146,14 +144,14 @@ main (int argc, char **argv) {
   assert (info->addrlen > 0);
   UTEST_SUCCESS();
 
-  UTEST_PRINTF ("\tlocal address:\t%s", str);
+  gxPLPrintf ("\tlocal address:\t%s", str);
   if (info->port >= 0) {
 
-    UTEST_PRINTF (":%d\n", info->port);
+    gxPLPrintf (":%d\n", info->port);
   }
   else {
 
-    putchar ('\n');
+    gxPLPutchar ('\n');
   }
 
   // TEST 9
@@ -161,7 +159,7 @@ main (int argc, char **argv) {
   str = gxPLIoBcastAddrGet (app);
   assert (str);
   UTEST_SUCCESS();
-  UTEST_PRINTF ("\tbcast address:\t%s\n", str);
+  gxPLPrintf ("\tbcast address:\t%s\n", str);
 
   // TEST 10
   // adds a messages listener
@@ -174,8 +172,8 @@ main (int argc, char **argv) {
   prvHeartbeatMessageNew();
   UTEST_SUCCESS();
 
-  UTEST_PRINTF ("\nPress any key to start xPL application loop...\n");
-  UTEST_WAIT();
+  gxPLPrintf ("\nPress any key to start xPL application loop...\n");
+  gxPLWait();
 
   // TEST 12
   UTEST_NEW ("Starting xPL application loop...\n");
@@ -188,14 +186,14 @@ main (int argc, char **argv) {
 
     if ( (timeout % 1000) == 0) {
       // print a dot each second
-      putchar ('.');
-      UTEST_FFLUSH (stdout);
+      gxPLPutchar ('.');
+      gxPLFflush (stdout);
     }
 
     if ( (timeout -= POLL_RATE) <= 0) {
 
       // Send heartbeat message each 10 seconds
-      UTEST_PRINTF ("\n\n*** Send heartbeat[%ld] ***\n", ++msg_count);
+      gxPLPrintf ("\n\n*** Send heartbeat[%ld] ***\n", ++msg_count);
       ret = gxPLAppBroadcastMessage (app, message);
       assert (ret > 0);
       timeout = 10000;
@@ -215,22 +213,22 @@ main (int argc, char **argv) {
   }
 
   // TEST 14
-  UTEST_PRINTF ("\nPress any key to close...\n");
-  UTEST_WAIT();
+  gxPLPrintf ("\nPress any key to close...\n");
+  gxPLWait();
 
-  // Delete the message
+  UTEST_NEW ("close xPL network...\n");
   ret = gxPLAppClose (app);
   assert (ret == 0);
   UTEST_SUCCESS();
 
   gxPLMessageDelete (message);
 
-  UTEST_PRINTF ("\n******************************************\n");
-  UTEST_PRINTF ("**** All tests (%d) were successful ! ****\n", test_count);
-  UTEST_PRINTF ("******************************************\n");
+  gxPLPrintf ("\n******************************************\n");
+  gxPLPrintf ("**** All tests (%d) were successful ! ****\n", test_count);
+  gxPLPrintf ("******************************************\n");
   UTEST_PMEM_AFTER();
-  UTEST_FFLUSH (stdout);
-  UTEST_STOP();
+  gxPLFflush (stdout);
+  gxPLStop();
   return 0;
 }
 
@@ -309,8 +307,8 @@ prvHeartbeatMessageNew (void) {
   char * mstr = gxPLMessageToString (message);
   assert (mstr);
 
-  UTEST_PRINTF ("%s", mstr);
-  UTEST_FFLUSH (stdout);
+  gxPLPrintf ("%s", mstr);
+  gxPLFflush (stdout);
   free (mstr);
 #endif
 }

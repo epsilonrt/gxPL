@@ -26,7 +26,7 @@ DEBUG_FORMAT = dwarf-2
 
 # Optimization level for debug, can be [0, 1, 2, 3, s]. 0 turns off optimization.
 # (Note: 3 is not always the best optimization level)
-DEBUG_OPT = 0
+DEBUG_OPT = s
 
 # Enabling Debug information (ON / OFF)
 # DEBUG = ON

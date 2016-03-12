@@ -14,9 +14,9 @@
 
 #ifdef __AVR__
 /* constants ================================================================ */
-#define AVR_UTEST_TERM_PORT         "tty0"
-#define AVR_UTEST_TERM_BAUDRATE     500000
-#define AVR_UTEST_TERM_FLOW         SERIAL_FLOW_NONE
+#define AVR_TERMINAL_PORT         "tty0"
+#define AVR_TERMINAL_BAUDRATE     500000
+#define AVR_TERMINAL_FLOW         SERIAL_FLOW_NONE
 #endif
 
 #define UTEST_COUNTER test_count
@@ -38,11 +38,11 @@ main (int argc, char **argv) {
   const char * cstr = NULL;
 
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
-  UTEST_INIT();
-  UTEST_PRINTF ("\ngxPLMessage test (%s)\n", GXPL_TARGET_STR);
+  gxPLStdIoOpen();
+  gxPLPrintf ("\ngxPLMessage test (%s)\n", GXPL_TARGET_STR);
   UTEST_PMEM_BEFORE();
-  UTEST_PRINTF ("Press any key to proceed...\n");
-  UTEST_WAIT();
+  gxPLPrintf ("Press any key to proceed...\n");
+  gxPLWait();
 
   UTEST_NEW ("gxPLMessageNew() > ");
   m = gxPLMessageNew (gxPLMessageTrigger);
@@ -251,7 +251,7 @@ main (int argc, char **argv) {
   assert (ret == 0);
   cstr = gxPLMessagePairGet (m, "command");
   assert (cstr);
-  UTEST_PRINTF ("%s -> %s\n", buf, cstr);
+  gxPLPrintf ("%s -> %s\n", buf, cstr);
   ret = strcmp (cstr, buf);
   assert (ret == 0);
   UTEST_SUCCESS();
@@ -298,7 +298,7 @@ main (int argc, char **argv) {
   str = gxPLMessageToString (m);
   assert (str);
   UTEST_SUCCESS();
-  UTEST_PRINTF ("unicast message:\n%s", str);
+  gxPLPrintf ("unicast message:\n%s", str);
 
   // Decode the message
   char * str1 = malloc (strlen (str) + 1);
@@ -333,7 +333,7 @@ main (int argc, char **argv) {
   // Print the message
   str = gxPLMessageToString (m);
   assert (str);
-  UTEST_PRINTF ("broadcast message:\n%s", str);
+  gxPLPrintf ("broadcast message:\n%s", str);
 
   // Decode the message
   str1 = malloc (strlen (str) + 1);
@@ -343,7 +343,7 @@ main (int argc, char **argv) {
   assert (rm);
   str2 = gxPLMessageToString (m);
   assert (str2);
-  UTEST_PRINTF ("received message:\n%s", str2);
+  gxPLPrintf ("received message:\n%s", str2);
   ret = strcmp (str1, str2);
   assert (ret == 0);
   UTEST_SUCCESS();
@@ -363,12 +363,12 @@ main (int argc, char **argv) {
   // Delete the message
   gxPLMessageDelete (m);
 
-  UTEST_PRINTF ("\n\n******************************************\n");
-  UTEST_PRINTF ("**** All tests (%d) were successful ! ****\n", test_count);
-  UTEST_PRINTF ("******************************************\n");
+  gxPLPrintf ("\n\n******************************************\n");
+  gxPLPrintf ("**** All tests (%d) were successful ! ****\n", test_count);
+  gxPLPrintf ("******************************************\n");
   UTEST_PMEM_AFTER();
-  UTEST_FFLUSH (stdout);
-  UTEST_STOP();
+  gxPLFflush (stdout);
+  gxPLStop();
   return 0;
 }
 /* ========================================================================== */
