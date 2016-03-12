@@ -175,7 +175,7 @@ static void
 prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata) {
 
   fprintf (logfile, " %s [xpl - message] type = %s",
-           gxPLTimeStr (gxPLTime()),
+           gxPLDateTimeStr (gxPLTime(), "%y/%m/%d %H:%M:%S"),
            gxPLMessageTypeToString (gxPLMessageTypeGet (message)));
 
 

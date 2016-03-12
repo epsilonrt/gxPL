@@ -20,8 +20,17 @@ __BEGIN_C_DECLS
 // -----------------------------------------------------------------------------
 #include <avr/pgmspace.h>
 
+/* constants ================================================================ */
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE -1
+#endif
+
 /* macros =================================================================== */
-#define gxPLStop() for(;;);
+#define gxPLExit(c) for(;;);
+#define gxPLSprintf(str,fmt,...) sprintf_P(str,fmt,##__VA_ARGS__)
 
 #ifdef AVR_INTERRUPT_BUTTON
 #include <avrio/button.h>
@@ -62,7 +71,7 @@ __BEGIN_C_DECLS
 #define gxPLPrintf(fmt,...) printf(fmt,##__VA_ARGS__)
 #define gxPLFflush(f) fflush(f)
 #define gxPLWait() getchar()
-#define gxPLStop()
+#define gxPLExit(c) exit(c)
 #define gxPLIsInterrupted() (0)
 #define gxPLSprintf(str,fmt,...) sprintf(str,fmt,##__VA_ARGS__)
 // -----------------------------------------------------------------------------

@@ -136,7 +136,7 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 
     // Update last heartbeat time
     long now = gxPLTime();
-    PDEBUG ("Sent heartbeat message at %s", gxPLTimeStr (now));
+    PDEBUG ("Sent heartbeat message at %s", gxPLTimeStr (now, NULL));
     device->hbeat_last = now;
     return 0;
   }

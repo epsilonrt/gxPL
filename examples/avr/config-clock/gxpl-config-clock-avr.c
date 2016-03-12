@@ -210,7 +210,7 @@ prvSendTick (void) {
     if ( (last == 0) || ( (now - last) >= tick_rate)) {
 
       // Install the value and send the message
-      gxPLMessagePairSet (message, "time", gxPLTimeStr(now));
+      gxPLMessagePairSet (message, "time", gxPLDateTimeStr(now));
 
       // Broadcast the message
       gxPLDeviceMessageSend (device, message);

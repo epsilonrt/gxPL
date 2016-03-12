@@ -296,9 +296,26 @@ int gxPLTimeMs (unsigned long * ms);
 /**
  * @brief converts the system time t into a null-terminated string
  * @param t time return by gxPLTime
+ * @param format same as strftime() on unix, NULL if default (yyyymmddhhmmss)
  * @return system time t into a null-terminated string
  */
-char * gxPLTimeStr (unsigned long t);
+char * gxPLDateTimeStr (unsigned long t, const char * format);
+
+/**
+ * @brief converts the system time t into a null-terminated string
+ * @param t time return by gxPLTime
+ * @param format same as strftime() on unix, NULL if default (yyyymmdd)
+ * @return system time t into a null-terminated string
+ */
+char * gxPLDateStr (unsigned long t, const char * format);
+
+/**
+ * @brief converts the system time t into a null-terminated string
+ * @param t time return by gxPLTime
+ * @param format same as strftime() on unix, NULL if default (hhmmss)
+ * @return system time t into a null-terminated string
+ */
+char * gxPLTimeStr (unsigned long t, const char * format);
 
 /**
  * @brief suspends execution for (at least) ms milliseconds

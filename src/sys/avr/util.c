@@ -14,24 +14,54 @@
 #include <avrio/delay.h>
 #include <avrio/task.h>
 #include <gxPL/util.h>
+#include <avr/pgmspace.h>
 
 /* constants ================================================================ */
 #define MIN_SEC 60UL
 #define HOUR_SEC (MIN_SEC * 60UL)
 #define DAY_SEC (HOUR_SEC * 24UL)
 
+/* structures =============================================================== */
+struct tm {
+  int s;
+  int m;
+  int h;
+  int d;
+};
+
+/* private functions ======================================================== */
+/*
+ * TODO: RTC with asynchronous 8 bits timer
+ */
+// -----------------------------------------------------------------------------
+struct tm *
+prvTime (unsigned long t) {
+  static struct tm clk;
+  unsigned long mod;
+
+  clk.d = t / DAY_SEC;
+  mod = (clk.d * DAY_SEC);
+  clk.h = (t % mod) / HOUR_SEC;
+  mod += (clk.h * HOUR_SEC);
+  clk.m = (t % mod) / MIN_SEC;
+  mod += (clk.m * MIN_SEC);
+  clk.s = t % mod;
+
+  return &clk;
+}
+
 /* api functions ============================================================ */
 
 /* ----------------------------------------------------------------------------
  * @brief System time
- * This time can be an absolute time (a date) or relative to the system startup 
+ * This time can be an absolute time (a date) or relative to the system startup
  * (on embedded platform, for example)
  * @return time in seconds
  */
 unsigned long
 gxPLTime (void) {
   unsigned long t;
-  
+
   (void) gxPLTimeMs (&t);
   return t / 1000UL;
 }
@@ -43,7 +73,7 @@ gxPLTime (void) {
  */
 int
 gxPLTimeMs (unsigned long * ms) {
-  
+
   *ms = xTaskConvertTicks (xTaskSystemTime ());
   return 0;
 }
@@ -54,20 +84,38 @@ gxPLTimeMs (unsigned long * ms) {
  * @return system time t into a null-terminated string
  */
 char *
-gxPLTimeStr (unsigned long t) {
+gxPLDateTimeStr (unsigned long t, const char * format) {
   static char buf[16];
-  unsigned int d, h, m, s;
-  unsigned long mod;
-  
-  d = t / DAY_SEC;
-  mod = (d * DAY_SEC);
-  h = (t % mod) / HOUR_SEC;
-  mod += (h * HOUR_SEC);
-  m = (t % mod) / MIN_SEC;
-  mod += (m * MIN_SEC);
-  s = t % mod;
-  snprintf (buf, sizeof(buf), "%dd %02d:%02d:%02d", d, h, m, s);
 
+  struct tm * clk = prvTime (t);
+
+  snprintf_P (buf, sizeof (buf), PSTR ("------%02d%02d%02d%02d"),
+              clk->d, clk->h, clk->m, clk->s);
+
+  return buf;
+}
+
+// -----------------------------------------------------------------------------
+char *
+gxPLTimeStr (unsigned long t, const char * format) {
+  static char buf[8];
+
+  struct tm * clk = prvTime (t);
+
+  snprintf_P (buf, sizeof (buf), PSTR ("%02d%02d%02d"),
+              clk->h, clk->m, clk->s);
+
+  return buf;
+}
+
+// -----------------------------------------------------------------------------
+char *
+gxPLDateStr (unsigned long t, const char * format) {
+  static char buf[10];
+
+  struct tm * clk = prvTime (t);
+
+  snprintf_P (buf, sizeof (buf), PSTR ("------%02d"), clk->d);
   return buf;
 }
 
@@ -78,7 +126,7 @@ gxPLTimeStr (unsigned long t) {
  */
 int
 gxPLTimeDelayMs (unsigned long ms) {
-  
+
   delay_ms (ms);
   return 0;
 }

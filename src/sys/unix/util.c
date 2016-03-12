@@ -50,10 +50,42 @@ gxPLTimeMs (unsigned long * ms) {
 
 // -----------------------------------------------------------------------------
 char *
-gxPLTimeStr (unsigned long time) {
+gxPLDateTimeStr (unsigned long time, const char * format) {
   static char buf[41];
 
-  strftime (buf, sizeof (buf) - 1, "%y/%m/%d %H:%M:%S", localtime ( (time_t *) &time));
+  if (format == NULL) {
+    //yyyymmddhhmmss
+    format = "%Y%m%d%H%M%S";
+  }
+  strftime (buf, sizeof (buf) - 1, format, localtime ( (time_t *) &time));
+
+  return buf;
+}
+
+// -----------------------------------------------------------------------------
+char *
+gxPLDateStr (unsigned long time, const char * format) {
+  static char buf[16];
+
+  if (format == NULL) {
+    //yyyymmdd
+    format = "%Y%m%d";
+  }
+  strftime (buf, sizeof (buf) - 1, format, localtime ( (time_t *) &time));
+
+  return buf;
+}
+
+// -----------------------------------------------------------------------------
+char *
+gxPLTimeStr (unsigned long time, const char * format) {
+  static char buf[16];
+
+  if (format == NULL) {
+    //hhmmss
+    format = "%H%M%S";
+  }
+  strftime (buf, sizeof (buf) - 1, format, localtime ( (time_t *) &time));
 
   return buf;
 }
@@ -61,6 +93,7 @@ gxPLTimeStr (unsigned long time) {
 // -----------------------------------------------------------------------------
 int
 gxPLTimeDelayMs (unsigned long ms) {
+  
   return delay_ms (ms);
 }
 

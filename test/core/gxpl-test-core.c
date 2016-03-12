@@ -228,7 +228,7 @@ main (int argc, char **argv) {
   gxPLPrintf ("******************************************\n");
   UTEST_PMEM_AFTER();
   gxPLFflush (stdout);
-  gxPLStop();
+  gxPLExit(EXIT_SUCCESS);
   return 0;
 }
 

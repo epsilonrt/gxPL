@@ -231,7 +231,7 @@ main (int argc, char **argv) {
     if (gxPLIsInterrupted()) {
 
       prvCloseAll();
-      gxPLStop();
+      gxPLExit (EXIT_SUCCESS);
     }
 
     // Process clock tick update checking
@@ -251,7 +251,7 @@ main (int argc, char **argv) {
 
         // Send heartbeat message each 10 seconds
         gxPLPrintf ("\n\n*** send sensor.basic msg for device #%d current=%lu ***\n",
-                      d + 1, counter[d]);
+                    d + 1, counter[d]);
 
         // Write the value and send the message
         ret = gxPLMessagePairSetFormat (message[d], "current", "%d", counter[d]);
@@ -283,7 +283,7 @@ prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p) {
   assert (ret == 0);
 
   gxPLPrintf ("\n+++ dev[%d]: received %s message +++\n", d + 1,
-                gxPLMessageTypeToString (gxPLMessageTypeGet (msg)));
+              gxPLMessageTypeToString (gxPLMessageTypeGet (msg)));
 }
 
 // -----------------------------------------------------------------------------
