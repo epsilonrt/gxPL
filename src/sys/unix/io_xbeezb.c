@@ -35,6 +35,7 @@ typedef struct xbeezb_data {
   int max_payload;
 
   volatile int fid; // frame id
+  int modem_status;
 } xbeezb_data;
 
 /* macros =================================================================== */
@@ -155,74 +156,42 @@ prvZbLocalAtCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
 }
 
 // -----------------------------------------------------------------------------
+static int
+prvZbModemStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
+  gxPLIo * io = (gxPLIo *) pvXBeeGetUserContext (xbee);
+
+  dp->modem_status = iXBeePktStatus (pkt);
+#ifndef __AVR__
+  PDEBUG ("%s (0x%02X)",
+          sXBeeModemStatusToString (dp->modem_status), dp->modem_status);
+#else
+  PDEBUG ("0x%02X", dp->modem_status);
+#endif
+
+  vXBeeFreePkt (xbee, pkt);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
 // Gestionnaire de status de fin de transmission
 static int
 prvZbTxStatusCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
   gxPLIo * io = (gxPLIo *) pvXBeeGetUserContext (xbee);
+  int fid = iXBeePktFrameId (pkt);
 
-  if (iXBeePktFrameId (pkt) == dp->fid) {
+  if ( (fid > 0) && (fid == dp->fid)) {
     int status = iXBeePktStatus (pkt);
-    const char * error_msg;
 
     if (status != 0) {
 #ifndef __AVR__
-      switch (status) {
-        case 0x01:
-          error_msg = "MAC ACK Failure";
-          break;
-        case 0x02:
-          error_msg = "CCA Failure";
-          break;
-        case 0x15:
-          error_msg = "Invalid destination endpoint";
-          break;
-        case 0x21:
-          error_msg = "Network ACK Failure";
-          break;
-        case 0x22:
-          error_msg = "Not Joined to Network";
-          break;
-        case 0x23:
-          error_msg = "Self-addressed";
-          break;
-        case 0x24:
-          error_msg = "Address Not Found";
-          break;
-        case 0x25:
-          error_msg = "Route Not Found";
-          break;
-        case 0x26:
-          error_msg = "Broadcast source failed to hear a neighbor relay the message";
-          break;
-        case 0x2B:
-          error_msg = "Invalid binding table index";
-          break;
-        case 0x2C:
-          error_msg = "Resource error lack of free buffers, timers, etc.";
-          break;
-        case 0x2D:
-          error_msg = "Attempted broadcast with APS transmission";
-          break;
-        case 0x2E:
-          error_msg = "Attempted unicast with APS transmission, but EE=0";
-          break;
-        case 0x32:
-          error_msg = "Resource error lack of free buffers, timers, etc.";
-          break;
-        case 0x74:
-          error_msg = "Data payload too large";
-          break;
-        default:
-          error_msg = "Unknown";
-          break;
-      }
-      PERROR ("TX Status message error 0x%02X: %s", status, error_msg);
+      PWARNING ("frame #%d: %s (0x%02X)", fid,
+                sXBeeTransmitStatusToString (status), status);
 #else
-      PERROR ("TX Status message error 0x%02X", status);
+      PWARNING ("frame #%d: 0x%02X", fid, status);
 #endif
     }
+    dp->fid = 0;
   }
-  dp->fid = 0;
   vXBeeFreePkt (xbee, pkt);
   return 0;
 }
@@ -234,6 +203,31 @@ prvZbNodeIdCB (xXBee * xbee, xXBeePkt * pkt, uint8_t len) {
   PINFO ("%s joined zigbee network",
          prvZbAddrToString (pucXBeePktAddrRemote64 (pkt), 8));
   vXBeeFreePkt (xbee, pkt);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+static int
+prvWaitStatusModem (gxPLIo * io, int status, int timeout_ms) {
+  int ret;
+
+  do {
+
+    ret = iXBeePoll (dp->xbee, 500);
+    timeout_ms -= 500;
+  }
+  while ( (dp->modem_status != status) && (ret == 0) && (timeout_ms > 0));
+
+  if (ret != 0) {
+
+    PERROR ("Modem status error %d", ret);
+    return -1;
+  }
+  else if (dp->modem_status != status) {
+
+    PERROR ("Modem status timeout");
+    return -1;
+  }
   return 0;
 }
 
@@ -354,6 +348,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     xXBee * xbee;
     int ret;
     uint16_t word;
+    bool resetdone = false;
 
     if (io->setting->iosflag == 0) {
 
@@ -364,22 +359,58 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
       prvSetDefaultIface (io);
     }
+
+    io->pdata = calloc (1, sizeof (xbeezb_data));
+    assert (io->pdata);
+
+#if defined(GXPL_XBEEZB_HAS_HWRESET)
+#warning TODO: XBee sysio has no hardware reset feature
+    xDout * reset = &io->setting->xbee.reset_pin;
+    reset->act = 0;
+#if defined(CONFIG_XBEE_RESET_PORT) && defined(CONFIG_XBEE_RESET_PIN)
+    reset->num = CONFIG_XBEE_RESET_PIN;
+    io->setting->xbee.reset_hw = 1;
+#else
+    reset->num = -1;
+    io->setting->xbee.reset_hw = 0;
+#endif
+#else
+    io->setting->xbee.reset_hw = 0;
+#endif
+
+
     if ( (xbee = xXBeeOpen (io->setting->iface, &io->setting->xbee.ios,
                             XBEE_SERIES_S2)) == NULL) {
 
       PERROR ("Unable to open xbee module: %s (%d)",
               strerror (errno), errno);
+      free (io->pdata);
+      io->pdata = NULL;
       return -1;
     }
 
-    io->pdata = calloc (1, sizeof (xbeezb_data));
-    assert (io->pdata);
-
-    dp->xbee = xbee;
     vXBeeSetUserContext (xbee, io);
-    vXBeeSetCB (dp->xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
+    vXBeeSetCB (xbee, XBEE_CB_AT_LOCAL, prvZbLocalAtCB);
+    vXBeeSetCB (xbee, XBEE_CB_MODEM_STATUS, prvZbModemStatusCB);
+    dp->xbee = xbee;
 
-    // Gets and checks firmware version
+#ifdef GXPL_XBEEZB_HAS_HWRESET
+    if (io->setting->xbee.reset_hw)  {
+
+      PINFO ("Please wait while hardware reset...");
+      if (prvWaitStatusModem (io, XBEE_PKT_MODEM_HARDWARE_RESET, 5000) != 0) {
+
+        gxPLXBeeZbClose (io);
+        return -1;
+      }
+      else {
+        resetdone = true;
+        delay_ms (500);
+      }
+    }
+#endif
+
+    // Reads the firmware version
     ret = prvSendLocalAt (io, XBEE_CMD_VERS_FIRMWARE, NULL, 0, 1000);
     if (ret != 0) {
 
@@ -388,6 +419,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       return -1;
     }
 
+    // Checks firmware version for Series 2 (Zigbee)
     if (iXBeePktParamLen (dp->atpkt) > 0) {
       uint8_t fwid;
 
@@ -426,7 +458,7 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
     if (io->setting->xbee.new_panid) {
 
-      // New PAN ID
+      // Set new PAN ID if necessary
       ret = prvSendLocalAt (io, XBEE_CMD_PAN_ID, NULL, 0, 1000);
       if (ret != 0) {
 
@@ -465,6 +497,78 @@ gxPLXBeeZbOpen (gxPLIo * io) {
       }
     }
 
+    if (io->setting->xbee.reset_sw) {
+
+      // Software RESET FR
+      ret = prvSendLocalAt (io, XBEE_CMD_RESET_SOFT, NULL, 0, 1000);
+      if (ret != 0) {
+
+        PERROR ("XBee SW Reset %d", ret);
+        gxPLXBeeZbClose (io);
+        return -1;
+      }
+
+      PINFO ("Please wait while software reset...");
+      if (prvWaitStatusModem (io, XBEE_PKT_MODEM_WATCHDOG_TIMER_RESET, 5000) != 0) {
+
+        gxPLXBeeZbClose (io);
+        return -1;
+      }
+      else {
+
+        resetdone = true;
+      }
+
+    }
+
+    if ( (resetdone) && (io->setting->xbee.coordinator == 0)) {
+
+      PINFO ("Please wait while joining Zigbee network...");
+      if (prvWaitStatusModem (io, XBEE_PKT_MODEM_JOINED_NETWORK, 20000) != 0) {
+
+        gxPLXBeeZbClose (io);
+        return -1;
+      }
+    }
+
+    // Gets Association status
+    ret = prvSendLocalAt (io, XBEE_CMD_ASSOC_STATUS, NULL, 0, 1000);
+    if (ret != 0) {
+
+      PERROR ("Unable to read XBee module, return %d", ret);
+      gxPLXBeeZbClose (io);
+      return -1;
+    }
+    else {
+      uint8_t status;
+
+      if (iXBeePktParamGetUByte (&status, dp->atpkt, 0) == 0) {
+
+        if (status != 0) {
+
+#ifndef __AVR__
+          PERROR ("Association failed %s (0x%02X)",
+                  sXBeeAssociationStatusToString (status), status);
+#else
+          PERROR ("Association failed 0x%02X", status);
+#endif
+          gxPLXBeeZbClose (io);
+          return -1;
+        }
+        else {
+
+          PDEBUG ("Association successfull");
+        }
+      }
+    }
+
+    vXBeeSetCB (dp->xbee, XBEE_CB_DATA, prvZbDataCB);
+    vXBeeSetCB (dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
+    if (io->setting->xbee.coordinator) {
+
+      vXBeeSetCB (dp->xbee, XBEE_CB_NODE_IDENT, prvZbNodeIdCB);
+    }
+
     // Gets Operating PAN ID
     ret = prvSendLocalAt (io, XBEE_CMD_OPERATING_PAN_ID, NULL, 0, 1000);
     if (ret != 0) {
@@ -497,13 +601,6 @@ gxPLXBeeZbOpen (gxPLIo * io) {
 
       dp->max_payload = word;
       PDEBUG ("Maximum RF payload %d bytes", dp->max_payload);
-    }
-
-    vXBeeSetCB (dp->xbee, XBEE_CB_DATA, prvZbDataCB);
-    vXBeeSetCB (dp->xbee, XBEE_CB_TX_STATUS, prvZbTxStatusCB);
-    if (io->setting->xbee.coordinator) {
-
-      vXBeeSetCB (dp->xbee, XBEE_CB_NODE_IDENT, prvZbNodeIdCB);
     }
     return 0;
   }
@@ -597,9 +694,9 @@ gxPLXBeeZbSend (gxPLIo * io, const void * buffer, int count,
     PERROR ("Unable to deliver the message, error: %d", fid);
   }
   else {
-    
+
     dp->fid = fid;
-    PDEBUG ("Send ZigBee frame #%d (%d bytes)", fid, count);
+    PINFO ("Send ZigBee frame #%d (%d bytes)", fid, count);
   }
 
   return fid;

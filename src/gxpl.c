@@ -196,6 +196,7 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
   gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
   assert (setting);
 
+  setting->log = LOG_WARNING;
   if (iface) {
     strcpy (setting->iface, iface);
   }
@@ -204,7 +205,6 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
   }
   setting->connecttype = type;
   setting->malloc = 1;
-
   return setting;
 }
 
@@ -214,6 +214,7 @@ gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   gxPLSetting * setting = calloc (1, sizeof (gxPLSetting));
   assert (setting);
 
+  setting->log = LOG_WARNING;
   gxPLParseCommonArgs (setting, argc, argv);
   if (strlen (setting->iolayer) == 0) {
 
@@ -389,7 +390,7 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
   }
   else {
 
-    PINFO ("Error Polling");
+    PNOTICE ("gxPLIoCtl(gxPLIoFuncPoll) return %d", ret);
   }
   return ret;
 }

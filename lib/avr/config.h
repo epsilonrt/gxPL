@@ -36,13 +36,12 @@ extern "C" {
 #define CONFIG_DEVICE_FILTER          1
 // add the "remote-addr" field in hbeat.basic
 #define CONFIG_HBEAT_BASIC_EXTENSION  1
+// XBEE
+#define CONFIG_XBEE_RESET_PORT        PORTB
+#define CONFIG_XBEE_RESET_PIN         7
 
 /* conditionals options ====================================================== */
-#ifndef NDEBUG
-#define GXPL_LOG_DEBUG_LEVEL LOG_DEBUG
-#else
-#define GXPL_LOG_DEBUG_LEVEL LOG_INFO
-#endif
+
 /* ========================================================================== */
 #ifdef __cplusplus
 }

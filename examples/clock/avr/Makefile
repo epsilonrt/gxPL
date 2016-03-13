@@ -55,8 +55,9 @@ AVRIO_ARDUINO = OFF
 
 # Utilisation de la chaîne de compilation interne à AvrIO
 USE_INTERNAL_TOOLCHAIN = OFF
+
 # Utilisation de la chaîne de compilation Avr Studio 7
-USE_AVRSTUDIO7_TOOLCHAIN = ON
+USE_AVRSTUDIO7_TOOLCHAIN = OFF
 
 #                               ~~~~AVRIO~~~~
 #----------------------------------------------------------------------------

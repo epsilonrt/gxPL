@@ -21,15 +21,11 @@
 #define AVR_IOLAYER_NAME      "xbeezb"
 #define AVR_IOLAYER_PORT      "tty1"
 
-#define AVR_XBEE_RESET_PORT   PORTB
-#define AVR_XBEE_RESET_PIN    7
-
 #define AVR_TERMINAL_PORT         "tty0"
 #define AVR_TERMINAL_BAUDRATE     500000
 #define AVR_TERMINAL_FLOW         SERIAL_FLOW_NONE
 
 /* private variables ======================================================== */
-static xDPin xResetPin = { .port = &AVR_XBEE_RESET_PORT, .pin = AVR_XBEE_RESET_PIN };
 
 #endif
 
@@ -103,8 +99,10 @@ main (int argc, char **argv) {
              AVR_IOLAYER_NAME, AVR_IOLAYER_PORT);
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
   assert (setting);
-  setting->xbee.reset = &xResetPin;
   setting->log = LOG_DEBUG;
+#endif
+#ifndef GXPL_XBEEZB_HAS_HWRESET
+  setting->xbee.reset_sw = 1;
 #endif
   UTEST_SUCCESS();
 

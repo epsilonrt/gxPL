@@ -108,7 +108,7 @@ typedef struct _gxPLBridge gxPLBridge;
 /**
  * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
-#define GXPL_GETOPT "i:n:b:dD"
+#define GXPL_GETOPT "i:n:b:dDr"
 
 /**
  * @brief default baudrate for serial iolayer
@@ -219,13 +219,16 @@ typedef struct _gxPLIoXBeeSetting {
     struct {
       uint8_t coordinator: 1;
       uint8_t new_panid: 1;
-      uint8_t sw_reset: 1;
+      uint8_t reset_sw: 1;
+      uint8_t reset_hw: 1;
     };
   };
 #if defined(__AVR__)
-  xDPin * reset;
+#define GXPL_XBEEZB_HAS_HWRESET 1
+  xDPin reset_pin;
 #elif defined(ARCH_ARM_RASPBERRYPI)
-  xDout * reset;
+#define GXPL_XBEEZB_HAS_HWRESET 1
+  xDout reset_pin;
 #endif
 } gxPLIoXBeeSetting;
 

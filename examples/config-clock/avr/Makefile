@@ -7,6 +7,9 @@
 # Target Name (without extension).
 TARGET = gxpl-config-clock-avr
 
+# Enable logging messages (if OFF no display is performed)
+LOG = ON
+
 # Relative path from the root directory of the user's project
 PROJECT_TOPDIR = ../../..
 
@@ -36,7 +39,13 @@ BOARD = DVK90CAN1_XBEE
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = __ASSERT_USE_STDERR
+AVRIO_CONFIG  = 
+
+ifeq ($(LOG),ON)
+AVRIO_CONFIG += __ASSERT_USE_STDERR
+else
+AVRIO_CONFIG += NLOG
+endif
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -46,8 +55,9 @@ AVRIO_ARDUINO = OFF
 
 # Utilisation de la chaîne de compilation interne à AvrIO
 USE_INTERNAL_TOOLCHAIN = OFF
+
 # Utilisation de la chaîne de compilation Avr Studio 7
-USE_AVRSTUDIO7_TOOLCHAIN = ON
+USE_AVRSTUDIO7_TOOLCHAIN = OFF
 
 #                               ~~~~AVRIO~~~~
 #----------------------------------------------------------------------------
@@ -78,7 +88,7 @@ DEBUG_OPT = s
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = $(TARGET).c
+SRC  = examples/config-clock/gxpl-config-clock.c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =

@@ -37,11 +37,7 @@ extern "C" {
 #define CONFIG_HBEAT_BASIC_EXTENSION  1
 
 /* conditionals options ====================================================== */
-#ifndef NDEBUG
-#define GXPL_LOG_DEBUG_LEVEL LOG_DEBUG
-#else
-#define GXPL_LOG_DEBUG_LEVEL LOG_INFO
-#endif
+
 /* ========================================================================== */
 #ifdef __cplusplus
 }

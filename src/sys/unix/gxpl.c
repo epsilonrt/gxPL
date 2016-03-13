@@ -30,17 +30,20 @@
  *    -d / --debug         : enable debugging
  *    -b / --baudrate      : serial baudrate (if iolayer use serial port)
  *    -D / --nodaemon      : do not daemonize
+ *    -r / --reset         : performed iolayer reset
  */
 void
 gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   int c;
+  bool reset = false;
   static const char short_options[] = GXPL_GETOPT;
   static struct option long_options[] = {
     {"interface", required_argument, NULL, 'i'},
     {"net",       required_argument, NULL, 'n'},
     {"baudrate",  required_argument, NULL, 'b'},
     {"debug",     no_argument,       NULL, 'd' },
-    {"nodaemon",     no_argument,    NULL, 'D' },
+    {"nodaemon",  no_argument,       NULL, 'D' },
+    {"reset",     no_argument,       NULL, 'r' },
     {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
   };
 
@@ -48,7 +51,7 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   char * backup = malloc (sizeof (char *) * argc);
   memcpy (backup, argv, sizeof (char *) * argc);
   char * baudrate = NULL;
-  int loglvl = LOG_NOTICE;
+  int loglvl = LOG_WARNING;
 #ifdef DEBUG
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
 #endif
@@ -85,28 +88,38 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
         PDEBUG ("set nodaemon flag");
         break;
 
+      case 'r':
+        reset = true;
+        PDEBUG ("enable reset flag");
+        break;
+
       default:
         break;
     }
   }
   while (c != -1);
 
-  setting->log = MIN(LOG_DEBUG,loglvl);
+  setting->log = MIN (LOG_DEBUG, loglvl);
 
-  if ( (strncmp (setting->iolayer, "xbee", 4) == 0) && (baudrate)) {
-    int b;
-    char * endptr;
-    b = strtol (baudrate, &endptr, 10);
+  if (strncmp (setting->iolayer, "xbee", 4) == 0) {
     
-    if (*endptr == '\0') {
+    setting->xbee.reset_sw = reset;
+    
+    if (baudrate) {
+      int b;
+      char * endptr;
+      b = strtol (baudrate, &endptr, 10);
 
-      setting->xbee.ios.baud = b;
-      setting->xbee.ios.dbits = SERIAL_DATABIT_8;
-      setting->xbee.ios.parity = SERIAL_PARITY_NONE;
-      setting->xbee.ios.sbits = SERIAL_STOPBIT_ONE;
-      setting->xbee.ios.flow = GXPL_DEFAULT_FLOW;
-      setting->xbee.ios.flag = 0;
-      setting->iosflag = 1;
+      if (*endptr == '\0') {
+
+        setting->xbee.ios.baud = b;
+        setting->xbee.ios.dbits = SERIAL_DATABIT_8;
+        setting->xbee.ios.parity = SERIAL_PARITY_NONE;
+        setting->xbee.ios.sbits = SERIAL_STOPBIT_ONE;
+        setting->xbee.ios.flow = GXPL_DEFAULT_FLOW;
+        setting->xbee.ios.flag = 0;
+        setting->iosflag = 1;
+      }
     }
   }
 

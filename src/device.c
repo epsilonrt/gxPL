@@ -136,7 +136,7 @@ prvHeartbeatMessageSendHello (gxPLDevice * device) {
 
     // Update last heartbeat time
     long now = gxPLTime();
-    PDEBUG ("Sent heartbeat message at %s", gxPLTimeStr (now, NULL));
+    PDEBUG ("Sent heartbeat message timestamp %s", gxPLTimeStr (now, NULL));
     device->hbeat_last = now;
     return 0;
   }
@@ -210,7 +210,7 @@ gxPLDeviceMessageHandler (gxPLDevice * device, gxPLMessage * message,
        (gxPLAppIsHubEchoMessage (device->parent, message, &device->id) == true)) {
 
     device->ishubconfirmed = 1;
-    PDEBUG ("Hub detected and confirmed existing");
+    PINFO ("Hub detected");
   }
 
   // If we are not reporting your own messages, see if they originated with us

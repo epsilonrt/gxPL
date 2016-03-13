@@ -259,6 +259,7 @@ prvPrintUsage (void) {
           " cross the bridge (default: 1)\n");
 
   printf ("  -b           - enable broadcast for inside nework\n");
+  printf ("  -r           - perform a iolayer reset (if supported)\n");
   printf ("  -D           - do not daemonize -- run from the console\n");
   printf ("  -d           - enable debugging messages\n");
   printf ("  -h           - print this message\n\n");

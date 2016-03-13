@@ -43,11 +43,13 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  * @brief Returns a new gxPLApplication setting from command line parameters
  *
  * This will parse the passed command array for options and parameters
- * It supports the following options:
- *    -i / --interface xxx : interface or device used to access the network
- *    -n / --net       xxx : hardware abstraction layer to access the network
- *    -d / --debug         : enable debugging
- *    -D / --nodaemon      : do not daemonize
+ * It supports the following options: \n
+ *  -  -i / --interface xxx : interface or device used to access the network
+ *  -  -n / --net       xxx : hardware abstraction layer to access the network
+ *  -  -d / --debug         : enable debugging
+ *  -  -D / --nodaemon      : do not daemonize
+ *  -  -r / --reset         : performed iolayer reset (if supported)
+ *  .
  *
  * @param argc number of parameters from main
  * @param argv list of parameters from main

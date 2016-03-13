@@ -8,16 +8,14 @@
  *    -b / --baudrate      : serial baudrate (if iolayer use serial port)
  *
  * Copyright 2005 (c), Gerald R Duprey Jr
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright (c) 2015-2016, Pascal JEAN aka epsilonRT
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <signal.h>
 #include <gxPL.h>
 #include "version-git.h"
 
@@ -29,17 +27,49 @@
 #define REPORT_OWN_MESSAGE    true
 #define DEFAULT_CONFIG_FILE "gxpl-clock.xpl"
 
+#ifdef __AVR__
+// -----------------------------------AVR---------------------------------------
+/* constants ================================================================ */
+/* =============================================================================
+ * AVR has no command line or terminal, constants below allow to setup the
+ * io layer and the serial port terminal, if NLOG is defined in the makefile,
+ * no terminal is used.
+ * =============================================================================
+ */
+#define AVR_IOLAYER_NAME      "xbeezb"
+#define AVR_IOLAYER_PORT      "tty1"
+
+//#define CONFIG_XBEE_RESET_PORT   PORTB
+//#define CONFIG_XBEE_RESET_PIN    7
+
+#define AVR_TERMINAL_PORT     "tty0"
+#define AVR_TERMINAL_BAUDRATE 500000
+#define AVR_TERMINAL_FLOW     SERIAL_FLOW_NONE
+
+#define AVR_INTERRUPT_BUTTON  BUTTON_BUTTON1
+
+#else /* __AVR__ not defined */
+// ----------------------------------UNIX---------------------------------------
+#include <signal.h>
+#include <unistd.h>
+
+/* private functions ======================================================== */
+static void prvSignalHandler (int sig) ;
+
+// -----------------------------------------------------------------------------
+#endif /* __AVR__ not defined */
+#include <gxPL/stdio.h>
+
 /* private variables ======================================================== */
 static gxPLApplication * app;
 static gxPLDevice * device;
 static gxPLMessage * message;
 
 /* configurable items ======================================================= */
-static int tick_rate;  // Second between ticks */
-static bool started;
+static int tick_rate;  // Second between ticks
+static bool started;   // false to stop sending clock messages
 
 /* private functions ======================================================== */
-static void prvSignalHandler (int s);
 static void prvSendTick (void);
 static void prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) ;
 static const char * prvIntToStr (int value);
@@ -52,15 +82,25 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
+#ifdef __AVR__
+  gxPLStdIoOpen();
+  setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
+  assert (setting);
+  
+  setting->log = LOG_DEBUG;
+  gxPLPrintf ("Press any key to start...\n");
+  gxPLWait();
+#else
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
+#endif
 
   // opens the xPL network
   app = gxPLAppOpen (setting);
   if (app == NULL) {
 
-    fprintf (stderr, "Unable to start xPL");
-    exit (EXIT_FAILURE);
+    PERROR ("Unable to start xPL");
+    gxPLExit (EXIT_FAILURE);
   }
 
   // Create a configurable device and set our application version
@@ -96,7 +136,7 @@ main (int argc, char * argv[]) {
 
   // Add a responder for time setting
   ret = gxPLDeviceListenerAdd (device, prvMessageListener, gxPLMessageAny,
-                               "clock", NULL, NULL);
+                               NULL, NULL, NULL);
   assert (ret == 0);
 
   // Add a device change listener we'll use to pick up a new tick rate
@@ -112,9 +152,14 @@ main (int argc, char * argv[]) {
   ret = gxPLMessageSchemaSet (message, "clock", "update");
   assert (ret == 0);
 
+#ifdef __AVR__
+  gxPLPrintf ("Press Button to abort ...\n");
+#else
   // Install signal traps for proper shutdown
   signal (SIGTERM, prvSignalHandler);
   signal (SIGINT, prvSignalHandler);
+  gxPLPrintf ("Press Ctrl+C to abort ...\n");
+#endif
 
   // Enable the service
   ret = gxPLDeviceEnable (device, true);
@@ -128,15 +173,20 @@ main (int argc, char * argv[]) {
 
     // Process clock tick update checking
     prvSendTick();
+
+    if (gxPLIsInterrupted()) {
+
+      prvCloseAll();
+      gxPLExit (EXIT_SUCCESS);
+    }
   }
   return 0;
 }
 
-
 /* private functions ======================================================== */
 
 // --------------------------------------------------------------------------
-//  Quickly to convert an integer to string */
+//  Quickly to convert an integer to string
 static const char *
 prvIntToStr (int value) {
   static char numBuffer[10];
@@ -149,27 +199,27 @@ prvIntToStr (int value) {
 //  It's best to put the logic for reading the device configuration
 //  and parsing it into your code in a seperate function so it can
 //  be used by your prvConfigChanged and your startup code that
-//  will want to parse the same data after a setting file is loaded */
+//  will want to parse the same data after a setting file is loaded
 static void
 prvSetConfig (gxPLDevice * device) {
 
-  // Get the tickrate */
+  // Get the tickrate
   const char * str_rate = gxPLDeviceConfigValueGet (device, TICK_RATE_CFG_NAME);
   const char * str_started = gxPLDeviceConfigValueGet (device, STARTED_CFG_NAME);
   int new_rate;
   char * endptr;
 
-  // Handle bad configurable (override it) */
+  // Handle bad configurable (override it)
   if ( (str_rate == NULL) || (strlen (str_rate) == 0)) {
     gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (tick_rate));
     return;
   }
 
-  // Convert text to a number */
+  // Convert text to a number
   new_rate = strtol (str_rate, &endptr, 10);
 
   if (*endptr != '\0') {
-    // Bad value -- override it */
+    // Bad value -- override it
     gxPLDeviceConfigValueSet (device, TICK_RATE_CFG_NAME, prvIntToStr (tick_rate));
     return;
   }
@@ -181,16 +231,16 @@ prvSetConfig (gxPLDevice * device) {
     started = false;
   }
 
-  // Install new tick rate */
+  // Install new tick rate
   tick_rate = new_rate;
 }
 
 // --------------------------------------------------------------------------
-//  Handle a change to the device device configuration */
+//  Handle a change to the device device configuration
 static void
 prvConfigChanged (gxPLDevice * device, void * udata) {
 
-  // Read setting items for device and install */
+  // Read setting items for device and install
   prvSetConfig (device);
 }
 
@@ -199,50 +249,29 @@ prvConfigChanged (gxPLDevice * device, void * udata) {
 static void
 prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) {
 
-  PINFO ("Received a Clock Message from %s-%s.%s of type %d for %s.%s\n",
-          gxPLMessageSourceVendorIdGet (msg),
-          gxPLMessageSourceDeviceIdGet (msg),
-          gxPLMessageSourceInstanceIdGet (msg),
-          gxPLMessageTypeGet (msg),
-          gxPLMessageSchemaClassGet (msg),
-          gxPLMessageSchemaTypeGet (msg));
+  PINFO ("received %s msg from %s-%s.%s with %s.%s schema\n",
+         gxPLMessageTypeToString (gxPLMessageTypeGet (msg)),
+         gxPLMessageSourceVendorIdGet (msg),
+         gxPLMessageSourceDeviceIdGet (msg),
+         gxPLMessageSourceInstanceIdGet (msg),
+         gxPLMessageSchemaClassGet (msg),
+         gxPLMessageSchemaTypeGet (msg));
 }
-
-// -----------------------------------------------------------------------------
-// signal handler
-static void
-prvSignalHandler (int s) {
-  int ret;
-
-  // all devices will be deactivated and destroyed before closing
-  ret = gxPLAppClose (app);
-  assert (ret == 0);
-  gxPLMessageDelete (message);
-
-  printf ("\neverything was closed.\nHave a nice day !\n");
-  exit (EXIT_SUCCESS);
-}
-
 
 // -----------------------------------------------------------------------------
 static void
 prvSendTick (void) {
 
   if ( (tick_rate > 0) && (started) && gxPLDeviceIsHubConfirmed (device))  {
-    static time_t last;
-    time_t now = time (NULL);
+    static unsigned long last;
+    unsigned long now = gxPLTime();
 
     // Skip unless the delay has passed
     if ( (last == 0) || ( (now - last) >= tick_rate)) {
-      struct tm * t;
-      char str[24];
-
-      // Format the date/time
-      t = localtime (&now);
-      strftime (str, 24, "%Y%m%d%H%M%S", t);
+      char * strtime = gxPLDateTimeStr (now, NULL);
 
       // Install the value and send the message
-      gxPLMessagePairSet (message, "time", str);
+      gxPLMessagePairSet (message, "time", strtime);
 
       // Broadcast the message
       gxPLDeviceMessageSend (device, message);
@@ -252,5 +281,37 @@ prvSendTick (void) {
     }
   }
 }
+
+// -----------------------------------------------------------------------------
+static void
+prvCloseAll (void) {
+  int ret;
+
+  // Sends heartbeat end messages to all devices
+  ret = gxPLAppDisableAllDevices (app);
+  assert (ret == 0);
+
+#ifdef __AVR__
+  gxPLPrintf ("\nPress any key to close...\n");
+  gxPLWait();
+#endif
+  ret = gxPLAppClose (app);
+  assert (ret == 0);
+
+  gxPLMessageDelete (message);
+
+  gxPLPrintf ("\neverything was closed.\nHave a nice day !\n");
+}
+
+#ifndef __AVR__
+// -----------------------------------------------------------------------------
+// unix signal handler
+static void
+prvSignalHandler (int sig) {
+
+  prvCloseAll();
+  gxPLExit (EXIT_SUCCESS);
+}
+#endif
 
 /* ========================================================================== */

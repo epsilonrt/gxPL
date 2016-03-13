@@ -32,15 +32,6 @@ __BEGIN_C_DECLS
 #define gxPLExit(c) for(;;);
 #define gxPLSprintf(str,fmt,...) sprintf_P(str,fmt,##__VA_ARGS__)
 
-#ifdef AVR_INTERRUPT_BUTTON
-#include <avrio/button.h>
-#ifdef AVRIO_BUTTON_ENABLE
-#define gxPLIsInterrupted() (xButGet(AVR_INTERRUPT_BUTTON) != 0)
-#else
-#define gxPLIsInterrupted() (0)
-#endif
-#endif
-
 #ifndef NLOG
 // -------------------------------------
 #include <avrio/file.h>
@@ -50,6 +41,19 @@ __BEGIN_C_DECLS
 #define gxPLPrintf(fmt,...) printf_P(PSTR(fmt),##__VA_ARGS__)
 #define gxPLFflush(f) iFileFlush(f)
 #define gxPLWait() getchar()
+
+// -----------------------------------------------------------------------------
+INLINE bool 
+gxPLIsInterrupted(void) {
+  
+  while (iFileDataAvailable (stdin) > 0) {
+
+    if (getchar() == 3) {
+      return true;
+    }
+  }
+  return false;
+}
 
 #else /* NLOG defined */
 // -------------------------------------
@@ -61,6 +65,15 @@ __BEGIN_C_DECLS
 #define gxPLPrintf(fmt,...)
 #define gxPLFflush(f)
 #define gxPLWait() delay_ms(5000)
+
+#ifdef AVR_INTERRUPT_BUTTON
+#include <avrio/button.h>
+#ifdef AVRIO_BUTTON_ENABLE
+#define gxPLIsInterrupted() (xButGet(AVR_INTERRUPT_BUTTON) != 0)
+#else
+#define gxPLIsInterrupted() (0)
+#endif
+#endif
 
 // -------------------------------------
 #endif /* NLOG defined */
@@ -85,7 +98,7 @@ INLINE void
 gxPLStdIoOpen (void) {
 #if defined(__AVR__)
 
-#if defined(AVR_INTERRUPT_BUTTON) && defined(AVRIO_BUTTON_ENABLE)
+#if defined(NLOG) && defined(AVR_INTERRUPT_BUTTON) && defined(AVRIO_BUTTON_ENABLE)
   vButInit();
 #endif
 
