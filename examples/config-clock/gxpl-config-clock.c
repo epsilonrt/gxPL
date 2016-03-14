@@ -20,12 +20,13 @@
 #include "version-git.h"
 
 /* constants ================================================================ */
-#define CLOCK_VERSION VERSION_SHORT
-#define DEFAULT_TICK_RATE 60
-#define TICK_RATE_CFG_NAME "tickrate"
-#define STARTED_CFG_NAME "started"
+#define CLOCK_VERSION         VERSION_SHORT
+#define DEFAULT_TICK_RATE     60
+#define TICK_RATE_CFG_NAME    "tickrate"
+#define STARTED_CFG_NAME      "started"
 #define REPORT_OWN_MESSAGE    true
-#define DEFAULT_CONFIG_FILE "gxpl-clock.xpl"
+#define DEFAULT_CONFIG_FILE   "gxpl-clock.xpl"
+#define POLL_RATE_MS          1000
 
 #ifdef __AVR__
 // -----------------------------------AVR---------------------------------------
@@ -39,14 +40,9 @@
 #define AVR_IOLAYER_NAME      "xbeezb"
 #define AVR_IOLAYER_PORT      "tty1"
 
-//#define CONFIG_XBEE_RESET_PORT   PORTB
-//#define CONFIG_XBEE_RESET_PIN    7
-
 #define AVR_TERMINAL_PORT     "tty0"
 #define AVR_TERMINAL_BAUDRATE 500000
 #define AVR_TERMINAL_FLOW     SERIAL_FLOW_NONE
-
-#define AVR_INTERRUPT_BUTTON  BUTTON_BUTTON1
 
 #else /* __AVR__ not defined */
 // ----------------------------------UNIX---------------------------------------
@@ -75,6 +71,7 @@ static void prvMessageListener (gxPLDevice * device, gxPLMessage * msg, void * u
 static const char * prvIntToStr (int value);
 static void prvSetConfig (gxPLDevice * device);
 static void prvConfigChanged (gxPLDevice * device, void * udata);
+static void prvCloseAll (void);
 
 /* main ===================================================================== */
 int
@@ -86,8 +83,8 @@ main (int argc, char * argv[]) {
   gxPLStdIoOpen();
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
   assert (setting);
-  
   setting->log = LOG_DEBUG;
+  
   gxPLPrintf ("Press any key to start...\n");
   gxPLWait();
 #else
@@ -152,13 +149,13 @@ main (int argc, char * argv[]) {
   ret = gxPLMessageSchemaSet (message, "clock", "update");
   assert (ret == 0);
 
-#ifdef __AVR__
-  gxPLPrintf ("Press Button to abort ...\n");
-#else
+  gxPLPrintf ("Starting xPL Clock\n");
+  gxPLPrintf ("Press Ctrl+C to abort ...\n");
+
+#ifndef __AVR__
   // Install signal traps for proper shutdown
   signal (SIGTERM, prvSignalHandler);
   signal (SIGINT, prvSignalHandler);
-  gxPLPrintf ("Press Ctrl+C to abort ...\n");
 #endif
 
   // Enable the service
@@ -166,9 +163,8 @@ main (int argc, char * argv[]) {
   assert (ret == 0);
 
   for (;;) {
-    // Let XPL run for a while, returning after it hasn't seen any
-    // activity in 100ms or so
-    ret = gxPLAppPoll (app, 100);
+
+    ret = gxPLAppPoll (app, POLL_RATE_MS);
     assert (ret == 0);
 
     // Process clock tick update checking

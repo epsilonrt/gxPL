@@ -40,7 +40,7 @@ DEBUG_OPT = 0
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC  = examples/clock/gxpl-clock.c
+SRC  = $(TARGET).c
 
 # List C++ source files here. (C++ dependencies are automatically generated.)
 CPPSRC =
