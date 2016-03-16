@@ -3,7 +3,7 @@
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
-SUBDIRS = io message core device hub bridge
+SUBDIRS = io message core device device-config hub bridge
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)

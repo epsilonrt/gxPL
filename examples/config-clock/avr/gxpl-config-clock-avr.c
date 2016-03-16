@@ -1,12 +1,7 @@
 /**
  * @file
  * Simple configurable xPL device device that sends a time update periodically
- * The available options are:
- *    -i / --interface xxx : interface or device used to access the network
- *    -n / --net       xxx : hardware abstraction layer to access the network
- *    -d / --debug         : enable debugging
- *    -b / --baudrate      : serial baudrate (if iolayer use serial port)
- *
+ * 
  * Copyright 2005 (c), Gerald R Duprey Jr
  * Copyright (c) 2015-2016, Pascal JEAN aka epsilonRT
  * All rights reserved.
@@ -27,9 +22,12 @@
 #define REPORT_OWN_MESSAGE    true
 #define DEFAULT_CONFIG_FILE   "gxpl-clock.xpl"
 #define POLL_RATE_MS          1000
+#define GXPL_DMEM_DEBUG 1
 
-#ifdef __AVR__
-// -----------------------------------AVR---------------------------------------
+#if (RAMSIZE <= 4096) && !defined(NLOG)
+#warning RAM size may not be sufficient, should write LOG=OFF in the Makefile
+#endif
+
 /* constants ================================================================ */
 /* =============================================================================
  * AVR has no command line or terminal, constants below allow to setup the
@@ -44,16 +42,7 @@
 #define AVR_TERMINAL_BAUDRATE 500000
 #define AVR_TERMINAL_FLOW     SERIAL_FLOW_NONE
 
-#else /* __AVR__ not defined */
-// ----------------------------------UNIX---------------------------------------
-#include <signal.h>
-#include <unistd.h>
-
-/* private functions ======================================================== */
-static void prvSignalHandler (int sig) ;
-
-// -----------------------------------------------------------------------------
-#endif /* __AVR__ not defined */
+#define AVR_INTERRUPT_BUTTON BUTTON_BUTTON1
 #include <gxPL/stdio.h>
 
 /* private variables ======================================================== */
@@ -79,7 +68,6 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
-#ifdef __AVR__
   gxPLStdIoOpen();
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
   assert (setting);
@@ -87,10 +75,6 @@ main (int argc, char * argv[]) {
   
   gxPLPrintf ("Press any key to start...\n");
   gxPLWait();
-#else
-  setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
-  assert (setting);
-#endif
 
   // opens the xPL network
   app = gxPLAppOpen (setting);
@@ -151,12 +135,6 @@ main (int argc, char * argv[]) {
 
   gxPLPrintf ("Starting xPL Clock\n");
   gxPLPrintf ("Press Ctrl+C to abort ...\n");
-
-#ifndef __AVR__
-  // Install signal traps for proper shutdown
-  signal (SIGTERM, prvSignalHandler);
-  signal (SIGINT, prvSignalHandler);
-#endif
 
   // Enable the service
   ret = gxPLDeviceEnable (device, true);
@@ -269,6 +247,11 @@ prvSendTick (void) {
       // Install the value and send the message
       gxPLMessagePairSet (message, "time", strtime);
 
+#ifdef GXPL_DMEM_DEBUG
+    int dmem = gxPLDynamicMemoryUsed();
+    gxPLMessagePairSet (message, "dmem", prvIntToStr(dmem));
+#endif
+
       // Broadcast the message
       gxPLDeviceMessageSend (device, message);
 
@@ -287,10 +270,9 @@ prvCloseAll (void) {
   ret = gxPLAppDisableAllDevices (app);
   assert (ret == 0);
 
-#ifdef __AVR__
   gxPLPrintf ("\nPress any key to close...\n");
   gxPLWait();
-#endif
+  
   ret = gxPLAppClose (app);
   assert (ret == 0);
 
@@ -298,16 +280,5 @@ prvCloseAll (void) {
 
   gxPLPrintf ("\neverything was closed.\nHave a nice day !\n");
 }
-
-#ifndef __AVR__
-// -----------------------------------------------------------------------------
-// unix signal handler
-static void
-prvSignalHandler (int sig) {
-
-  prvCloseAll();
-  gxPLExit (EXIT_SUCCESS);
-}
-#endif
 
 /* ========================================================================== */

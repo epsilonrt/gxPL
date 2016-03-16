@@ -30,7 +30,7 @@
   <Dependencies/>
   <VirtualDirectory Name="gxpl-config-clock">
     <File Name="Makefile"/>
-    <File Name="../gxpl-config-clock.c"/>
+    <File Name="gxpl-config-clock.c"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
