@@ -73,6 +73,8 @@ gxPLIsInterrupted(void) {
 #else
 #define gxPLIsInterrupted() (0)
 #endif
+#else
+#define gxPLIsInterrupted() (0)
 #endif
 
 // -------------------------------------

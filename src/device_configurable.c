@@ -731,7 +731,7 @@ gxPLDeviceConfigValueSetAt (gxPLDevice * device, const char * name,
           if (value == NULL) {
             value = "";
           }
-          p = realloc (p, strlen (value + 1));
+          p = realloc (p, strlen (value) + 1);
           strcpy (p, value);
           return iVectorReplace (&item->values, index, p);
         }
