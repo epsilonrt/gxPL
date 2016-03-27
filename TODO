@@ -1,0 +1,24 @@
+gxPL TODO
+
+* gxpl-xbee-bridge
+  Lors de l'arrivée d'un nouveau device configurable côté zigbee, le premier
+  message config.list échoue à être transmis de out->in avec l'erreur 0x32:
+    gxpl-xbee-bridge(debug): Just read 123 bytes, raw buffer below >>>
+    xpl-cmnd
+    {
+    hop=1
+    source=cdp1802-dcm.0000010a1k2a8y
+    target=epsirt-sensor.40c04814000003gs
+    }
+    config.list
+    {
+    command=request
+    }
+    <<<
+    gxpl-xbee-bridge(debug): Now dispatching valid message
+    gxpl-xbee-bridge(info): OUT --> IN  > Deliver
+    gxpl-xbee-bridge(info): Send ZigBee frame #11 (123 bytes)
+    gxpl-xbee-bridge(warn): io_xbeezb.c:188: prvZbTxStatusCB(): frame #11: Resource error lack of free buffers, timers, etc. (0x32)
+  
+  Solution envisagée: Attendre un compte rendu de transmission correcte avant
+  de flusher un message de out->in
