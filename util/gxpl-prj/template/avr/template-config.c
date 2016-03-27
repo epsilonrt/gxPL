@@ -47,14 +47,15 @@ main (void) {
     ret = gxPLAppPoll (app, POLL_RATE_MS);
     assert (ret == 0);
 
-    if (gxPLDeviceIsHubConfirmed (device)) {
+    if (gxPLDeviceIsHubConfirmed (device) && gxPLDeviceIsConfigured (device)) {
 
-      // if the hub is confirmed, performs tasks...
+      // if the hub is confirmed, performs xPL tasks...
       ret = iSensorTask (device);
       assert (ret >= 0);
-      ret = iUiTask (device);
-      assert (ret >= 0);
     }
+
+    ret = iUiTask (device);
+    assert (ret >= 0);
   }
 }
 
