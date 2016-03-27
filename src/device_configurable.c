@@ -78,8 +78,13 @@ prvSendConfigList (gxPLDevice * device) {
   gxPLMessagePairAdd (message, "reconf", "newconf");
   gxPLMessagePairAdd (message, "reconf", "interval");
 
+#if CONFIG_DEVICE_GROUP
   gxPLDeviceGroupAddListOfItems (device, message);
+#endif  /* CONFIG_DEVICE_GROUP set */
+
+#if CONFIG_DEVICE_FILTER
   gxPLDeviceFilterAddListOfItems (device, message);
+#endif  /* CONFIG_DEVICE_FILTER set */
 
   for (int i = 0; i < iVectorSize (&device->config->items); i++) {
 
@@ -130,10 +135,15 @@ prvDeviceConfigSendCurrent (gxPLDevice * device) {
   gxPLMessagePairAdd (message, "newconf", gxPLDeviceId (device)->instance);
   gxPLMessagePairAddFormat (message, "interval", "%d",
                             gxPLDeviceHeartbeatInterval (device) / 60);
+#if CONFIG_DEVICE_GROUP
   // Include groups
   gxPLDeviceGroupAddCurrentValues (device, message);
+#endif  /* CONFIG_DEVICE_GROUP set */
+
+#if CONFIG_DEVICE_FILTER
   // Include filters
   gxPLDeviceFilterAddCurrentValues (device, message);
+#endif  /* CONFIG_DEVICE_FILTER set */
 
   // Add in device configurable items
   for (int i = 0; i < iVectorSize (&device->config->items); i++) {
@@ -212,8 +222,8 @@ prvConfigNew (gxPLDevice * device, xVector * config) {
         }
       }
       else {
-        
-          item->values_max = 1;
+
+        item->values_max = 1;
       }
       item->name = malloc (strlen (name) + 1);
       assert (item->name);
@@ -263,16 +273,20 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
         }
       }
     }
+#if CONFIG_DEVICE_GROUP
     // Check for groups
     else if (strcmp (p->name, "group") == 0) {
 
       gxPLDeviceGroupAddFromString (device, p->value);
     }
+#endif  /* CONFIG_DEVICE_GROUP set */
+#if CONFIG_DEVICE_FILTER
     // Check for filters
     else if (strcmp (p->name, "filter") == 0) {
 
       gxPLDeviceFilterAddFromStr (device, p->value);
     }
+#endif  /* CONFIG_DEVICE_FILTER set */
     // Anything else had better be a configurable
     else {
       gxPLDeviceConfigValueAdd (device, p->name, p->value);
@@ -304,10 +318,10 @@ prvConfigSet (gxPLDevice * device, xVector * config, int index) {
     gxPLDeviceEnable (device, true);
     PDEBUG ("device restarted");
   }
-  
+
   // informs the manager that the configuration has been taken
-  if ((was_configured == false) && (device->hbeat_msg)) {
-    
+  if ( (was_configured == false) && (device->hbeat_msg)) {
+
     gxPLMessageDelete (device->hbeat_msg);
     device->hbeat_msg = NULL;
     gxPLDeviceHeartbeatSend (device, gxPLHeartbeatHello);
@@ -336,8 +350,15 @@ prvConfigHandler (gxPLDevice * device, gxPLMessage * message, void * udata) {
     if (strcasecmp (schema_type, "response") == 0) {
 
       gxPLDeviceConfigItemClearAll (device);
+      
+#if CONFIG_DEVICE_FILTER
       gxPLDeviceFilterClearAll (device);
+#endif  /* CONFIG_DEVICE_FILTER set */
+
+#if CONFIG_DEVICE_GROUP
       gxPLDeviceGroupClearAll (device);
+#endif  /* CONFIG_DEVICE_GROUP set */
+
       prvConfigSet (device, gxPLMessageBodyGet (message), 0);
     }
     else {
@@ -777,7 +798,7 @@ gxPLDeviceConfigLoad (gxPLDevice * device) {
 
   // And we are done
   if (values) {
-    
+
     PINFO ("%s config file sucessfully loaded", device->config->filename);
   }
   return values;
