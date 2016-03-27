@@ -47,7 +47,7 @@ priSendCurrentValue (gxPLDevice * device, gxPLMessageType msgtype) {
   }
 
   gxPLMessageTypeSet (currentmsg, msgtype);
-  gxPLMessagePairSetFormat (currentmsg, "current", "%.1f", current);
+  gxPLMessagePairSetFormat (currentmsg, "current", "%.2f", current);
 
   if (msgtype == gxPLMessageTrigger) {
 
@@ -55,7 +55,7 @@ priSendCurrentValue (gxPLDevice * device, gxPLMessageType msgtype) {
   }
 
   // Broadcast the message
-  PINFO ("broadcast current value = %.1fV", current);
+  PINFO ("broadcast current value = %.2fV", current);
   return gxPLDeviceMessageSend (device, currentmsg);
 }
 

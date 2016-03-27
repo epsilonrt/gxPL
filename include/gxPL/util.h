@@ -48,9 +48,17 @@ int gxPLStrCpy (char * dst, const char * src);
 /**
  * @brief Quickly to convert an integer to string
  * @param value
- * @return 
+ * @return a static const string
  */
 const char * gxPLIntToStr (int value);
+
+/**
+ * @brief Quickly to convert an double to string
+ * @param value
+ * @param precision (8 max)
+ * @return a static const string
+ */
+const char * gxPLDoubleToStr (double value, int precision);
 
 /**
  * @}

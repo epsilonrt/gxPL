@@ -136,10 +136,25 @@ gxPLStrCpy (char * dst, const char * src) {
 // --------------------------------------------------------------------------
 const char *
 gxPLIntToStr (int value) {
-  static char numBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER(int)+1];
+  static char intBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER (int) + 1];
 
-  sprintf (numBuffer, "%d", value);
-  return numBuffer;
+  sprintf (intBuffer, "%d", value);
+  return intBuffer;
+}
+
+// --------------------------------------------------------------------------
+const char *
+gxPLDoubleToStr (double value, int precision) {
+  static char doubleBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER (int) + 8 + 2];
+
+  precision = MIN (precision, 8);
+  sprintf (doubleBuffer, "%.8f", value);
+  if (precision < 8) {
+    int len = strlen (doubleBuffer);
+    
+    doubleBuffer[len -8 + precision] = '\0';
+  }
+  return doubleBuffer;
 }
 
 // -----------------------------------------------------------------------------
@@ -392,7 +407,7 @@ gxPLSchemaFromString (gxPLSchema * schema, const char * str) {
       }
     }
   }
-  
+
   PERROR ("Unable to set schema from %s", str);
   return -1;
 }

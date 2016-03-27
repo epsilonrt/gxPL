@@ -22,6 +22,7 @@
 
 #define SENSOR_NAME "vin"
 #define SENSOR_TYPE "voltage"
+#define SENSOR_GAP_NAME "gap"
 
 /*
  * AVR_TERMINAL used for gxPL debug purpose only ...
@@ -55,9 +56,10 @@ int iSensorTask (gxPLDevice * device);
 // !!TODO!! Here you can add more interfaces...
 
 /*
- * xPL
+ * xPL Device
  */
 gxPLDevice * xDeviceCreate(const char * iolayerport, const char * iolayername, int log);
-
+void vDeviceConfigChanged (gxPLDevice * device, void * udata);
+void vDeviceSetConfig (gxPLDevice * device);
 /* ========================================================================== */
 #endif /* _TEMPLATE_HEADER_ defined */
