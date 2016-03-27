@@ -30,6 +30,7 @@
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="template" Path="examples/template/avr/template.project" Active="No"/>
   <Project Name="template" Path="examples/template/avr/template.project" Active="No"/>
+  <Project Name="gxpl-template-avr" Path="examples/template/avr/gxpl-template-avr.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -70,6 +71,7 @@
       <Project Name="gxpl-test-device-config-avr" ConfigName="Debug"/>
       <Project Name="gxpl-test-device-config-unix" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
+      <Project Name="gxpl-template-avr" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -110,6 +112,7 @@
       <Project Name="gxpl-test-device-config-avr" ConfigName="Release"/>
       <Project Name="gxpl-test-device-config-unix" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>
+      <Project Name="gxpl-template-avr" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

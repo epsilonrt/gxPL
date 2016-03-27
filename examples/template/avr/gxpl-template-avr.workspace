@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="gxpl-template-avr" Database="">
+  <Project Name="gxpl-template-avr" Path="gxpl-template-avr.project" Active="Yes"/>
+  <Project Name="adc_test" Path="test/adc/adc_test.project" Active="No"/>
+  <Project Name="button_test" Path="test/button/button_test.project" Active="No"/>
+  <Project Name="hih6130_test" Path="test/hih6130/hih6130_test.project" Active="No"/>
+  <Project Name="hsc_spi_test" Path="test/hsc_spi/hsc_spi_test.project" Active="No"/>
+  <Project Name="kernel_test" Path="test/kernel/kernel_test.project" Active="No"/>
+  <Project Name="lcd_test" Path="test/lcd/lcd_test.project" Active="No"/>
+  <Project Name="led_test" Path="test/led/led_test.project" Active="No"/>
+  <Project Name="rc_servo_test" Path="test/rc_servo/rc_servo_test.project" Active="No"/>
+  <Project Name="spi_test" Path="test/spi/spi_test.project" Active="No"/>
+  <Project Name="terminal_test" Path="test/terminal/terminal_test.project" Active="No"/>
+  <Project Name="tsl230_test" Path="test/tsl230/tsl230_test.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="no">
+      <Environment/>
+      <Project Name="gxpl-template-avr" ConfigName="Debug"/>
+      <Project Name="adc_test" ConfigName="Debug"/>
+      <Project Name="button_test" ConfigName="Debug"/>
+      <Project Name="hih6130_test" ConfigName="Debug"/>
+      <Project Name="hsc_spi_test" ConfigName="Debug"/>
+      <Project Name="kernel_test" ConfigName="Debug"/>
+      <Project Name="lcd_test" ConfigName="Debug"/>
+      <Project Name="led_test" ConfigName="Debug"/>
+      <Project Name="rc_servo_test" ConfigName="Debug"/>
+      <Project Name="spi_test" ConfigName="Debug"/>
+      <Project Name="terminal_test" ConfigName="Debug"/>
+      <Project Name="tsl230_test" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
+      <Project Name="gxpl-template-avr" ConfigName="Release"/>
+      <Project Name="adc_test" ConfigName="Release"/>
+      <Project Name="button_test" ConfigName="Release"/>
+      <Project Name="hih6130_test" ConfigName="Release"/>
+      <Project Name="hsc_spi_test" ConfigName="Release"/>
+      <Project Name="kernel_test" ConfigName="Release"/>
+      <Project Name="lcd_test" ConfigName="Release"/>
+      <Project Name="led_test" ConfigName="Release"/>
+      <Project Name="rc_servo_test" ConfigName="Release"/>
+      <Project Name="spi_test" ConfigName="Release"/>
+      <Project Name="terminal_test" ConfigName="Release"/>
+      <Project Name="tsl230_test" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
