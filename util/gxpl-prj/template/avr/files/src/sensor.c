@@ -48,6 +48,14 @@ priSendCurrentValue (gxPLDevice * device, gxPLMessageType msgtype) {
 
   gxPLMessageTypeSet (currentmsg, msgtype);
   gxPLMessagePairSetFormat (currentmsg, "current", "%.2f", current);
+  /*
+   * if the device is configurable, the instance ID can be
+   * changed and should be updated.
+   */
+  if (gxPLDeviceIsConfigurale (device)) {
+    
+    gxPLMessageSourceInstanceIdSet (currentmsg, gxPLDeviceInstanceId (device));
+  }
 
   if (msgtype == gxPLMessageTrigger) {
 
@@ -65,9 +73,9 @@ prvSensorMessageListener (gxPLDevice * device, gxPLMessage * msg, void * udata) 
 
   if (gxPLMessagePairExist (msg, "request") == true) {
     // the request key is present in the message
-    
+
     if (strcmp (gxPLMessagePairGet (msg, "request"), "current") == 0) {
-      
+
       // this is a request for the current value
       if (gxPLMessagePairExist (msg, "device") == true) {
 
