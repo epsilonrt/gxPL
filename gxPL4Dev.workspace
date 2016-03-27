@@ -21,13 +21,13 @@
   <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="No"/>
   <Project Name="gxpl-test-device-avr" Path="test/device/avr/gxpl-test-device-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-unix" Path="test/device/unix/gxpl-test-device-unix.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-clock" Path="examples/clock/unix/gxpl-clock.project" Active="No"/>
   <Project Name="gxpl-clock-avr" Path="examples/clock/avr/gxpl-clock-avr.project" Active="No"/>
   <Project Name="gxpl-config-clock" Path="examples/config-clock/unix/gxpl-config-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock/avr/gxpl-config-clock-avr.project" Active="No"/>
-  <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="Yes"/>
-  <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="No"/>
+  <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="No"/>
+  <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="Yes"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -61,13 +61,13 @@
       <Project Name="gxpl-test-core-unix" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Debug"/>
       <Project Name="gxpl-test-device" ConfigName="Debug"/>
-      <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-clock" ConfigName="Debug"/>
       <Project Name="gxpl-clock-avr" ConfigName="Debug"/>
       <Project Name="gxpl-config-clock" ConfigName="Debug"/>
       <Project Name="gxpl-config-clock-avr" ConfigName="Debug"/>
       <Project Name="gxpl-test-device-config-avr" ConfigName="Debug"/>
       <Project Name="gxpl-test-device-config-unix" ConfigName="Debug"/>
+      <Project Name="gxPL" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -101,13 +101,13 @@
       <Project Name="gxpl-test-core-unix" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-device" ConfigName="Release"/>
       <Project Name="gxpl-test-device" ConfigName="Release"/>
-      <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-clock" ConfigName="Release"/>
       <Project Name="gxpl-clock-avr" ConfigName="Release"/>
       <Project Name="gxpl-config-clock" ConfigName="Release"/>
       <Project Name="gxpl-config-clock-avr" ConfigName="Release"/>
       <Project Name="gxpl-test-device-config-avr" ConfigName="Release"/>
       <Project Name="gxpl-test-device-config-unix" ConfigName="Release"/>
+      <Project Name="gxPL" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

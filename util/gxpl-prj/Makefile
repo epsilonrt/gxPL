@@ -23,8 +23,10 @@ install: uninstall
 	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template
 	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template/c
 	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template/cpp
+	@-install -d -m 0755 $(INSTALL_DATDIR)/gxpl/template/avr
 	@-install -m 0644 $(CURDIR)/template/c/* $(INSTALL_DATDIR)/gxpl/template/c
 	@-install -m 0644 $(CURDIR)/template/cpp/* $(INSTALL_DATDIR)/gxpl/template/cpp
+	@-cp -a  $(CURDIR)/template/avr/* $(INSTALL_DATDIR)/gxpl/template/avr
 	@-install -m 0755 $(CURDIR)/gxpl-prj $(INSTALL_BINDIR)
 	@sed -i -e "s#INSTALLED_TEMPLATE_DIR#$(INSTALL_DATDIR)/gxpl/template#g" $(INSTALL_BINDIR)/gxpl-prj
 

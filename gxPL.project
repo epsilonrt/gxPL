@@ -29,6 +29,85 @@
   <VirtualDirectory Name="util">
     <VirtualDirectory Name="gxpl-prj">
       <VirtualDirectory Name="template">
+        <VirtualDirectory Name="avr">
+          <VirtualDirectory Name="files">
+            <VirtualDirectory Name="test">
+              <VirtualDirectory Name="spi">
+                <File Name="util/gxpl-prj/template/avr/files/test/spi/Makefile"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/spi/spi_test.c"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="kernel">
+                <File Name="util/gxpl-prj/template/avr/files/test/kernel/kernel_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/kernel/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="button">
+                <File Name="util/gxpl-prj/template/avr/files/test/button/button_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/button/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="tsl230">
+                <File Name="util/gxpl-prj/template/avr/files/test/tsl230/Makefile"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/tsl230/tsl230_test.c"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="led">
+                <File Name="util/gxpl-prj/template/avr/files/test/led/led_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/led/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="rc_servo">
+                <File Name="util/gxpl-prj/template/avr/files/test/rc_servo/rc_servo_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/rc_servo/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="terminal">
+                <File Name="util/gxpl-prj/template/avr/files/test/terminal/Makefile"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/terminal/terminal_test.c"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="hsc_spi">
+                <File Name="util/gxpl-prj/template/avr/files/test/hsc_spi/hsc_spi_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/hsc_spi/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="adc">
+                <File Name="util/gxpl-prj/template/avr/files/test/adc/adc_test.c"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/adc/Makefile"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="hih6130">
+                <File Name="util/gxpl-prj/template/avr/files/test/hih6130/Makefile"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/hih6130/hih6130_test.c"/>
+              </VirtualDirectory>
+              <VirtualDirectory Name="lcd">
+                <File Name="util/gxpl-prj/template/avr/files/test/lcd/Makefile"/>
+                <File Name="util/gxpl-prj/template/avr/files/test/lcd/lcd_test.c"/>
+              </VirtualDirectory>
+              <File Name="util/gxpl-prj/template/avr/files/test/Makefile"/>
+            </VirtualDirectory>
+            <VirtualDirectory Name="src">
+              <File Name="util/gxpl-prj/template/avr/files/src/sensor.c"/>
+              <File Name="util/gxpl-prj/template/avr/files/src/ui.c"/>
+            </VirtualDirectory>
+            <VirtualDirectory Name="board">
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-tsl230.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-servo.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-lcd.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-button.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-led.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-spi.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-tc.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-config.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-adc.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-kernel.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-lcdbacklight.h"/>
+              <File Name="util/gxpl-prj/template/avr/files/board/avrio-board-twi.h"/>
+            </VirtualDirectory>
+            <File Name="util/gxpl-prj/template/avr/files/config.h"/>
+            <File Name="util/gxpl-prj/template/avr/files/README"/>
+            <File Name="util/gxpl-prj/template/avr/files/board.mk"/>
+            <File Name="util/gxpl-prj/template/avr/files/AUTHORS"/>
+            <File Name="util/gxpl-prj/template/avr/files/Makefile"/>
+            <File Name="util/gxpl-prj/template/avr/files/NOTICE"/>
+          </VirtualDirectory>
+          <File Name="util/gxpl-prj/template/avr/template-config.c"/>
+          <File Name="util/gxpl-prj/template/avr/template-config-old.c"/>
+          <File Name="util/gxpl-prj/template/avr/template.h"/>
+          <File Name="util/gxpl-prj/template/avr/template.c"/>
+        </VirtualDirectory>
         <VirtualDirectory Name="cpp">
           <File Name="util/gxpl-prj/template/cpp/template.cpp"/>
           <File Name="util/gxpl-prj/template/cpp/Makefile"/>

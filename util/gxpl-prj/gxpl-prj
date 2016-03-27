@@ -1,11 +1,11 @@
 #!/bin/bash
-# (c) Copyright 2015 Pascal JEAN aka epsilonRT
+# (c) Copyright 2015-2016 Pascal JEAN aka epsilonRT
 # All rights reserved.
 # Licensed under the Apache License, Version 2.0 (the "License")
 
 GXPL_TEMPLATE_DIR=INSTALLED_TEMPLATE_DIR
+#GXPL_TEMPLATE_DIR=${GXPL_ROOT}/util/gxpl-prj/template
 #----------------------------------------------------------------------------
-
 
 if [ ! -d ${GXPL_TEMPLATE_DIR} ]; then
 cat << EOF
@@ -14,6 +14,7 @@ Vous devez installer correctement gxPLApplication (sudo make install)
 EOF
 exit 1
 fi
+
 
 usage()
 {
@@ -31,11 +32,15 @@ OPTIONS:
   -f    Force l'écrasement de fichiers existants.
   -g    Ajoute les fichiers créés au dépôt git du répertoire courant
   -s    Créé aussi un fichier Makefile et un fichier source C (ou C++)
+  -a    Indique que le projet à créer est un projet C pour ATMEL AVR
   -p    Indique que le projet à créer est un projet C++
+  -n    Ne pas créer un nouveau répertoire portant le nom du projet
 EOF
 }
 
-while getopts ":fgsph" opt; do
+DIR="ON"
+
+while getopts ":fgsphan" opt; do
   case $opt in
     f)
       FORCE="ON"
@@ -48,6 +53,12 @@ while getopts ":fgsph" opt; do
       ;;
     p)
       CPP="ON"
+      ;;
+    a)
+      AVR="ON"
+      ;;
+    n)
+      DIR="OFF"
       ;;
     h)
       usage
@@ -63,15 +74,22 @@ done
 
 shift $((OPTIND-1))
 
-PROJECT_DIR=$(pwd)
-
 if [ $# -lt 1 ]; then
   PROJECT_NAME=$(basename ${PROJECT_DIR})
 else
   PROJECT_NAME=$1
 fi
 
+if [ "_$DIR" = "_ON" ]; then
+  PROJECT_DIR=$(pwd)/${PROJECT_NAME}
+  mkdir -p ${PROJECT_DIR}
+else
+  PROJECT_DIR=$(pwd)
+fi
+
+PROJECT_UPPER=$(echo ${PROJECT_NAME} | tr a-z A-Z | tr - _)
 PROJECT_FILE=${PROJECT_DIR}/${PROJECT_NAME}.project
+
 if [ "_$CPP" = "_ON" ]; then
   SOURCE_FILE=${PROJECT_DIR}/${PROJECT_NAME}.cpp
 else
@@ -89,29 +107,69 @@ if [ -f ${PROJECT_FILE} ]; then
   fi
 fi
 
-if [ "_$CPP" = "_ON" ]; then
-  cp ${GXPL_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
+if [ "_$AVR" = "_ON" ]; then
+  WORKSPACE_FILE=${PROJECT_DIR}/${PROJECT_NAME}.workspace
+  
+  cp ${GXPL_TEMPLATE_DIR}/avr/template.project ${PROJECT_FILE}
+  cp ${GXPL_TEMPLATE_DIR}/avr/template.workspace ${WORKSPACE_FILE}
+  sed -i -e "s#template#$PROJECT_NAME#g" ${WORKSPACE_FILE}
 else
-  cp ${GXPL_TEMPLATE_DIR}/c/template.project ${PROJECT_FILE}
+  if [ "_$CPP" = "_ON" ]; then
+    cp ${GXPL_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
+  else
+    cp ${GXPL_TEMPLATE_DIR}/c/template.project ${PROJECT_FILE}
+  fi
 fi
 sed -i -e "s#template#$PROJECT_NAME#g" ${PROJECT_FILE}
+
 if [ "_$GIT" = "_ON" ]; then
   git add ${PROJECT_FILE}
 fi
 
 
 if [ "_$SOURCE" = "_ON" ]; then
-  if [ "_$CPP" = "_ON" ]; then
-    cp ${GXPL_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
-    cp ${GXPL_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
+
+  if [ "_$AVR" = "_ON" ]; then
+    SOURCE_FILE_CONFIG=${PROJECT_DIR}/${PROJECT_NAME}-config.c
+    HEADER_FILE=${PROJECT_DIR}/src/${PROJECT_NAME}.h
+    
+    cp ${GXPL_TEMPLATE_DIR}/avr/template.c ${SOURCE_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/avr/template-config.c ${SOURCE_FILE_CONFIG}
+    cp -a ${GXPL_TEMPLATE_DIR}/avr/files/* ${PROJECT_DIR}
+    cp ${GXPL_TEMPLATE_DIR}/avr/template.h ${HEADER_FILE}
+    
+    sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
+    sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE_CONFIG}
+    sed -i -e "s#template#$PROJECT_NAME#g" ${HEADER_FILE}
+    sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
+    sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${SOURCE_FILE}
+    sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${SOURCE_FILE_CONFIG}
+    sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${HEADER_FILE}
+    sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${MAKE_FILE}
+    sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${PROJECT_DIR}/board.mk
+    find ${PROJECT_DIR}/test -name Makefile -exec sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" {} \;
+    find ${PROJECT_DIR}/src -name "*.c" -exec sed -i -e "s#template#$PROJECT_NAME#g" {} \;
+    
+    if [ "_$GIT" = "_ON" ]; then
+      git add ${PROJECT_DIR}/*
+    fi
+    
   else
-    cp ${GXPL_TEMPLATE_DIR}/c/template.c ${SOURCE_FILE}
-    cp ${GXPL_TEMPLATE_DIR}/c/Makefile ${MAKE_FILE}
-  fi
-  sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
-  sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
-  if [ "_$GIT" = "_ON" ]; then
-    git add ${MAKE_FILE} ${SOURCE_FILE}
+  
+    if [ "_$CPP" = "_ON" ]; then
+      cp ${GXPL_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
+      cp ${GXPL_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
+    else
+      cp ${GXPL_TEMPLATE_DIR}/c/template.c ${SOURCE_FILE}
+      cp ${GXPL_TEMPLATE_DIR}/c/Makefile ${MAKE_FILE}
+    fi
+    sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
+    sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
+    
+    if [ "_$GIT" = "_ON" ]; then
+      git add ${MAKE_FILE} ${SOURCE_FILE}
+    fi
+    
   fi
 fi
 
