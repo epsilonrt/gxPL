@@ -25,7 +25,7 @@
 #define TICK_RATE_CFG_NAME    "tickrate"
 #define STARTED_CFG_NAME      "started"
 #define REPORT_OWN_MESSAGE    true
-#define DEFAULT_CONFIG_FILE   "gxpl-clock.xpl"
+#define DEFAULT_CONFIG_FILE   "gxpl-testdcfg.xpl"
 #define POLL_RATE_MS          1000
 #define GXPL_DMEM_DEBUG 1
 
@@ -61,7 +61,8 @@ static void prvSignalHandler (int sig) ;
 
 // -----------------------------------------------------------------------------
 #endif /* __AVR__ not defined */
-#include <gxPL/stdio.h>
+#define UTEST_COUNTER test_count
+#include <gxPL/utest.h>
 
 /* private variables ======================================================== */
 static gxPLApplication * app;
@@ -86,6 +87,13 @@ main (int argc, char * argv[]) {
   int ret;
   gxPLSetting * setting;
 
+  vLogSetMask (LOG_UPTO (LOG_DEBUG));
+  gxPLStdIoOpen();
+  gxPLPrintf ("\ngxPLDeviceConfig test (%s)\n", GXPL_TARGET_STR);
+  UTEST_PMEM_BEFORE();
+  gxPLPrintf ("Press any key to proceed...\n");
+  gxPLWait();
+
 #ifdef __AVR__
   gxPLStdIoOpen();
   setting = gxPLSettingNew (AVR_IOLAYER_PORT, AVR_IOLAYER_NAME, gxPLConnectViaHub);
@@ -108,7 +116,7 @@ main (int argc, char * argv[]) {
   }
 
   // Create a configurable device and set our application version
-  device = gxPLAppAddConfigurableDevice (app, "epsirt", "clock",
+  device = gxPLAppAddConfigurableDevice (app, "epsirt", "testdcfg",
                                          gxPLConfigPath (DEFAULT_CONFIG_FILE));
   assert (device);
 
@@ -227,10 +235,10 @@ prvSetConfig (gxPLDevice * device) {
     return;
   }
 
-  if (strcmp (str_started, "on") == 0) {
+  if ((strcmp (str_started, "on") == 0) || (strcmp (str_started, "1") == 0)) {
     started = true;
   }
-  else if (strcmp (str_started, "off") == 0) {
+  else if ((strcmp (str_started, "off") == 0) || (strcmp (str_started, "0") == 0)) {
     started = false;
   }
 
@@ -308,7 +316,11 @@ prvCloseAll (void) {
 
   gxPLMessageDelete (message);
 
-  gxPLPrintf ("\neverything was closed.\nHave a nice day !\n");
+  gxPLPrintf ("\n******************************************\n");
+  gxPLPrintf ("**** All tests (%d) were successful ! ****\n", test_count);
+  gxPLPrintf ("******************************************\n");
+  UTEST_PMEM_AFTER();
+  gxPLFflush (stdout);
 }
 
 #ifndef __AVR__

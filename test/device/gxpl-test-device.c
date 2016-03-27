@@ -315,16 +315,8 @@ prvCloseAll (void) {
 static void
 prvSignalHandler (int sig) {
 
-  switch (sig) {
-
-    case SIGTERM:
-    case SIGINT:
-      prvCloseAll();
-      exit (EXIT_SUCCESS);
-      break;
-    default:
-      break;
-  }
+  prvCloseAll();
+  exit (EXIT_SUCCESS);
 }
 #endif
 
