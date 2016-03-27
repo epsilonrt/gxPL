@@ -381,7 +381,7 @@ int gxPLMessagePairExist (const gxPLMessage * message, const char * name);
  * @param message pointer to the message
  * @param name the name
  * @param value the value, If NULL is supplied, a zero-length string is assigned ("")
- * @return pointer to the schema type, must not be released. NULL if an error occurs
+ * @return 0, -1 if an error occurs
  */
 int gxPLMessagePairAdd (gxPLMessage * message, const char * name, const char * value);
 
