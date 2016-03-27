@@ -31,7 +31,7 @@ main (void) {
   device = xDeviceCreate (IOLAYER_PORT, IOLAYER_NAME, TEMPLATE_LOG_LEVEL);
   assert (device);
 
-  app = gxPLDeviceParentGet (device);
+  app = gxPLDeviceParent (device);
 
   ret = iSensorInit (device);
   assert (ret == 0);

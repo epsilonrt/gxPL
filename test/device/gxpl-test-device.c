@@ -272,7 +272,7 @@ main (int argc, char **argv) {
 static void
 prvDeviceHandler (gxPLDevice * device, gxPLMessage * msg, void * p) {
   char * ud = (char *) p;
-  int d = gxPLAppDeviceIndex (gxPLDeviceParentGet (device), device);
+  int d = gxPLAppDeviceIndex (gxPLDeviceParent (device), device);
 
   // Check if userdata provided is correct
   int ret = strcmp (ud, udata[d]);

@@ -26,8 +26,10 @@
   <Project Name="gxpl-config-clock" Path="examples/config-clock/unix/gxpl-config-clock.project" Active="No"/>
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock/avr/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="No"/>
-  <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="Yes"/>
+  <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="No"/>
   <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="template" Path="examples/template/avr/template.project" Active="No"/>
+  <Project Name="template" Path="examples/template/avr/template.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>

@@ -178,6 +178,7 @@
       <File Name="include/gxPL/util.h"/>
       <File Name="include/gxPL/utest.h"/>
       <File Name="include/gxPL/stdio.h"/>
+      <File Name="examples/template/avr/src/sensor.c"/>
     </VirtualDirectory>
     <File Name="include/gxPL.h"/>
   </VirtualDirectory>
