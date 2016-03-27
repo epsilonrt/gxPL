@@ -46,6 +46,13 @@ __BEGIN_C_DECLS
 int gxPLStrCpy (char * dst, const char * src);
 
 /**
+ * @brief Quickly to convert an integer to string
+ * @param value
+ * @return 
+ */
+const char * gxPLIntToStr (int value);
+
+/**
  * @}
  */
 

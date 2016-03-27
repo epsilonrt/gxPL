@@ -12,6 +12,11 @@
 #include <ctype.h>
 #include <gxPL/util.h>
 
+/* macros =================================================================== */
+#ifndef MAX_CHAR_LEN_DECIMAL_INTEGER
+#define MAX_CHAR_LEN_DECIMAL_INTEGER(type) (80*sizeof(type)/33 + 2)
+#endif
+
 /* public api functions ===================================================== */
 
 // -----------------------------------------------------------------------------
@@ -126,6 +131,15 @@ gxPLStrCpy (char * dst, const char * src) {
   }
   *p = '\0';
   return count;
+}
+
+// --------------------------------------------------------------------------
+const char *
+gxPLIntToStr (int value) {
+  static char numBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER(int)+1];
+
+  sprintf (numBuffer, "%d", value);
+  return numBuffer;
 }
 
 // -----------------------------------------------------------------------------
