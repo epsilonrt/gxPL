@@ -126,7 +126,7 @@ int gxPLDeviceListenerRemove (gxPLDevice * device,
  * @param device pointer on the device
  * @return pointer to an gxPLApplication object that is the parent of the device, NULL if error occurs
  */
-gxPLApplication * gxPLDeviceParentGet (gxPLDevice * device);
+gxPLApplication * gxPLDeviceParent (gxPLDevice * device);
 
 /**
  * @brief Gets the identifier
@@ -134,6 +134,27 @@ gxPLApplication * gxPLDeviceParentGet (gxPLDevice * device);
  * @return the identifier, NULL if error occurs
  */
 const gxPLId * gxPLDeviceId (const gxPLDevice * device);
+
+/**
+ * @brief Gets the vendor identifier
+ * @param device pointer on the device
+ * @return the vendor identifier, NULL if error occurs
+ */
+const char * gxPLDeviceVendorId (const gxPLDevice * device);
+
+/**
+ * @brief Gets the device identifier
+ * @param device pointer on the device
+ * @return the device identifier, NULL if error occurs
+ */
+const char * gxPLDeviceDeviceId (const gxPLDevice * device);
+
+/**
+ * @brief Gets the instance identifier
+ * @param device pointer on the device
+ * @return the device instance, NULL if error occurs
+ */
+const char * gxPLDeviceInstanceId (const gxPLDevice * device);
 
 /**
  * @brief Indicates whether the device is enabled.

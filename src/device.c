@@ -45,7 +45,7 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
 
   gxPLMessage * message = gxPLDeviceMessageNew (device, gxPLMessageStatus);
   assert (message);
-  gxPLApplication * app = gxPLDeviceParentGet (device);
+  gxPLApplication * app = gxPLDeviceParent (device);
   assert (app);
 
   gxPLMessageBroadcastSet (message, true);
@@ -91,7 +91,7 @@ prvHeartbeatMessageNew (gxPLDevice * device, gxPLHeartbeatType type) {
 
 #if CONFIG_HBEAT_BASIC_EXTENSION != 0
   // add the "remote-addr" field in hbeat.basic
-  if ((gxPLIoInfoGet (app)->family & gxPLNetFamilyInet) == 0) {
+  if ( (gxPLIoInfoGet (app)->family & gxPLNetFamilyInet) == 0) {
     const char * local_addr = gxPLIoLocalAddrGet (app);
     if (strlen (local_addr) > 0) {
 
@@ -348,15 +348,20 @@ gxPLDeviceNew (gxPLApplication * app,
     return NULL;
   }
 
+#if CONFIG_DEVICE_GROUP
   if (gxPLDeviceGroupInit (device) != 0) {
     free (device);
     return NULL;
   }
+#endif  /* CONFIG_DEVICE_GROUP set */
 
+#if CONFIG_DEVICE_FILTER
   if (gxPLDeviceFilterInit (device) != 0) {
     free (device);
     return NULL;
   }
+#endif  /* CONFIG_DEVICE_FILTER set */
+
   // init instance id
   if (instance_id != NULL) {
 
@@ -398,11 +403,15 @@ gxPLDeviceDelete (gxPLDevice * device) {
     // Release device resources
     free (device->version);
 
+#if CONFIG_DEVICE_GROUP
     // Release group info
     gxPLDeviceGroupDelete (device);
+#endif  /* CONFIG_DEVICE_GROUP set */
 
+#if CONFIG_DEVICE_FILTER
     // Release filters
     gxPLDeviceFilterDelete (device);
+#endif  /* CONFIG_DEVICE_FILTER set */
 
     // Release any listeners
     vVectorDestroy (&device->listener);
@@ -436,7 +445,7 @@ gxPLDeviceMessageNew (gxPLDevice * device, gxPLMessageType type) {
 int
 gxPLDeviceMessageSend (gxPLDevice * device, gxPLMessage * message) {
 
-  return gxPLAppBroadcastMessage (gxPLDeviceParentGet (device), message);
+  return gxPLAppBroadcastMessage (gxPLDeviceParent (device), message);
 }
 
 // -----------------------------------------------------------------------------
@@ -628,7 +637,7 @@ gxPLDeviceReportOwnMessagesSet (gxPLDevice * device, bool isreportownmsg) {
 
 // -----------------------------------------------------------------------------
 gxPLApplication *
-gxPLDeviceParentGet (gxPLDevice * device) {
+gxPLDeviceParent (gxPLDevice * device) {
 
   return device->parent;
 }
@@ -638,6 +647,27 @@ const gxPLId *
 gxPLDeviceId (const gxPLDevice * device) {
 
   return &device->id;
+}
+
+// -----------------------------------------------------------------------------
+const char * 
+gxPLDeviceVendorId (const gxPLDevice * device) {
+  
+  return (const char *)device->id.vendor;
+}
+
+// -----------------------------------------------------------------------------
+const char * 
+gxPLDeviceDeviceId (const gxPLDevice * device) {
+  
+  return (const char *)device->id.device;
+}
+
+// -----------------------------------------------------------------------------
+const char * 
+gxPLDeviceInstanceId (const gxPLDevice * device) {
+  
+  return (const char *)device->id.instance;
 }
 
 // -----------------------------------------------------------------------------
@@ -706,8 +736,8 @@ gxPLDeviceHeartbeatLast (const gxPLDevice * device) {
 // -----------------------------------------------------------------------------
 gxPLSetting *
 gxPLDeviceSetting (gxPLDevice * device) {
-  
-  return gxPLAppSetting (gxPLDeviceParentGet (device));
+
+  return gxPLAppSetting (gxPLDeviceParent (device));
 }
 
 /* ========================================================================== */
