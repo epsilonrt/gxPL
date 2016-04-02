@@ -3,7 +3,7 @@
 ###############################################################################
 
 # Nom du fichier cible (sans extension).
-TARGET = tsl230_test
+TARGET = hsc_spi_test
 
 # Chemin relatif du répertoire racine du projet de l'utilisateur
 PROJECT_TOPDIR = ../..
@@ -26,10 +26,11 @@ GIT_VERSION = OFF
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = AVRIO_TASK_ENABLE
-AVRIO_CONFIG += AVRIO_TSL230_ENABLE
+AVRIO_CONFIG =
+AVRIO_CONFIG += __ASSERT_USE_STDERR
 AVRIO_CONFIG += AVRIO_TC_ENABLE
 AVRIO_CONFIG += AVRIO_TC_FLAVOUR=TC_FLAVOUR_POLL
+#AVRIO_CONFIG += AVRIO_TC_FLAVOUR=TC_FLAVOUR_IRQ
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -70,9 +71,8 @@ DISABLE_DELETE_UNUSED_SECTIONS = OFF
 # Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
 # recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
 # d'accès complet du fichier mais seulement le nom du projet (avrio, avrx, ...)
-SRC = $(TARGET).c avrio/task.c avrio/tsl230.c avrio/counter.c
-SRC += avrio/file.c avrio/tc.c avrio/tc_poll.c avrio/tc_irq.c 
-SRC += avrio/dpin.c  avrio/queue.c
+SRC = $(TARGET).c avrio/spi.c avrio/hsc.c
+SRC += avrio/file.c avrio/tc.c avrio/tc_poll.c avrio/tc_irq.c avrio/dpin.c  avrio/queue.c
 
 # Liste des fichiers source C++. (Les dépendances sont automatiquement générées.)
 # Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
@@ -86,7 +86,7 @@ CPPSRC =
 #   générés par le compilateur et seront supprimés lors d'un make clean.
 #   Cela est valable aussi sous DOS/Windows (bien que le système d'exploitation
 #   ne soit pas sensible à la casse).
-ASRC =  avrio/mutex.S
+ASRC = avrio/mutex.S
 
 # Place -D or -U options here for C sources
 CDEFS =
@@ -121,7 +121,7 @@ PRINTF_VERSION = FLOAT
 SCANF_VERSION = STANDARD
 
 # ON/OFF
-MATH_LIB_ENABLE = ON
+MATH_LIB_ENABLE = OFF
 
 #---------------- Additional Compiler/Assembler Options ----------------
 CFLAGS   +=

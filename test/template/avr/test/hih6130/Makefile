@@ -3,7 +3,7 @@
 ###############################################################################
 
 # Nom du fichier cible (sans extension).
-TARGET = tsl230_test
+TARGET = hih6130_test
 
 # Chemin relatif du répertoire racine du projet de l'utilisateur
 PROJECT_TOPDIR = ../..
@@ -26,10 +26,11 @@ GIT_VERSION = OFF
 
 # Configuration de AvrIO
 # -------------------------------
-AVRIO_CONFIG  = AVRIO_TASK_ENABLE
-AVRIO_CONFIG += AVRIO_TSL230_ENABLE
+AVRIO_CONFIG  = TWI_MASTER_ENABLE
+AVRIO_CONFIG += __ASSERT_USE_STDERR
 AVRIO_CONFIG += AVRIO_TC_ENABLE
 AVRIO_CONFIG += AVRIO_TC_FLAVOUR=TC_FLAVOUR_POLL
+#AVRIO_CONFIG += AVRIO_TC_FLAVOUR=TC_FLAVOUR_IRQ
 
 # Valide le noyau multitâche temps réel AVRX (sous forme de bibliothèque)
 AVRX = OFF
@@ -51,11 +52,11 @@ DEBUG_FORMAT = dwarf-2
 #     0 = pas d'optimisation (pour debug).
 #     s = optimisation de la taille du code (pour release).
 #     (Note: 3 n'est pas toujours le meilleur niveau. Voir la FAQ avr-libc.)
-DEBUG_OPT = s
+DEBUG_OPT = 0
 
 # Retrait des informations Debug (ON/OFF)
 # Si défini sur ON, aucune information de debug ne sera générée
-DEBUG = ON
+#DEBUG = ON
 
 # Affiche la ligne de compilation GCC ou non (ON/OFF)
 #VIEW_GCC_LINE = ON
@@ -66,13 +67,14 @@ DEBUG = ON
 # Cela peut être problèmatique dans certains cas (bootloarder !)
 DISABLE_DELETE_UNUSED_SECTIONS = OFF
 
+
 # Liste des fichiers source C. (Les dépendances sont automatiquement générées.)
 # Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
 # recherche du compilateur, il n'est donc pas nécessaire de préciser le chemin
 # d'accès complet du fichier mais seulement le nom du projet (avrio, avrx, ...)
-SRC = $(TARGET).c avrio/task.c avrio/tsl230.c avrio/counter.c
-SRC += avrio/file.c avrio/tc.c avrio/tc_poll.c avrio/tc_irq.c 
-SRC += avrio/dpin.c  avrio/queue.c
+SRC = $(TARGET).c avrio/hih6130.c avrio/twi_noirq.c
+SRC += avrio/file.c avrio/tc.c avrio/tc_poll.c avrio/tc_irq.c avrio/dpin.c  avrio/queue.c
+
 
 # Liste des fichiers source C++. (Les dépendances sont automatiquement générées.)
 # Le chemin d'accès des fichiers sources systèmes a été ajouté au chemin de
@@ -86,7 +88,7 @@ CPPSRC =
 #   générés par le compilateur et seront supprimés lors d'un make clean.
 #   Cela est valable aussi sous DOS/Windows (bien que le système d'exploitation
 #   ne soit pas sensible à la casse).
-ASRC =  avrio/mutex.S
+ASRC = avrio/mutex.S
 
 # Place -D or -U options here for C sources
 CDEFS =
@@ -125,8 +127,8 @@ MATH_LIB_ENABLE = ON
 
 #---------------- Additional Compiler/Assembler Options ----------------
 CFLAGS   +=
-CPPFLAGS += 
-ASFLAGS  += 
+CPPFLAGS +=
+ASFLAGS  +=
 #---------------- Additional Linker Options ----------------
 LDFLAGS  +=
 

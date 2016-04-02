@@ -20,5 +20,11 @@ gxPL TODO
     gxpl-xbee-bridge(info): Send ZigBee frame #11 (123 bytes)
     gxpl-xbee-bridge(warn): io_xbeezb.c:188: prvZbTxStatusCB(): frame #11: Resource error lack of free buffers, timers, etc. (0x32)
   
-  Solution envisagée: Attendre un compte rendu de transmission correcte avant
-  de flusher un message de out->in
+  Solution envisagée: Attendre un compte rendu de transmission correct avant
+  de flusher un message de out->in, donc créer un thread chargé de l'envoi dans
+  unix/io_xbeezb.c alimenté d'un côté par gxPLXBeeZbSend() à travers une dlist
+  protégée par un mutex et recevant du côté prvZbModemStatusCB() les comptes 
+  rendus à travers une file de message.
+
+* all
+  Uniformiser le nom des getter -> retirer le Get final
