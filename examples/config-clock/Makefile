@@ -17,6 +17,8 @@ all: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 clean: $(SUBDIRS) $(CLEANER_SUBDIRS)
 distclean: $(SUBDIRS) $(CLEANER_SUBDIRS) 
+install: $(SUBDIRS)
+uninstall: $(SUBDIRS)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
