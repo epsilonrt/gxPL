@@ -343,7 +343,14 @@ gxPLAppPoll (gxPLApplication * app, int timeout_ms) {
 
         // We receive a message, append null character to terminate the string
         buffer[size] = '\0';
-        PDEBUG ("Just read %d bytes, raw buffer below >>>\n%s<<<", size, buffer);
+        if (bLogIsDaemonized ()) {
+
+          PDEBUG ("Just read %d bytes", size);
+        }
+        else {
+
+          PDEBUG ("Just read %d bytes, raw buffer below >>>\n%s<<<", size, buffer);
+        }
 
         // TODO: Send the raw message to any raw message msg_listener ?
 
