@@ -157,17 +157,40 @@ if [ "_$SOURCE" = "_ON" ]; then
   else
   
     if [ "_$CPP" = "_ON" ]; then
+      # C++: TODO
       cp ${GXPL_TEMPLATE_DIR}/cpp/template.cpp ${SOURCE_FILE}
       cp ${GXPL_TEMPLATE_DIR}/cpp/Makefile ${MAKE_FILE}
+      sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
+      sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
+      
+      if [ "_$GIT" = "_ON" ]; then
+        git add ${MAKE_FILE} ${SOURCE_FILE}
+      fi
+      
     else
-      cp ${GXPL_TEMPLATE_DIR}/c/template.c ${SOURCE_FILE}
-      cp ${GXPL_TEMPLATE_DIR}/c/Makefile ${MAKE_FILE}
-    fi
-    sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
-    sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
-    
-    if [ "_$GIT" = "_ON" ]; then
-      git add ${MAKE_FILE} ${SOURCE_FILE}
+      SOURCE_FILE_DAEMON=${PROJECT_DIR}/${PROJECT_NAME}-daemon.c
+      HEADER_FILE=${PROJECT_DIR}/src/${PROJECT_NAME}.h
+      
+      cp ${GXPL_TEMPLATE_DIR}/unix/template.c ${SOURCE_FILE}
+      cp ${GXPL_TEMPLATE_DIR}/unix/template-daemon.c ${SOURCE_FILE_DAEMON}
+      cp -a ${GXPL_TEMPLATE_DIR}/unix/files/* ${PROJECT_DIR}
+      cp ${GXPL_TEMPLATE_DIR}/unix/template.h ${HEADER_FILE}
+      
+      sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE}
+      sed -i -e "s#template#$PROJECT_NAME#g" ${SOURCE_FILE_DAEMON}
+      sed -i -e "s#template#$PROJECT_NAME#g" ${HEADER_FILE}
+      sed -i -e "s#template#$PROJECT_NAME#g" ${MAKE_FILE}
+      sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${SOURCE_FILE}
+      sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${SOURCE_FILE_DAEMON}
+      sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${HEADER_FILE}
+      sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" ${MAKE_FILE}
+      find ${PROJECT_DIR}/test -name Makefile -exec sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" {} \;
+      find ${PROJECT_DIR}/src -name "*.c" -exec sed -i -e "s#template#$PROJECT_NAME#g" {} \;
+      find ${PROJECT_DIR}/src -name "*.c" -exec sed -i -e "s#TEMPLATE#$PROJECT_UPPER#g" {} \;
+      
+      if [ "_$GIT" = "_ON" ]; then
+        git add ${PROJECT_DIR}/*
+      fi
     fi
     
   fi

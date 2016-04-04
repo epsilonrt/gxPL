@@ -9,8 +9,11 @@ endif
 
 #---------------- Install to gxpl-prj template directory ----------------
 INSTALL_AVR_DIR=$(GXPL_ROOT)/util/gxpl-prj/template/avr
+INSTALL_UNIX_DIR=$(GXPL_ROOT)/util/gxpl-prj/template/unix
 
 all:
+
+install: install-unix install-avr
 
 install-avr:
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/
@@ -118,4 +121,68 @@ install-avr:
 	-install -m 0644 avr/board/avrio-board-lcdbacklight.h $(INSTALL_AVR_DIR)/files/board
 	-install -m 0644 avr/board/avrio-board-twi.h $(INSTALL_AVR_DIR)/files/board
 
-.PHONY: install-avr
+install-unix:
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/
+
+	-install -m 0644 unix/template.workspace $(INSTALL_UNIX_DIR)/
+	-install -m 0644 unix/template.project $(INSTALL_UNIX_DIR)/
+	-install -m 0644 unix/template.c $(INSTALL_UNIX_DIR)/
+	-install -m 0644 unix/template-daemon.c $(INSTALL_UNIX_DIR)/
+	-install -m 0644 unix/src/template.h $(INSTALL_UNIX_DIR)
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/
+	-install -m 0644 unix/config.h $(INSTALL_UNIX_DIR)/files/
+	-install -m 0644 unix/README $(INSTALL_UNIX_DIR)/files/
+	-install -m 0644 unix/AUTHORS $(INSTALL_UNIX_DIR)/files/
+	-install -m 0644 unix/Makefile $(INSTALL_UNIX_DIR)/files/
+	-install -m 0644 unix/NOTICE $(INSTALL_UNIX_DIR)/files/
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/src
+	-install -m 0644 unix/src/main.c $(INSTALL_UNIX_DIR)/files/src
+	-install -m 0644 unix/src/device.c $(INSTALL_UNIX_DIR)/files/src
+	-install -m 0644 unix/src/device-config.c $(INSTALL_UNIX_DIR)/files/src
+	-install -m 0644 unix/src/sensor.c $(INSTALL_UNIX_DIR)/files/src
+	-install -m 0644 unix/src/ui.c $(INSTALL_UNIX_DIR)/files/src
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test
+	-install -m 0644 unix/test/Makefile $(INSTALL_UNIX_DIR)/files/test
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/switch
+	-install -m 0644 unix/test/switch/switch_test.project $(INSTALL_UNIX_DIR)/files/test/switch
+	-install -m 0644 unix/test/switch/Makefile $(INSTALL_UNIX_DIR)/files/test/switch
+	-install -m 0644 unix/test/switch/switch_test.c $(INSTALL_UNIX_DIR)/files/test/switch
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/led
+	-install -m 0644 unix/test/led/led_test.c $(INSTALL_UNIX_DIR)/files/test/led
+	-install -m 0644 unix/test/led/Makefile $(INSTALL_UNIX_DIR)/files/test/led
+	-install -m 0644 unix/test/led/led_test.project $(INSTALL_UNIX_DIR)/files/test/led
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/button
+	-install -m 0644 unix/test/button/button_test.c $(INSTALL_UNIX_DIR)/files/test/button
+	-install -m 0644 unix/test/button/button_test.project $(INSTALL_UNIX_DIR)/files/test/button
+	-install -m 0644 unix/test/button/Makefile $(INSTALL_UNIX_DIR)/files/test/button
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/i2c
+	-install -m 0644 unix/test/i2c/i2c_test.c $(INSTALL_UNIX_DIR)/files/test/i2c
+	-install -m 0644 unix/test/i2c/i2c_test.project $(INSTALL_UNIX_DIR)/files/test/i2c
+	-install -m 0644 unix/test/i2c/Makefile $(INSTALL_UNIX_DIR)/files/test/i2c
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/xbee
+	-install -m 0644 unix/test/xbee/Makefile $(INSTALL_UNIX_DIR)/files/test/xbee
+  
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/xbee/node
+	-install -m 0644 unix/test/xbee/node/xbee_node_test.project $(INSTALL_UNIX_DIR)/files/test/xbee/node
+	-install -m 0644 unix/test/xbee/node/Makefile $(INSTALL_UNIX_DIR)/files/test/xbee/node
+	-install -m 0644 unix/test/xbee/node/xbee_node_test.c $(INSTALL_UNIX_DIR)/files/test/xbee/node
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/xbee/coordinator
+	-install -m 0644 unix/test/xbee/coordinator/xbee_coordinator_test.project $(INSTALL_UNIX_DIR)/files/test/xbee/coordinator
+	-install -m 0644 unix/test/xbee/coordinator/Makefile $(INSTALL_UNIX_DIR)/files/test/xbee/coordinator
+	-install -m 0644 unix/test/xbee/coordinator/xbee_coordinator_test.c $(INSTALL_UNIX_DIR)/files/test/xbee/coordinator
+
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/rs485
+	-install -m 0644 unix/test/rs485/rs485_test.c $(INSTALL_UNIX_DIR)/files/test/rs485
+	-install -m 0644 unix/test/rs485/rs485_test.project $(INSTALL_UNIX_DIR)/files/test/rs485
+	-install -m 0644 unix/test/rs485/Makefile $(INSTALL_UNIX_DIR)/files/test/rs485
+
+.PHONY: install-avr install-unix install

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="template" Database="">
+  <Project Name="led_test" Path="test/led/led_test.project" Active="No"/>
+  <Project Name="button_test" Path="test/button/button_test.project" Active="No"/>
+  <Project Name="i2c_test" Path="test/i2c/i2c_test.project" Active="No"/>
+  <Project Name="rs485_test" Path="test/rs485/rs485_test.project" Active="No"/>
+  <Project Name="switch_test" Path="test/switch/switch_test.project" Active="No"/>
+  <Project Name="xbee_coordinator_test" Path="test/xbee/coordinator/xbee_coordinator_test.project" Active="No"/>
+  <Project Name="xbee_node_test" Path="test/xbee/node/xbee_node_test.project" Active="No"/>
+  <Project Name="template" Path="template.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="led_test" ConfigName="Debug"/>
+      <Project Name="button_test" ConfigName="Debug"/>
+      <Project Name="i2c_test" ConfigName="Debug"/>
+      <Project Name="rs485_test" ConfigName="Debug"/>
+      <Project Name="switch_test" ConfigName="Debug"/>
+      <Project Name="xbee_coordinator_test" ConfigName="Debug"/>
+      <Project Name="xbee_node_test" ConfigName="Debug"/>
+      <Project Name="template" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
+      <Project Name="led_test" ConfigName="Release"/>
+      <Project Name="button_test" ConfigName="Release"/>
+      <Project Name="i2c_test" ConfigName="Release"/>
+      <Project Name="rs485_test" ConfigName="Release"/>
+      <Project Name="switch_test" ConfigName="Release"/>
+      <Project Name="xbee_coordinator_test" ConfigName="Release"/>
+      <Project Name="xbee_node_test" ConfigName="Release"/>
+      <Project Name="template" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
