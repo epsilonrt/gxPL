@@ -3,7 +3,7 @@
 ###############################################################################
 
 # Nom du fichier cible (sans extension).
-TARGET = i2c_test
+TARGET = eeprom_test
 
 # Chemin relatif du répertoire racine du projet de l'utilisateur
 PROJECT_TOPDIR = .

@@ -162,10 +162,15 @@ install-unix:
 	-install -m 0644 unix/test/button/button_test.project $(INSTALL_UNIX_DIR)/files/test/button
 	-install -m 0644 unix/test/button/Makefile $(INSTALL_UNIX_DIR)/files/test/button
 
-	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/i2c
-	-install -m 0644 unix/test/i2c/i2c_test.c $(INSTALL_UNIX_DIR)/files/test/i2c
-	-install -m 0644 unix/test/i2c/i2c_test.project $(INSTALL_UNIX_DIR)/files/test/i2c
-	-install -m 0644 unix/test/i2c/Makefile $(INSTALL_UNIX_DIR)/files/test/i2c
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/iaq
+	-install -m 0644 unix/test/iaq/iaq_test.c $(INSTALL_UNIX_DIR)/files/test/iaq
+	-install -m 0644 unix/test/iaq/iaq_test.project $(INSTALL_UNIX_DIR)/files/test/iaq
+	-install -m 0644 unix/test/iaq/Makefile $(INSTALL_UNIX_DIR)/files/test/iaq
+	
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/eeprom
+	-install -m 0644 unix/test/eeprom/eeprom_test.c $(INSTALL_UNIX_DIR)/files/test/eeprom
+	-install -m 0644 unix/test/eeprom/eeprom_test.project $(INSTALL_UNIX_DIR)/files/test/eeprom
+	-install -m 0644 unix/test/eeprom/Makefile $(INSTALL_UNIX_DIR)/files/test/eeprom
 
 	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/xbee
 	-install -m 0644 unix/test/xbee/Makefile $(INSTALL_UNIX_DIR)/files/test/xbee

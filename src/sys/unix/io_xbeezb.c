@@ -364,7 +364,6 @@ gxPLXBeeZbOpen (gxPLIo * io) {
     assert (io->pdata);
 
 #if defined(GXPL_XBEEZB_HAS_HWRESET)
-#warning TODO: XBee sysio has no hardware reset feature
     xDout * reset = &io->setting->xbee.reset_pin;
     reset->act = 0;
 #if defined(CONFIG_XBEE_RESET_PORT) && defined(CONFIG_XBEE_RESET_PIN)

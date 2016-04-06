@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
 SUBDIRS = unix 
-CLEANER_SUBDIRS = avr
+CLEANER_SUBDIRS = 
 
 # Choix de l'architecture matérielle du système
 ARCH = ARCH_GENERIC_LINUX
