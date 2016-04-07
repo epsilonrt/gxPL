@@ -117,7 +117,11 @@ else
   if [ "_$CPP" = "_ON" ]; then
     cp ${GXPL_TEMPLATE_DIR}/cpp/template.project ${PROJECT_FILE}
   else
-    cp ${GXPL_TEMPLATE_DIR}/c/template.project ${PROJECT_FILE}
+    WORKSPACE_FILE=${PROJECT_DIR}/${PROJECT_NAME}.workspace
+    
+    cp ${GXPL_TEMPLATE_DIR}/unix/template.project ${PROJECT_FILE}
+    cp ${GXPL_TEMPLATE_DIR}/unix/template.workspace ${WORKSPACE_FILE}
+    sed -i -e "s#template#$PROJECT_NAME#g" ${WORKSPACE_FILE}
   fi
 fi
 sed -i -e "s#template#$PROJECT_NAME#g" ${PROJECT_FILE}

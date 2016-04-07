@@ -14,7 +14,6 @@
       <Environment/>
       <Project Name="led_test" ConfigName="Debug"/>
       <Project Name="button_test" ConfigName="Debug"/>
-      <Project Name="i2c_test" ConfigName="Debug"/>
       <Project Name="rs485_test" ConfigName="Debug"/>
       <Project Name="switch_test" ConfigName="Debug"/>
       <Project Name="xbee_coordinator_test" ConfigName="Debug"/>
@@ -27,7 +26,6 @@
       <Environment/>
       <Project Name="led_test" ConfigName="Release"/>
       <Project Name="button_test" ConfigName="Release"/>
-      <Project Name="i2c_test" ConfigName="Release"/>
       <Project Name="rs485_test" ConfigName="Release"/>
       <Project Name="switch_test" ConfigName="Release"/>
       <Project Name="xbee_coordinator_test" ConfigName="Release"/>
