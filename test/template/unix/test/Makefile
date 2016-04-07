@@ -1,7 +1,7 @@
 ###############################################################################
 #     Licensed under the Apache License, Version 2.0 (the "License")          #
 ###############################################################################
-SUBDIRS = led button switch xbee rs485 i2c
+SUBDIRS = led button switch xbee rs485 iaq eeprom
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)

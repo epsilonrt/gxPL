@@ -1,6 +1,6 @@
 /*
- * i2c_test.c
- * I2C access to an IAQ sensor
+ * iaq_test.c
+ * IAQ sensor test
  * 
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
