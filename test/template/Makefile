@@ -189,5 +189,10 @@ install-unix:
 	-install -m 0644 unix/test/rs485/rs485_test.c $(INSTALL_UNIX_DIR)/files/test/rs485
 	-install -m 0644 unix/test/rs485/rs485_test.project $(INSTALL_UNIX_DIR)/files/test/rs485
 	-install -m 0644 unix/test/rs485/Makefile $(INSTALL_UNIX_DIR)/files/test/rs485
+  
+	-install -d -m 0755 $(INSTALL_UNIX_DIR)/files/test/serial
+	-install -m 0644 unix/test/serial/serial_test.c $(INSTALL_UNIX_DIR)/files/test/serial
+	-install -m 0644 unix/test/serial/serial_test.project $(INSTALL_UNIX_DIR)/files/test/serial
+	-install -m 0644 unix/test/serial/Makefile $(INSTALL_UNIX_DIR)/files/test/serial
 
 .PHONY: install-avr install-unix install

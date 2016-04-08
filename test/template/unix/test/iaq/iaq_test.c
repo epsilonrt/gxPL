@@ -2,6 +2,8 @@
  * iaq_test.c
  * IAQ sensor test
  * 
+ * Displays the values measured by an air quality sensor IAQ
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>

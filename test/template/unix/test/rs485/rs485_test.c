@@ -1,8 +1,8 @@
 /*
- * sysio_demo_rs485.c
- * Transmet l'alphabet sur la liaison RS485 toutes les secondes
+ * rs485_test.c
+ * Transmits the alphabet on the RS485 every second
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,7 +80,6 @@ main (int argc, char **argv) {
       /* Error handling. See errno. */
       perror ("write");
     }
-    // Remplacer les lignes ci-dessous par votre code
     putchar ('.');
     fflush (stdout);
     delay_ms (1000);

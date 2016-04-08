@@ -1,8 +1,8 @@
 /*
- * sysio_demo_led.c
- * Démo d'utilisation de doutput pour gérer des leds
+ * led_test.c
+ * doutput usage demonstration to handle leds
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>

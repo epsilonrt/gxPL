@@ -1,7 +1,7 @@
 /*
- * sysio_demo_button.c
- * Démo d'utilisation de dinput pour gérer des boutons poussoirs
- * Affiche les appuis et relachement de la façon suivante:
+ * button_test.c
+ * dinput usage demonstration to handle pushbuttons
+ * Displays the key press as follows (P Press / R Realease) :
  * 000 - P: 0
  * 001 - R: 0
  * 002 - P: 1
@@ -9,7 +9,7 @@
  * 004 - P: 2
  * 005 - R: 2
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>

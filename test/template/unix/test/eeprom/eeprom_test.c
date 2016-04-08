@@ -23,7 +23,15 @@
 #define DEFAULT_EE_FLAGS      I2CMEM_FLAG_ADDR16
 #define DEFAULT_EE_I2CADDR    0x50
 
-int
+/* private functions ======================================================== */
+/** ----------------------------------------------------------------------------
+ * @brief Convert string to long integer
+ * @param str C-string beginning with the representation of an integral number.
+ * @param l pointer on converted integral number, if no valid conversion could 
+ *  be performed, the pointed value is not changed.
+ * @return 0, -1 if error occurs
+ */
+static int
 iStrToLong (const char * str, long * l) {
   char *endptr;
 
@@ -33,7 +41,7 @@ iStrToLong (const char * str, long * l) {
     return -1;
   }
 
-  * l = t;
+  *l = t;
   return 0;
 }
 
@@ -90,11 +98,11 @@ main (int argc, char **argv) {
   m = xI2cMemOpen (i2cbus, i2caddr, mem_size, page_size, flags);
   if (m == NULL) {
 
-    PERROR ("Failed to open memory (%d): %s", errno, strerror (errno) );
+    PERROR ("Failed to open memory (%d): %s", errno, strerror (errno));
     exit (EXIT_FAILURE);
   }
 
-  srand (time (NULL) ); // init. pseudorandom generator
+  srand (time (NULL));  // init. pseudorandom generator
   wbuf = malloc (page_size);
   assert (wbuf);
   rbuf = malloc (page_size);
@@ -118,7 +126,7 @@ main (int argc, char **argv) {
     ret = iI2cMemWrite (m, offset, wbuf, page_size);
     if (ret != 0) {
 
-      PERROR ("write data fail(%d): %s", errno, strerror (errno) );
+      PERROR ("write data fail(%d): %s", errno, strerror (errno));
       break;
     }
     else {
@@ -128,7 +136,7 @@ main (int argc, char **argv) {
 
       if (ret != page_size) {
 
-        PERROR ("read data fail(%d): %s", errno, strerror (errno) );
+        PERROR ("read data fail(%d): %s", errno, strerror (errno));
         break;
       }
       else {
@@ -161,7 +169,7 @@ main (int argc, char **argv) {
 
   if (iI2cMemClose (m) != 0) {
 
-    PERROR ("iI2cMemClose failed (%d): %s", errno, strerror (errno) );
+    PERROR ("iI2cMemClose failed (%d): %s", errno, strerror (errno));
     ret = -1;
   }
   free (wbuf);

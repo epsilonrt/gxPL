@@ -1,11 +1,11 @@
 /*
- * sysio_demo_xbee_coordinator.c
- * Démo coordinateur XBee
- * - Affiche l'identification des nouveaux noeuds
- * - Affiche le contenu des paquets de données reçus
- * - Transmet périodiquement un paquet de test en broadcast
+ * xbee_coordinator_test.c
+ * XBee demonstration as coordinator
+ * - Displays the identification of new nodes
+ * - Displays the contents of the received data packets
+ * - Periodically transmits a test data packet
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>

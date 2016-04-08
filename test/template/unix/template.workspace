@@ -9,6 +9,7 @@
   <Project Name="template" Path="template.project" Active="Yes"/>
   <Project Name="iaq_test" Path="test/iaq/iaq_test.project" Active="No"/>
   <Project Name="eeprom_test" Path="test/eeprom/eeprom_test.project" Active="No"/>
+  <Project Name="serial_test" Path="test/serial/serial_test.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -21,6 +22,7 @@
       <Project Name="template" ConfigName="Debug"/>
       <Project Name="iaq_test" ConfigName="Debug"/>
       <Project Name="eeprom_test" ConfigName="Debug"/>
+      <Project Name="serial_test" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -33,6 +35,7 @@
       <Project Name="template" ConfigName="Release"/>
       <Project Name="iaq_test" ConfigName="Release"/>
       <Project Name="eeprom_test" ConfigName="Release"/>
+      <Project Name="serial_test" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

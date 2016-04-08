@@ -1,13 +1,13 @@
 /*
- * sysio_demo_switch.c
- * Démo d'utilisation de dinput pour gérer des micro-switchs
- * Affiche les basculements de switchs de la façon suivante:
+ * switch_test.c
+ * dinput usage demonstration to handle microswitches
+ * Displays the switch modifications as follows :
  * 000 - SW: 0x1 (P0)
  * 001 - SW: 0x3 (P1)
  * 002 - SW: 0x7 (P2)
  * 003 - SW: 0xF (P3)
  *
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>

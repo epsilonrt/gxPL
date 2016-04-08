@@ -1,10 +1,10 @@
 /* 
- * sysio_demo_xbee_node.c
- * Démo noeud XBee
- * - Affiche le contenu des paquets de données reçus
- * - Transmet périodiquement un paquet de données de test
+ * xbee_node_test.c
+ * XBee demonstration as router
+ * - Displays the contents of the received data packets
+ * - Periodically transmits a test data packet
  * 
- * This software is governed by the CeCILL license <http://www.cecill.info>
+ * Licensed under the Apache License, Version 2.0 (the "License")
  */
 #include <stdio.h>
 #include <stdlib.h>
