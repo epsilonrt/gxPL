@@ -48,11 +48,13 @@ install-avr:
 	-install -m 0644 avr/test/kernel/kernel_test.c $(INSTALL_AVR_DIR)/files/test/kernel
 	-install -m 0644 avr/test/kernel/kernel_test.project $(INSTALL_AVR_DIR)/files/test/kernel
 	-install -m 0644 avr/test/kernel/Makefile $(INSTALL_AVR_DIR)/files/test/kernel
+	-install -m 0644 avr/test/kernel/kernel_test.aps $(INSTALL_AVR_DIR)/files/test/kernel
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/button
 	-install -m 0644 avr/test/button/button_test.c $(INSTALL_AVR_DIR)/files/test/button
 	-install -m 0644 avr/test/button/button_test.project $(INSTALL_AVR_DIR)/files/test/button
 	-install -m 0644 avr/test/button/Makefile $(INSTALL_AVR_DIR)/files/test/button
+	-install -m 0644 avr/test/button/button_test.aps $(INSTALL_AVR_DIR)/files/test/button
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/tsl230
 	-install -m 0644 avr/test/tsl230/tsl230_test.project $(INSTALL_AVR_DIR)/files/test/tsl230
@@ -64,16 +66,20 @@ install-avr:
 	-install -m 0644 avr/test/led/led_test.c $(INSTALL_AVR_DIR)/files/test/led
 	-install -m 0644 avr/test/led/Makefile $(INSTALL_AVR_DIR)/files/test/led
 	-install -m 0644 avr/test/led/led_test.project $(INSTALL_AVR_DIR)/files/test/led
+	-install -m 0644 avr/test/led/led_test.aps $(INSTALL_AVR_DIR)/files/test/led
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/gifam
 	-install -m 0644 avr/test/gifam/gifam_test.project $(INSTALL_AVR_DIR)/files/test/gifam
 	-install -m 0644 avr/test/gifam/gifam_test.c $(INSTALL_AVR_DIR)/files/test/gifam
 	-install -m 0644 avr/test/gifam/Makefile $(INSTALL_AVR_DIR)/files/test/gifam
+	-install -m 0644 avr/test/gifam/gifam_test.aps $(INSTALL_AVR_DIR)/files/test/gifam
+	-install -m 0644 avr/test/gifam/gifam.* $(INSTALL_AVR_DIR)/files/test/gifam
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/xbee
 	-install -m 0644 avr/test/xbee/xbee_test.project $(INSTALL_AVR_DIR)/files/test/xbee
 	-install -m 0644 avr/test/xbee/Makefile $(INSTALL_AVR_DIR)/files/test/xbee
 	-install -m 0644 avr/test/xbee/xbee_test.c $(INSTALL_AVR_DIR)/files/test/xbee
+	-install -m 0644 avr/test/xbee/xbee_test.aps $(INSTALL_AVR_DIR)/files/test/xbee
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/rc_servo
 	-install -m 0644 avr/test/rc_servo/rc_servo_test.c $(INSTALL_AVR_DIR)/files/test/rc_servo
@@ -84,6 +90,7 @@ install-avr:
 	-install -m 0644 avr/test/terminal/Makefile $(INSTALL_AVR_DIR)/files/test/terminal
 	-install -m 0644 avr/test/terminal/terminal_test.project $(INSTALL_AVR_DIR)/files/test/terminal
 	-install -m 0644 avr/test/terminal/terminal_test.c $(INSTALL_AVR_DIR)/files/test/terminal
+	-install -m 0644 avr/test/terminal/terminal_test.aps $(INSTALL_AVR_DIR)/files/test/terminal
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/hsc_spi
 	-install -m 0644 avr/test/hsc_spi/hsc_spi_test.c $(INSTALL_AVR_DIR)/files/test/hsc_spi
@@ -101,11 +108,13 @@ install-avr:
 	-install -m 0644 avr/test/hih6130/hih6130_test.project $(INSTALL_AVR_DIR)/files/test/hih6130
 	-install -m 0644 avr/test/hih6130/Makefile $(INSTALL_AVR_DIR)/files/test/hih6130
 	-install -m 0644 avr/test/hih6130/hih6130_test.c $(INSTALL_AVR_DIR)/files/test/hih6130
+	-install -m 0644 avr/test/hih6130/hih6130_test.aps $(INSTALL_AVR_DIR)/files/test/hih6130
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/test/lcd
 	-install -m 0644 avr/test/lcd/Makefile $(INSTALL_AVR_DIR)/files/test/lcd
 	-install -m 0644 avr/test/lcd/lcd_test.project $(INSTALL_AVR_DIR)/files/test/lcd
 	-install -m 0644 avr/test/lcd/lcd_test.c $(INSTALL_AVR_DIR)/files/test/lcd
+	-install -m 0644 avr/test/lcd/lcd_test.aps $(INSTALL_AVR_DIR)/files/test/lcd
 
 	-install -d -m 0755 $(INSTALL_AVR_DIR)/files/board
 	-install -m 0644 avr/board/avrio-board-tsl230.h $(INSTALL_AVR_DIR)/files/board

@@ -23,11 +23,12 @@
 #include <stdio.h>
 
 /* constants ================================================================ */
-#define TERMINAL_BAUDRATE 38400
+#define TERMINAL_BAUDRATE 115200
 
 /* main ===================================================================== */
 int
 main (void) {
+  
   eTwiStatus eTwiError;
   eHih6130Error eError;
   xHih6130Data xData;
@@ -36,7 +37,7 @@ main (void) {
 
   // Initialization of the serial port for display
   xSerialIos settings = SERIAL_SETTINGS (TERMINAL_BAUDRATE);
-  FILE * tc = xFileOpen ("tty0", O_RDWR, &settings);
+  FILE * tc = xFileOpen ("tty1", O_RDWR, &settings);
   stdout = tc;
   sei();
 
@@ -46,6 +47,13 @@ main (void) {
   vTwiInit ();
   eTwiError = eTwiSetSpeed (100);
   assert (eTwiError == TWI_SUCCESS);
+  
+  eTwiError = eTwiSetSpeed (400);
+  if (eTwiError != TWI_SUCCESS) {
+
+    printf ("eTwiSetSpeed failed, error = % d\n", eTwiError);
+    for (;;);
+  }
 
   // Initialization of the sensor and no error checking
   eError = eHih6130Init (0);
@@ -74,7 +82,7 @@ main (void) {
 
     // Display measures
     printf ("%.1f,%.1f\n", xData.iTemp / 10.0, xData.iHum / 10.0);
-    delay_ms (100);
+    delay_ms (500);
   }
   return 0;
 }

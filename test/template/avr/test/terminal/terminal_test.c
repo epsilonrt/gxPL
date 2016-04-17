@@ -13,7 +13,7 @@
 #include <avr/version.h>
 
 /* constants ================================================================ */
-#define PORT         "tty0"
+#define PORT         "tty1"
 #define BAUDRATE     38400
 
 /* internal public functions ================================================ */

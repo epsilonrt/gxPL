@@ -19,12 +19,12 @@
 
 /* constants ================================================================ */
 #define XBEE_BAUDRATE   38400
-#define XBEE_PORT       "tty1"
-#define XBEE_RESET_PORT PORTB
-#define XBEE_RESET_PIN  7
+#define XBEE_PORT       "tty0"
+#define XBEE_RESET_PORT PORTD
+#define XBEE_RESET_PIN  4
 
 #define TERMINAL_BAUDRATE 115200
-#define TERMINAL_PORT     "tty0"
+#define TERMINAL_PORT     "tty1"
 
 /* private variables ======================================================== */
 static xXBee * xbee;
@@ -34,7 +34,6 @@ volatile int iAtLocalFrameId = 0;
 volatile int iAtLocalStatus = XBEE_PKT_STATUS_UNKNOWN;
 static xXBeePkt * xAtLocalPkt;
 static char sMyNID[21];
-static uint64_t ullPanID;
 static xDPin xResetPin = { .port = &XBEE_RESET_PORT, .pin = XBEE_RESET_PIN };
 
 /* private functions ======================================================== */
@@ -94,7 +93,7 @@ int
 iInit (xSerialIos * xXBeeIos) {
 
   /*
-   * LED used to indicate the reception of a packet or to report an error 
+   * LED used to indicate the reception of a packet or to report an error
    * when opening the serial terminal.
    */
   vLedInit();
@@ -151,10 +150,13 @@ vWaitToJoinNetwork (void) {
     ret = iXBeePktParamLen (xAtLocalPkt);
 
     if (ret == 8) {
+      uint32_t ulMsb, ulLsb;
 
-      if (iXBeePktParamGetULongLong (&ullPanID, xAtLocalPkt, 0) == 0) {
+      if (iXBeePktParamGetULong (&ulMsb, xAtLocalPkt, 0) == 0) {
+        if (iXBeePktParamGetULong (&ulLsb, xAtLocalPkt, 4) == 0) {
 
-        printf ("Requested PAN Id> 0x%llx\n", ullPanID);
+          printf ("Requested PAN Id> 0x%lx%08lx\n", ulMsb, ulLsb);
+        }
       }
     }
     vXBeeFreePkt (xbee, xAtLocalPkt);
@@ -184,10 +186,13 @@ vWaitToJoinNetwork (void) {
     ret = iXBeePktParamLen (xAtLocalPkt);
 
     if (ret == 8) {
+      uint32_t ulMsb, ulLsb;
 
-      if (iXBeePktParamGetULongLong (&ullPanID, xAtLocalPkt, 0) == 0) {
+      if (iXBeePktParamGetULong (&ulMsb, xAtLocalPkt, 0) == 0) {
+        if (iXBeePktParamGetULong (&ulLsb, xAtLocalPkt, 4) == 0) {
 
-        printf ("\nCurrent PAN Id> 0x%llx, Network joined\n", ullPanID);
+          printf ("\nOperating PAN Id> 0x%lx%08lx\n", ulMsb, ulLsb);
+        }
       }
     }
     vXBeeFreePkt (xbee, xAtLocalPkt);
@@ -249,7 +254,7 @@ iDataCB (xXBee *xbee, xXBeePkt *pkt, uint8_t len) {
     }
 
     putchar ('>');
-    
+
     if (iXBeePktIsBroadcast (pkt)) {
       putchar ('*');
     }

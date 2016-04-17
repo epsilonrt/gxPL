@@ -1,117 +1,121 @@
 /**
- * gifam-test.c
- * GIFAM control from a serial terminal:
- * - 0: Comfort (No signal)
- * - 1: Off (+)
- * - 2: AboveFreezing (-)
- * - 3: Economy (full)
- * - 4: Comfort-1 (3"/4'57)
- * - 5: Comfort-2 (7"/4'53)
+ * gifam_demo.c
+ * Démonstration de commande "Fil pilote"
  *
- * Licensed under the Apache License, Version 2.0 (the "License")
+ * Ce test permet de tester la génération du signal pilote à l'aide de la carte
+ * d'évaluation gifam-chip-evb et d'un kit DVKCAN1.
+ * La carte DVKCAN1 configurée en 3,3V, est reliée à la carte d'évaluation
+ * gifam-chip-evb par le bus I2C (TWI CON)
+ *
+ * Au démarrage, le mode confort est sélectionné.
+ * Chaque appui sur le bouton poussoir permet de passer au mode suivant:
+ * - ModeConfort   (0) - Pas de signal       - Confort
+ * - ModeDelestage (1) - Alternance Positive - Arret forcé
+ * - ModeHorsGel   (2) - Alternance Négative - Hors Gel
+ * - ModeEco       (3) - Deux Alternances    - Economique
+ * - ModeConfortM1 (4) - Secteur 3s / 4'57   - Confort -1 °C
+ * - ModeConfortM2 (5) - Secteur 7s / 4'53   - Confort -2 °C
+ * La led correspondant au numéro de mode est allumée.
+ *
+ * This software is governed by the CeCILL license <http://www.cecill.info>
  */
-#include <stdio.h>
-#include <avrio/twi.h>
-#include <avrio/led.h>
 #include <avrio/delay.h>
-#include <avrio/tc.h>
-
-/* constants ================================================================ */
-#define TERMINAL_BAUDRATE 115200
-#define TERMINAL_PORT     "tty0"
-
-#define GIFAM_SLAVE 0x20
+#include <avrio/led.h>
+#include <avrio/button.h>
+#include <avrio/twi.h>
+#include "gifam.h"
 
 /* private functions ======================================================== */
-void vLedAssert (int i);
-void vSetGifam (uint8_t mode);
+// Fonction de test qui fait clignoter la led7 si test est faux
+static void vAssert (bool test);
 
 /* main ===================================================================== */
 int
 main (void) {
-  int ret;
+  eGifamMode eNewMode = ModeConfort; // Mode de départ
+  eGifamMode eCurrentMode = ModeUnknown;
+  int iTimeOut = 16;
 
+  // Initialisation des fonctions
   vLedInit();
-
-  // Initialization of the serial port for display
-  xSerialIos xTermIos = SERIAL_SETTINGS (TERMINAL_BAUDRATE);
-  FILE * tc = xFileOpen (TERMINAL_PORT, O_RDWR | O_NONBLOCK, &xTermIos);
-  vLedAssert (tc != NULL);
-  stdout = tc;
-  stdin = tc;
-  sei();
-
-  printf ("\nGIFAM Test\nPress Key 0-5 to set GIFAM mode...\n");
-  printf ("- 0: Comfort (No signal)\n");
-  printf ("- 1: Off (+)\n");
-  printf ("- 2: AboveFreezing (-)\n");
-  printf ("- 3: Economy (full)\n");
-  printf ("- 4: Comfort-1 (3\"/4'57)\n");
-  printf ("- 5: Comfort-2 (7\"/4'53) \n\n");
-
-  // I²C bus initialization as master at 400 kHz and no error checking
+  vButInit();
   vTwiInit ();
+  eTwiSetSpeed (400);
 
-  ret = eTwiSetSpeed (400);
-  if (ret != 0) {
+  // Attente de réponse du tiny45, nécessaire lors d'un démarrage de l'alim.
+  while (iGifamInit () != 0) {
 
-    printf ("eTwiSetSpeed failed, error = % d\n", ret);
-    for (;;);
+    if (iTimeOut-- <= 0) {
+
+      vAssert (0); // bloque et fait clignoter la led 7
+    }
+    delay_ms (100);
   }
-
-  vSetGifam (0);
 
   for (;;) {
 
-    ret = getchar();
-    if ( (ret >= '0') && (ret <= '5')) {
-      uint8_t req_mode = ret - '0'; // Convert ASCII -> Bin
+    if (eNewMode != eCurrentMode) {
 
-      vSetGifam (req_mode);
+      while (eNewMode != eCurrentMode) {
+
+        // Le nouveau mode est différent du courant
+        vGifamSet (eNewMode); // modification du mode
+        eCurrentMode = eGifamGet(); // lecture du mode
+        if (eNewMode != eCurrentMode) {
+
+          delay_ms (500);
+          vLedToggle (LED_LED1);
+        }
+      }
+      vLedClear (LED_LED1);
     }
-  }
-}
 
-// -----------------------------------------------------------------------------
-void
-vSetGifam (uint8_t req_mode) {
-  int ret;
-  uint8_t set_mode;
+    // Attente appui BP
+    while (xButGet (BUTTON_BUTTON1) == 0)
+      ;
 
-  printf ("Set mode % d > ", req_mode);
-  ret = eTwiWrite (GIFAM_SLAVE, req_mode);
-  if (ret == 0) {
+    if ( (eNewMode == ModeEco) || (eNewMode == ModeConfortM1)) {
 
-    ret = eTwiRead (GIFAM_SLAVE, &set_mode);
-    if (ret == 0) {
+      // Remets le fil au repos afin de pouvoir mesurer la durée d'activation
+      // des modes étendus
+      vGifamSet (ModeConfort);
+      // Attente appui BP
+      delay_ms (250);
+      while (xButGet (BUTTON_BUTTON1) == 0) {
 
-      printf ("Success\n");
+        vLedToggle (LED_LED1);
+        delay_ms (50);
+      }
+    }
+    vLedClear (LED_LED1);
+
+    delay_ms (250);
+    // Passe au mode suivant
+    if (eNewMode < ModeConfortM2) {
+
+      eNewMode++;
     }
     else {
 
-      printf ("Read failed, error = % d\n", ret);
+      eNewMode = ModeConfort;
     }
   }
-  else {
-
-    printf ("Write failed, error = % d\n", ret);
-  }
+  return 0;
 }
 
-/* -----------------------------------------------------------------------------
- * Checks that the condition is true, otherwise the LED flashes quickly always
- */
-void
-vLedAssert (int i) {
+/* private functions ======================================================== */
+// ------------------------------------------------------------------------------
+static void
+vAssert (bool test) {
 
-  if (!i) {
+  if (test == false) {
 
     for (;;) {
 
       vLedSet (LED_LED1);
-      delay_ms (5);
+      delay_ms (50);
       vLedClear (LED_LED1);
-      delay_ms (25);
+      delay_ms (150);
     }
   }
 }
