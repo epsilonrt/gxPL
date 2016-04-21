@@ -26,7 +26,7 @@ ifeq (,$(wildcard $(INSTALL_BINDIR)/$(TARGET)))
 else
 	@-$(INSTALL_BINDIR)/$(TARGET) stop
 endif
-	@-cp -f $(INSTALL_DATDIR)/$(TARGET).conf $(INSTALL_DATDIR)/$(TARGET).conf.bak
+	@-mv -f $(INSTALL_DATDIR)/$(TARGET).conf $(INSTALL_DATDIR)/$(TARGET).conf.bak
 	@-rm -f $(INSTALL_BINDIR)/$(TARGET)
 
 .PHONY: all install uninstall

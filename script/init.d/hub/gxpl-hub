@@ -50,7 +50,7 @@ set_args () {
   
   var=$(trim "$(grep -v 'xpldebug' $tmpf | grep 'debug' | cut -d '=' -f2)")
   if [ "$var" = "1" -o "$var" = "true" ]; then
-    XPL_DEBUG=-d
+    XPL_DEBUG=-ddd
   fi
   
   rm -f $tmpf
