@@ -135,11 +135,11 @@ gxPLStrCpy (char * dst, const char * src) {
 
 // --------------------------------------------------------------------------
 const char *
-gxPLIntToStr (int value) {
-  static char intBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER (int) + 1];
+gxPLLongToStr (long value) {
+  static char longBuffer[MAX_CHAR_LEN_DECIMAL_INTEGER (long) + 1];
 
-  sprintf (intBuffer, "%d", value);
-  return intBuffer;
+  sprintf (longBuffer, "%ld", value);
+  return longBuffer;
 }
 
 // --------------------------------------------------------------------------

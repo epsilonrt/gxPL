@@ -46,11 +46,11 @@ __BEGIN_C_DECLS
 int gxPLStrCpy (char * dst, const char * src);
 
 /**
- * @brief Quickly to convert an integer to string
+ * @brief Quickly to convert an long integer to string
  * @param value
  * @return a static const string
  */
-const char * gxPLIntToStr (int value);
+const char * gxPLLongToStr (long value);
 
 /**
  * @brief Quickly to convert an double to string
