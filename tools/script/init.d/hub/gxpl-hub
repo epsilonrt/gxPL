@@ -6,7 +6,7 @@
 ###############################################################################
 ### BEGIN INIT INFO
 # Provides:          gxpl-hub
-# Required-Start:    $all
+# Required-Start:    $network $remote_fs $syslog
 # Required-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
@@ -28,6 +28,11 @@ test -x $DAEMON || exit 0
 
 niceness=0
 pgm_args="--quiet"
+
+getMyIP() {
+  NET_IF=$(netstat -rn | awk '/^0.0.0.0/ {thif=substr($0,74,10); print thif;} /^default.*UG/ {thif=substr($0,65,10); print thif;}')
+  NET_IP=$(ifconfig ${NET_IF} | awk -F"[ :]+" '/inet adr/ && !/127.0/ {print $4}')
+}
 
 trim () {
   local var="$*"
@@ -60,6 +65,14 @@ daemon_start () {
 
   set_args
   log_daemon_msg "Starting xPL Hub" "gxpl-hub"
+  
+  getMyIP
+  while [ "x$NET_IP" == "x" ]
+  do
+    sleep 1
+    getMyIP
+  done
+  
   start-stop-daemon --start $pgm_args --oknodo --nicelevel $niceness --exec $DAEMON -- $XPL_IF $XPL_DEBUG
   log_end_msg $?
   return $?
