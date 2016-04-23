@@ -182,12 +182,6 @@
     </VirtualDirectory>
     <File Name="include/gxPL.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="script">
-    <VirtualDirectory Name="init.d">
-      <File Name="script/init.d/gxpl-hub"/>
-      <File Name="script/init.d/gxpl-hub.conf"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="gxPL">

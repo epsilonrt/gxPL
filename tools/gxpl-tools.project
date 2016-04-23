@@ -26,6 +26,22 @@
  }]]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="script">
+    <VirtualDirectory Name="init.d">
+      <VirtualDirectory Name="hub">
+        <File Name="script/init.d/hub/gxpl-hub.conf"/>
+        <File Name="script/init.d/hub/gxpl-hub"/>
+        <File Name="script/init.d/hub/Makefile"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="xbee-bridge">
+        <File Name="script/init.d/xbee-bridge/gxpl-xbee-bridge.conf"/>
+        <File Name="script/init.d/xbee-bridge/gxpl-xbee-bridge"/>
+        <File Name="script/init.d/xbee-bridge/Makefile"/>
+      </VirtualDirectory>
+      <File Name="script/init.d/Makefile"/>
+    </VirtualDirectory>
+    <File Name="script/Makefile"/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="gxpl-tools">

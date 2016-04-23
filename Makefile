@@ -28,25 +28,19 @@ all: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 clean: $(SUBDIRS) $(CLEANER_SUBDIRS)
 distclean: $(SUBDIRS) $(CLEANER_SUBDIRS) 
-install: install_utils $(SUBDIRS) install_scripts
-uninstall: uninstall_scripts $(SUBDIRS) uninstall_utils
+install: install_util $(SUBDIRS)
+uninstall: $(SUBDIRS) uninstall_util
 
-install_utils: 
+install_util: 
 	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
-install_scripts: 
-	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
-uninstall_utils:
+uninstall_util:
 	$(MAKE) -w -C util $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
-	
-uninstall_scripts:
-	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
 $(CLEANER_SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS)
-
 
 .PHONY: all rebuild clean distclean install uninstall $(SUBDIRS) $(CLEANER_SUBDIRS)

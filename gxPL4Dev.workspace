@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="gxPL4Dev" Database="">
-  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="Yes"/>
+  <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
   <Project Name="gxpl-test-hub" Path="test/hub/gxpl-test-hub.project" Active="No"/>
   <Project Name="gxpl-test-bridge" Path="test/bridge/gxpl-test-bridge.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge" Path="tools/bridge/xbee/gxpl-xbee-bridge.project" Active="No"/>
-  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <Project Name="gxpl-examples" Path="examples/gxpl-examples.project" Active="No"/>
   <Project Name="gxpl-bridge" Path="tools/bridge/generic/gxpl-bridge.project" Active="No"/>
   <Project Name="gxpl-hub" Path="tools/hub/gxpl-hub.project" Active="No"/>
@@ -27,10 +26,12 @@
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock/avr/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
+  <Project Name="gxpl-hub-service" Path="tools/script/init.d/hub/gxpl-hub-service.project" Active="No"/>
+  <Project Name="gxpl-xbee-bridge-service" Path="tools/script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
+  <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
-      <Environment/>
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxPLibAvr" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
@@ -47,7 +48,6 @@
       <Project Name="gxpl-xbee-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-test-avr-io" ConfigName="Debug"/>
       <Project Name="gxpl-test-io" ConfigName="Debug"/>
-      <Project Name="gxpl-tools" ConfigName="Debug"/>
       <Project Name="gxpl-examples" ConfigName="Debug"/>
       <Project Name="gxpl-bridge" ConfigName="Debug"/>
       <Project Name="gxpl-hub" ConfigName="Debug"/>
@@ -69,9 +69,11 @@
       <Project Name="gxpl-test-device-config-unix" ConfigName="Debug"/>
       <Project Name="gxPL" ConfigName="Debug"/>
       <Project Name="gxpl-template-avr" ConfigName="Debug"/>
+      <Project Name="gxpl-hub-service" ConfigName="Debug"/>
+      <Project Name="gxpl-xbee-bridge-service" ConfigName="Debug"/>
+      <Project Name="gxpl-tools" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
-      <Environment/>
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxPLibAvr" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
@@ -88,7 +90,6 @@
       <Project Name="gxpl-xbee-bridge" ConfigName="Release"/>
       <Project Name="gxpl-test-avr-io" ConfigName="Release"/>
       <Project Name="gxpl-test-io" ConfigName="Release"/>
-      <Project Name="gxpl-tools" ConfigName="Release"/>
       <Project Name="gxpl-examples" ConfigName="Release"/>
       <Project Name="gxpl-bridge" ConfigName="Release"/>
       <Project Name="gxpl-hub" ConfigName="Release"/>
@@ -110,6 +111,9 @@
       <Project Name="gxpl-test-device-config-unix" ConfigName="Release"/>
       <Project Name="gxPL" ConfigName="Release"/>
       <Project Name="gxpl-template-avr" ConfigName="Release"/>
+      <Project Name="gxpl-hub-service" ConfigName="Release"/>
+      <Project Name="gxpl-xbee-bridge-service" ConfigName="Release"/>
+      <Project Name="gxpl-tools" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

@@ -5,26 +5,32 @@
 ###############################################################################
 SUBDIRS = logger sender hub bridge
 
+#---------------- Install Options ----------------
+prefix=/usr/local
+
+INSTALL_BINDIR=$(prefix)/bin
+INSTALL_DATDIR=$(prefix)/share
+MSG_INSTALL = [INSTALL]
+MSG_UNINSTALL = [UNINSTALL]
+
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 lib: $(SUBDIRS)
 cleanlib: $(SUBDIRS)
-extcoff: $(SUBDIRS)
-program: $(SUBDIRS)
-debug: $(SUBDIRS)
-install: $(SUBDIRS)
-uninstall: $(SUBDIRS)
+install: $(SUBDIRS) install_script
+uninstall: uninstall_script $(SUBDIRS)
 
-elf: $(SUBDIRS)
-hex: $(SUBDIRS)
-eep: $(SUBDIRS)
-lss: $(SUBDIRS)
-sym: $(SUBDIRS)
+install_script: 
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
-.PHONY: all clean distclean rebuild lib cleanlib extcoff program debug elf hex eep lss sym $(SUBDIRS)
+uninstall_script:
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS)
+
+.PHONY: all clean distclean rebuild lib cleanlib install_script uninstall_script $(SUBDIRS)
+
 
