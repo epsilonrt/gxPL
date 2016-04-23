@@ -44,8 +44,8 @@ int
 main (int argc, char * argv[]) {
   gxPLSetting * setting;
 
-  vLogInit(LOG_UPTO (LOG_NOTICE));
-  
+  vLogInit (LOG_UPTO (LOG_NOTICE));
+
   // retrieved the requested configuration from the command line
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectStandAlone);
   if (setting == NULL) {
@@ -54,7 +54,7 @@ main (int argc, char * argv[]) {
     exit (EXIT_FAILURE);
   }
   prvParseAdditionnalOptions (argc, argv);
-  
+
   // Now we detach (daemonize ourself)
   if (setting->nodaemon == 0) {
 
@@ -78,7 +78,7 @@ main (int argc, char * argv[]) {
 
       case -1:           // error
         PERROR ("unable to spawn gxpl-hub supervisor, %s (%d)",
-              strerror (errno), errno);
+                strerror (errno), errno);
         exit (EXIT_FAILURE);
     }
   }
@@ -162,9 +162,9 @@ prvSuperviseHub (gxPLSetting * setting) {
 
     // See if we can still do this
     if (hub_restart_count == MAX_HUB_RESTARTS) {
-      
+
       PERROR ("gxpl-hub has died %d times -- something may be wrong "
-            "-- terminating supervisor", MAX_HUB_RESTARTS);
+              "-- terminating supervisor", MAX_HUB_RESTARTS);
       exit (EXIT_FAILURE);
     }
 
@@ -195,7 +195,7 @@ prvSuperviseHub (gxPLSetting * setting) {
 
       case -1:           // error
         PERROR ("unable to spawn gxpl-hub supervisor, %s (%d)",
-              strerror (errno), errno);
+                strerror (errno), errno);
         exit (EXIT_FAILURE);
     }
 
@@ -203,19 +203,20 @@ prvSuperviseHub (gxPLSetting * setting) {
     waitpid (hub_pid, &ret, 0);
 
     if (WIFEXITED (ret)) {
+      
       vLog (LOG_NOTICE, "gxpl-hub exited normally with status %d -- restarting...",
             WEXITSTATUS (ret));
-      continue;
     }
-
-    if (WIFSIGNALED (ret)) {
+    else if (WIFSIGNALED (ret)) {
+      
       vLog (LOG_NOTICE, "gxpl-hub died from by receiving unexpected signal %d"
             " -- restarting...", WTERMSIG (ret));
-      continue;
     }
+    else {
 
-    vLog (LOG_NOTICE, "gxpl-hub died from unknown causes -- restarting...");
-    continue;
+      vLog (LOG_NOTICE, "gxpl-hub died from unknown causes -- restarting...");
+    }
+    delay_ms (1000);
   }
 }
 
