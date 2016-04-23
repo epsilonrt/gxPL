@@ -154,7 +154,10 @@ prvDeviceConfigSendCurrent (gxPLDevice * device) {
       for (int v = 0; v < iVectorSize (&item->values); v++) {
 
         char * value =  pvVectorGet (&item->values, v);
-        gxPLMessagePairAdd (message, item->name, value);
+        if (gxPLMessagePairAdd (message, item->name, value) != 0) {
+          
+          PERROR ("illegal name (%s), must contain only [a-z], [0-9] and hyphen/dash -", item->name);
+        }
       }
     }
   }
