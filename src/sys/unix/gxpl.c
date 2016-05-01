@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sysio/string.h>
 #include <gxPL/util.h>
 #include "gxpl_p.h"
 
@@ -25,33 +26,39 @@
 /* -----------------------------------------------------------------------------
  * This will parse the passed command array for options and parameters
  * It supports the following options:
- *    -i / --interface xxx : interface or device used to access the network
- *    -n / --net       xxx : hardware abstraction layer to access the network
- *    -d / --debug         : enable debugging
- *    -b / --baudrate      : serial baudrate (if iolayer use serial port)
- *    -D / --nodaemon      : do not daemonize
- *    -r / --reset         : performed iolayer reset
+ *  -  -i / --interface xxx : interface or device used to access the network
+ *  -  -n / --net       xxx : hardware abstraction layer to access the network
+ *  -  -W / --timeout   xxx : set the timeout at the opening of the io layer
+ *  -  -d / --debug         : enable debugging, it can be doubled or tripled to
+ *                            increase the level of debug.
+ *  -  -D / --nodaemon      : do not daemonize (if supported)
+ *  -  -B / --baudrate      : serial baudrate (if iolayer use serial port)
+ *  -  -r / --reset         : performed iolayer reset (if supported)
  */
 void
 gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   int c;
+  long n;
+  char * baudrate = NULL;
+  int loglvl = LOG_WARNING;
   bool reset = false;
   static const char short_options[] = GXPL_GETOPT;
   static struct option long_options[] = {
     {"interface", required_argument, NULL, 'i'},
     {"net",       required_argument, NULL, 'n'},
-    {"baudrate",  required_argument, NULL, 'b'},
+    {"baudrate",  required_argument, NULL, 'B'},
+    {"timeout",   required_argument, NULL, 'W'},
     {"debug",     no_argument,       NULL, 'd' },
     {"nodaemon",  no_argument,       NULL, 'D' },
     {"reset",     no_argument,       NULL, 'r' },
     {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
   };
 
+
   // backup inital argv
   char * backup = malloc (sizeof (char *) * argc);
+  assert (backup);
   memcpy (backup, argv, sizeof (char *) * argc);
-  char * baudrate = NULL;
-  int loglvl = LOG_WARNING;
 #ifdef DEBUG
   vLogSetMask (LOG_UPTO (LOG_DEBUG));
 #endif
@@ -73,9 +80,21 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
         PDEBUG ("set iolayer to %s", setting->iolayer);
         break;
 
-      case 'b':
+      case 'B':
         baudrate = optarg;
         PDEBUG ("set baudrate to %s", baudrate);
+        break;
+
+      case 'W':
+        if (iStrToLong (optarg, &n, 0) == 0) {
+          if ( (n > 0) && (n <= UINT_MAX)) {
+
+            setting->iotimeout = (unsigned) n;
+            PDEBUG ("set iotimeout to %u s", setting->iotimeout);
+            break;
+          }
+        }
+        PWARNING ("unable to set iotimeout to %s", optarg);
         break;
 
       case 'd':
@@ -102,9 +121,9 @@ gxPLParseCommonArgs (gxPLSetting * setting, int argc, char *argv[]) {
   setting->log = MIN (LOG_DEBUG, loglvl);
 
   if (strncmp (setting->iolayer, "xbee", 4) == 0) {
-    
+
     setting->xbee.reset_sw = reset;
-    
+
     if (baudrate) {
       int b;
       char * endptr;

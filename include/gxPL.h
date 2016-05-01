@@ -46,8 +46,11 @@ gxPLSetting * gxPLSettingNew (const char * iface, const char * iolayer, gxPLConn
  * It supports the following options: \n
  *  -  -i / --interface xxx : interface or device used to access the network
  *  -  -n / --net       xxx : hardware abstraction layer to access the network
- *  -  -d / --debug         : enable debugging
- *  -  -D / --nodaemon      : do not daemonize
+ *  -  -W / --timeout   xxx : set the timeout at the opening of the io layer
+ *  -  -d / --debug         : enable debugging, it can be doubled or tripled to
+ *                            increase the level of debug.
+ *  -  -D / --nodaemon      : do not daemonize (if supported)
+ *  -  -B / --baudrate      : serial baudrate (if iolayer use serial port)
  *  -  -r / --reset         : performed iolayer reset (if supported)
  *  .
  *

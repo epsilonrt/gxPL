@@ -200,6 +200,7 @@ prvFindDefaultIface (int fd, gxPLIo * io) {
   }
 
   // No good interface found
+  errno = ENONET;
   return -1;
 }
 
@@ -241,13 +242,34 @@ prvMakeBroadcastConnection (gxPLIo * io) {
 
   // See if we need to find a default interface
   if (strlen (io->setting->iface) == 0) {
+    int ret;
+    unsigned timeout = 0;
 
-    if (prvFindDefaultIface (fd, io)) {
+    do {
 
-      PERROR ("Could not find a working, non-loopback network interface");
-      close (fd);
-      return -1;
+      errno = 0;
+      ret = prvFindDefaultIface (fd, io);
+      if (ret == -1) {
+
+        if (errno == ENONET) {
+          
+          /* The machine is not on the network, we fall asleep before resuming 
+           * the search until the timeout is not reached. 
+           */
+          sleep (1);
+          timeout++;
+          if (timeout < io->setting->iotimeout) {
+            
+            continue;
+          }
+        }
+
+        PERROR ("Could not find a working, non-loopback network interface");
+        close (fd);
+        return -1;
+      }
     }
+    while (ret != 0);
   }
 
   // Init the interface info request
@@ -452,9 +474,9 @@ prvBuildLocalIpList (gxPLIo * io) {
       PERROR ("Unable to get IP addr list");
       return -1;
     }
-    
+
     if (iface_list.ifc_len == len) {
-      
+
       len *= 2;
       buf = realloc (buf, len);
       iface_list.ifc_len = len;
@@ -547,9 +569,9 @@ gxPLUdpOpen (gxPLIo * io) {
       free (io->pdata);
       return -1;
     }
-    
+
     iVectorInit (&dp->addr_list, 1, NULL, free);
-    iVectorInitSearch(&dp->addr_list, prvIpKey, prvIpMatch);
+    iVectorInitSearch (&dp->addr_list, prvIpKey, prvIpMatch);
 
     return prvBuildLocalIpList (io);
   }
@@ -602,9 +624,9 @@ gxPLUdpSend (gxPLIo * io, const void * buffer, int count, const gxPLIoAddr * tar
   struct sockaddr * addrdst = (struct sockaddr *) &dp->bcast_addr;
 
   if (target) {
-    
+
     if ( (target->isbroadcast == 0) && (target->family == gxPLNetFamilyInet4)) {
-      
+
       a.sin_family = AF_INET;
       memcpy (&a.sin_addr.s_addr, target->addr,  sizeof (a.sin_addr.s_addr));
       a.sin_port = htons (target->port);
@@ -736,7 +758,7 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
       return 0;
     }
     break;
-    
+
     default:
       errno = EINVAL;
       ret = -1;

@@ -20,6 +20,11 @@
 #include "gxpl_p.h"
 #include "version-git.h"
 
+/* constants ================================================================ */
+#ifndef DEFAULT_IO_TIMEMOUT
+#define DEFAULT_IO_TIMEMOUT 30
+#endif
+
 /* structures =============================================================== */
 typedef struct _listener_elmt {
   gxPLMessageListener func;
@@ -197,6 +202,7 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
   assert (setting);
 
   setting->log = LOG_WARNING;
+  setting->iotimeout = DEFAULT_IO_TIMEMOUT;
   if (iface) {
     strcpy (setting->iface, iface);
   }
@@ -205,6 +211,7 @@ gxPLSettingNew (const char * iface, const char * iolayer, gxPLConnectType type) 
   }
   setting->connecttype = type;
   setting->malloc = 1;
+
   return setting;
 }
 
@@ -215,6 +222,7 @@ gxPLSettingFromCommandArgs (int argc, char * argv[], gxPLConnectType type) {
   assert (setting);
 
   setting->log = LOG_WARNING;
+  setting->iotimeout = DEFAULT_IO_TIMEMOUT;
   gxPLParseCommonArgs (setting, argc, argv);
   if (strlen (setting->iolayer) == 0) {
 

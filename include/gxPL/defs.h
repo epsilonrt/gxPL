@@ -108,7 +108,7 @@ typedef struct _gxPLBridge gxPLBridge;
 /**
  * @brief getopt short options used by gxPLSettingFromCommandArgs()
  */
-#define GXPL_GETOPT "i:n:b:dDr"
+#define GXPL_GETOPT "i:n:B:W:dDr"
 
 /**
  * @brief default baudrate for serial iolayer
@@ -250,6 +250,7 @@ typedef struct _gxPLSetting {
       uint16_t broadcast: 1;  /**< all broadcasts messages will be rebroadcasted by the bridge */
     };
   };
+  unsigned iotimeout; /**< timeout at the opening of the io layer */
   union {
 
     gxPLIoXBeeSetting xbee;
