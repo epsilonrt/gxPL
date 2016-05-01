@@ -94,7 +94,6 @@ main (int argc, char * argv[]) {
 // Parse command line for switches
 // -s - source of message ident
 // -t - target of message ident
-// -b - target is broadcast
 // -m - message type
 // -c - schema class / type
 static gxPLMessage *
@@ -110,13 +109,12 @@ prvCreateMessage (int argc, char *argv[]) {
   gxPLMessageType msg_type = DEFAULT_MSG_TYPE;
   gxPLId id;
 
-  static const char short_options[] = "s:t:m:c:bh" GXPL_GETOPT;
+  static const char short_options[] = "s:t:m:c:h" GXPL_GETOPT;
   static struct option long_options[] = {
     {"source",    required_argument, NULL, 's'},
     {"target",    required_argument, NULL, 't'},
     {"schema",    required_argument, NULL, 'c'},
     {"message",   required_argument, NULL, 'm'},
-    {"broadcast", no_argument,       NULL, 'b' },
     {"help",     no_argument,        NULL, 'h' },
     {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
   };
@@ -243,13 +241,14 @@ prvCreateMessage (int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL Message Sender\n", __progname);
-  printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
-  printf ("Usage: %s [-i interface] [-d] [-s source] [-b] [-h] [-t target] "
-          "[-m message_type] -c schema  name=value name=value ...\n", __progname);
+  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Usage: %s [-i interface] [-n network] [-W timeout] [-s source] [-t target]"
+          " [-m message_type] [options] -c schema  name=value name=value ...\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0)"
           " as network interface\n");
-  printf ("  -d           - enable debugging messages\n");
-  printf ("  -h           - print this message\n");
+  printf ("  -n iolayer   - use hardware abstraction layer to access the network"
+          " (i.e. udp, xbeezb... default: udp)\n");
+  printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
   printf ("  -s source    - source of message in vendor-device.instance"
           " (default: " DEFAULT_SOURCE ")\n");
   printf ("  -t target    - target of message in vendor-device.instance format."
@@ -257,6 +256,11 @@ prvPrintUsage (void) {
   printf ("  -m type      - message type: cmnd, trig or stat (default: cmnd)\n");
   printf ("  -c schema    - schema class and type formatted as class.type"
           " - REQUIRED\n\n");
+  printf ("  -B baudrate  - set serial baudrate (if iolayer use serial port)\n");
+  printf ("  -r           - performed iolayer reset (if supported)\n");
+  printf ("  -d           - enable debugging, it can be doubled or tripled to"
+          " increase the level of debug. \n");
+  printf ("  -h           - print this message\n");
 }
 
 /* ========================================================================== */

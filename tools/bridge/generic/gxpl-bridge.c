@@ -235,13 +235,16 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL network bridge\n", __progname);
-  printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
   printf ("Usage: %s [-i interface] [-o interface] [-v vendor] [-c device] "
-          "[-f filename] [-m maxhop] [-b] [-d] [-h] [-D] "
+          "[-f filename] [-m maxhop] [options] "
           "-n iolayer\n", __progname);
 
   printf ("  -i interface - use interface named interface (i.e. /dev/ttyUSB0)"
           " as inside network interface\n");
+
+  printf ("  -n iolayer   - use hardware abstraction layer to access the inside network"
+          " (i.e. xbeezb...) REQUIRED\n");
 
   printf ("  -o interface - use interface named interface (i.e. eth0)"
           " as outside network interface\n");
@@ -254,6 +257,8 @@ prvPrintUsage (void) {
 
   printf ("  -f filename  - file name where to save the device configuration"
           "  (default: ./" DEFAULT_CONFIG_FILE ")\n");
+
+  printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
 
   printf ("  -m maxhop    - messages with hop count less than or equal to maxhop"
           " cross the bridge (default: 1)\n");

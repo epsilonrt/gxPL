@@ -298,10 +298,10 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL XBee to Ethernet network bridge\n", __progname);
-  printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
   //       01234567890123456789012345678901234567890123456789012345678901234567890123456789
   printf ("Usage: %s [-i interface] [-o interface] [-B baudrate] [-p panid] [-f filename]\n"
-          "          [-m maxhop] [-b] [-d] [-h] [-D]\n", __progname);
+          "          [-m maxhop] [options]\n", __progname);
 
   printf ("  -i interface - use interface named interface (i.e. /dev/ttyUSB0)\n"
           "                 as XBee interface\n");
@@ -311,6 +311,8 @@ prvPrintUsage (void) {
 
   printf ("  -f filename  - file name where to save the device configuration\n"
           "                 (default: ~/.gxpl/" DEFAULT_CONFIG_FILE ")\n");
+
+  printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
 
   printf ("  -B baudrate  - use this baudrate for the XBee interface\n"
           "                 (default: %d)\n", GXPL_DEFAULT_BAUDRATE);
@@ -323,7 +325,8 @@ prvPrintUsage (void) {
 
   printf ("  -b           - enable broadcast for inside network\n");
   printf ("  -D           - do not daemonize -- run from the console\n");
-  printf ("  -d           - enable debugging messages\n");
+  printf ("  -d           - enable debugging, it can be doubled or tripled to"
+          " increase the level of debug. \n");
   printf ("  -h           - print this message\n\n");
   //       01234567890123456789012345678901234567890123456789012345678901234567890123456789
   printf ("<NOTE>    PAN ID, max hop count and broadcast parameters may be configured\n"

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <getopt.h>
 
 #include <gxPL.h>
 #include "version-git.h"
@@ -38,15 +39,39 @@ static void prvSignalHandler (int s);
 static void prvSetConfig (gxPLDevice * device);
 static void prvConfigChanged (gxPLDevice * device, void * udata);
 static void prvPrintMessage (gxPLApplication * app, gxPLMessage * message, void * udata);
+static void prvPrintUsage (void);
 
 /* main ===================================================================== */
 int
 main (int argc, char * argv[]) {
-  int ret;
+  int c, ret;
   gxPLSetting * setting;
+  static const char short_options[] = "h" GXPL_GETOPT;
+  static struct option long_options[] = {
+    {"help",     no_argument,        NULL, 'h' },
+    {NULL, 0, NULL, 0} /* End of array need by getopt_long do not delete it*/
+  };
 
   setting = gxPLSettingFromCommandArgs (argc, argv, gxPLConnectViaHub);
   assert (setting);
+  
+  do  {
+
+    c = getopt_long (argc, argv, short_options, long_options, NULL);
+
+    switch (c) {
+
+      case 'h':
+        prvPrintUsage();
+        free (setting);
+        exit (EXIT_SUCCESS);
+        break;
+
+      default:
+        break;
+    }
+  }
+  while (c != -1);
 
   // opens the xPL network
   app = gxPLAppOpen (setting);
@@ -238,6 +263,25 @@ prvSignalHandler (int s) {
 
   printf ("\neverything was closed.\nHave a nice day !\n");
   exit (EXIT_SUCCESS);
+}
+
+// -----------------------------------------------------------------------------
+// Print usage info
+static void
+prvPrintUsage (void) {
+  printf ("%s - xPL Message Logger\n", __progname);
+  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Usage: %s [-i interface] [-n network] [-W timeout] [options]\n", __progname);
+  printf ("  -i interface - use interface named interface (i.e. eth0)"
+          " as network interface\n");
+  printf ("  -n network   - use hardware abstraction layer to access the network"
+          " (i.e. udp, xbeezb... default: udp)\n");
+  printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
+  printf ("  -B baudrate  - set serial baudrate (if iolayer use serial port)\n");
+  printf ("  -r           - performed iolayer reset (if supported)\n");
+  printf ("  -d           - enable debugging, it can be doubled or tripled to"
+          " increase the level of debug. \n");
+  printf ("  -h           - print this message\n");
 }
 
 /* ========================================================================== */

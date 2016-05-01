@@ -225,11 +225,13 @@ prvSuperviseHub (gxPLSetting * setting) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL Hub\n", __progname);
-  printf ("Copyright (c) 2015, Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
   printf ("Usage: %s [-i interface] [-d] [-D] [-h]\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0) as network interface\n");
-  printf ("  -d           - enable hub and gxPLib debugging messages\n");
+  printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
   printf ("  -D           - do not daemonize -- run from the console\n");
+  printf ("  -d           - enable debugging, it can be doubled or tripled to"
+          " increase the level of debug. \n");
   printf ("  -h           - print this message\n\n");
 }
 
