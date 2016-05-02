@@ -2,7 +2,7 @@
  * @brief  Simple xPL clock device that sends a time update out (AVR)
  *
  * Copyright (c) 2004, Gerald R. Duprey Jr.
- * Copyright (c) 2015-2016, Pascal JEAN aka epsilonRT
+ * Copyright (c) 2015-2016, epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */

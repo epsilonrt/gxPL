@@ -2,7 +2,7 @@
  * @file
  * Command Line xPL message sending tool
  *
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015 (c), epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
@@ -241,7 +241,7 @@ prvCreateMessage (int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL Message Sender\n", __progname);
-  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 epsilonRT                \n\n");
   printf ("Usage: %s [-i interface] [-n network] [-W timeout] [-s source] [-t target]"
           " [-m message_type] [options] -c schema  name=value name=value ...\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0)"

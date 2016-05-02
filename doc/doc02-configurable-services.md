@@ -1,6 +1,6 @@
 Using configurable devices  
 > Copyright (c) 2005, Gerald R Duprey Jr.  
-> Copyright (c) 2015, Pascal JEAN aka epsilonRT  
+> Copyright (c) 2015, epsilonRT                  
 
 ## Introduction 
 

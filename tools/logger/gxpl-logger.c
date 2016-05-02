@@ -3,7 +3,7 @@
  * Simple program to monitor for any message and any device changes and print them
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015 (c), epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
@@ -270,7 +270,7 @@ prvSignalHandler (int s) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL Message Logger\n", __progname);
-  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 epsilonRT                \n\n");
   printf ("Usage: %s [-i interface] [-n network] [-W timeout] [options]\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0)"
           " as network interface\n");

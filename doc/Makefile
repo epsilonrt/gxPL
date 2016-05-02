@@ -1,5 +1,5 @@
 ###############################################################################
-# (c) Copyright 2015 Pascal JEAN aka epsilonRT                                #
+# Copyright © 2015 epsilonRT                                                  #
 # All rights reserved.                                                        #
 # Licensed under the Apache License, Version 2.0 (the "License")              #
 ###############################################################################
@@ -58,7 +58,7 @@ clean:
 distclean: clean
 	@echo "$(MSG_DISTCLEAN)"
 	@-rm -f $(PROJECT_NAME)-doc-html-*.tar.gz
-	@-rm -f version.mk .version $(PROJECT_NAME).tag *.db
+	@-rm -f version.mk .version *.tag *.db
 
 install: tar uninstall
 	@echo "$(MSG_INSTALL) $(TARGET) doc in $(INSTALL_DOCDIR)"

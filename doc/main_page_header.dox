@@ -1,11 +1,11 @@
 /**
 @file main_page.dox
 @brief documentation front page
-  Copyright 2015 (c), Pascal JEAN aka epsilonRT
+  Copyright 2015-2016 (c), epsilonRT                
   All rights reserved.
   Licensed under the Apache License, Version 2.0 (the "License")
 
-@mainpage Tools, Application and Framework for xPL
+@mainpage Library, Tools and Framework for xPL
 
   @htmlonly
     <a href="http://opensource.org/licenses/Apache-2.0">
@@ -27,8 +27,9 @@
   "generic".\n
   xPL is an application protocol that is often above the Ethernet 
   protocol, however, it was decided to make a real separation between 
-  the application layer and the network layer to evolve easily. This 
-  project is under development and has, for now, only C API.
+  the application layer and the network layer to evolve easily. This project is 
+  under development and has, for now, only C API (Linux/Unix, ATMEL AVR8).
+
    
   gxPL is a xPL framework that hides most of the details of 
   dealing with xPL.  It will handle filtering messages, sending 
@@ -42,21 +43,21 @@
   It includes some example applications showing how to use various 
   features of the framework, including the source to the gxpl-hub.
 
-  You can get the latest development version using git :\n
+  You can get the latest development version using git (public, read-only) :\n
 @code
-$ git clone http://git.epsilonrt.com/gxPL
+$ git clone http://github.com/epsilonrt/gxPL.git
 @endcode
 
   You can browse the source code on 
   @htmlonly
-    <a href="http://gitweb.epsilonrt.com/gxPL.git">
-      http://gitweb.epsilonrt.com/gxPL.git
+    <a href="https://github.com/epsilonrt/gxPL">
+      https://github.com/epsilonrt/gxPL
     </a>
   @endhtmlonly
   
   @ref doc01 explains how to install.
 
-  @author Copyright (c) 2015, Pascal Jean aka epsilonRT
+  @author Copyright (c) 2015-2016, epsilonRT
 
   gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
   you may not use this file except in compliance with the License.  
@@ -72,7 +73,7 @@ $ git clone http://git.epsilonrt.com/gxPL
   
   @htmlonly
   <blockquote cite="http://www.xpl4java.org/xPL4Linux/">
-  <p>xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr<br>
+  <p>The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr<br>
   xPL4Linux homepage: <a href="http://www.xpl4java.org/xPL4Linux/">http://www.xpl4java.org/xPL4Linux/</a></p>
   </blockquote>
   @endhtmlonly

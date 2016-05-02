@@ -2,7 +2,7 @@
  * @file
  * Implementation of an xPL Bridge using gxPLib
  *
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015 (c), epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
@@ -235,7 +235,7 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL network bridge\n", __progname);
-  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 epsilonRT                \n\n");
   printf ("Usage: %s [-i interface] [-o interface] [-v vendor] [-c device] "
           "[-f filename] [-m maxhop] [options] "
           "-n iolayer\n", __progname);

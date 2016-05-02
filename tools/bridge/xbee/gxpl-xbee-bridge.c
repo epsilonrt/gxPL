@@ -2,7 +2,7 @@
  * @file
  * Implementation of an xPL Ethernet to XBee ZB (API without escape) Bridge using gxPLib
  *
- * Copyright 2015-2016 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015-2016 (c), epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
@@ -298,7 +298,7 @@ prvParseOptions (prvBridgeSetting * setting, int argc, char *argv[]) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL XBee to Ethernet network bridge\n", __progname);
-  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 epsilonRT                \n\n");
   //       01234567890123456789012345678901234567890123456789012345678901234567890123456789
   printf ("Usage: %s [-i interface] [-o interface] [-B baudrate] [-p panid] [-f filename]\n"
           "          [-m maxhop] [options]\n", __progname);

@@ -1,7 +1,7 @@
 #!/bin/bash
 # git-version 
 # Build a file containing version information from GIT
-# (c) Copyright 2015 Pascal JEAN aka epsilonRT
+# (c) Copyright 2015 epsilonRT                
 # All rights reserved.
 # Licensed under the Apache License, Version 2.0 (the "License")
 

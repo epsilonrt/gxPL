@@ -1,6 +1,6 @@
 xPL Hub
 > Copyright (c) 2005 -- Gerry Duprey  
-> Copyright (c) 2015, Pascal JEAN aka epsilonRT
+> Copyright (c) 2015, epsilonRT                
 
 ## Overview
 

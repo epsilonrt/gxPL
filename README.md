@@ -1,25 +1,29 @@
-# gxPLApplication  
-*Tools, Application and Framework for xPL*
+# gxPL
+*Library, Tools and Framework for xPL*
 
 ---
-Copyright 2015 (c), Pascal JEAN aka epsilonRT  
+Copyright 2015-2016 (c), epsilonRT                  
 
 Full documentation and installation is in the doc/ directory or on 
-Project Homepage: [http://www.epsilonrt.com/gxPLApplication](http://www.epsilonrt.com/gxPLApplication)
+Project Homepage: [http://www.epsilonrt.com/gxPL](http://www.epsilonrt.com/gxPL)
 
-**This project is under development and has, for now, only C API**
+gxPL is a fork of xPL4Linux whose development seems to have stopped since 2006. 
+The development was resumed starting from version V1.3a released October 18, 2006.
+The objectives of the fork are:
 
-gxPLApplication is a fork of xPL4Linux whose development seems to have stopped 
-since 2006. The development was resumed starting from version V1.3a 
-released October 18, 2006.  
-gxPLApplication aims to provide a cross-platform framework xPL in C, C ++ and 
-Python using only open source software. The letter 'g' in gxPLApplication means 
-"generic".  
-xPL is an application protocol that is often above the Ethernet 
-protocol, however, it was decided to make a real separation between 
-the application layer and the network layer to evolve easily.  
+*    Make the code modular describing xPL items as presented in the core documentation
+*    Separating the hardware layer and the application layer because it is the main advantage of xPL!
+*    Eliminate static variables to make the relocatable code and to be able to instantiate the "objects"
+
+gxPL aims to provide a cross-platform framework xPL in C, C ++ and Python using 
+only open source software. The letter 'g' in gxPL means "generic".
+xPL is an application protocol that is often above the Ethernet protocol, 
+however, it was decided to make a real separation between the application layer 
+and the network layer to evolve easily. 
+
+This project is under development and has, for now, only C API (Linux/Unix, ATMEL AVR8).
  
-gxPLApplication is a xPL framework that hides most of the details of 
+gxPL is a xPL framework that hides most of the details of 
 dealing with xPL.  It will handle filtering messages, sending 
 heartbeats, formatting and parsing messages, directing messages to 
 handlers based on where they were bound from, etc.  
@@ -31,18 +35,18 @@ integrate into an existing program.
 It includes some example applications showing how to use various 
 features of the framework, including the source to the gxpl-hub.
 
-You can get the latest development version using git :
+You can get the latest development version using git (public, read-only) :
 
-    $ git clone http://git.epsilonrt.com/gxPLApplication
+    $ git clone http://github.com/epsilonrt/gxPL.git
 
 You can browse the source code on 
-[http://gitweb.epsilonrt.com/gxPLApplication.git](http://gitweb.epsilonrt.com/gxPLApplication.git)
+[https://github.com/epsilonrt/gxPL](https://github.com/epsilonrt/gxPL)
 
-> xPL4Linux is Copyright (c) 2006, Gerald R Duprey Jr  
+> The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr  
 > xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
 
 ---
-gxPLApplication is licensed under the Apache License, Version 2.0 (the "License"); 
+gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
 you may not use this file except in compliance with the License.  
 You may obtain a copy of the License at:
 

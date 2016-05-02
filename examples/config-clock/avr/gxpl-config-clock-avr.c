@@ -3,7 +3,7 @@
  * Simple configurable xPL device device that sends a time update periodically
  * 
  * Copyright 2005 (c), Gerald R Duprey Jr
- * Copyright (c) 2015-2016, Pascal JEAN aka epsilonRT
+ * Copyright (c) 2015-2016, epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */

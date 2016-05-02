@@ -3,7 +3,7 @@
  * Implementation of an xPL Hub using gxPLib
  *
  * Copyright 2004 (c), Gerald R Duprey Jr
- * Copyright 2015 (c), Pascal JEAN aka epsilonRT
+ * Copyright 2015 (c), epsilonRT                
  * All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License")
  */
@@ -225,7 +225,7 @@ prvSuperviseHub (gxPLSetting * setting) {
 static void
 prvPrintUsage (void) {
   printf ("%s - xPL Hub\n", __progname);
-  printf ("Copyright (c) 2015-2016 Pascal JEAN aka epsilonRT\n\n");
+  printf ("Copyright (c) 2015-2016 epsilonRT                \n\n");
   printf ("Usage: %s [-i interface] [-d] [-D] [-h]\n", __progname);
   printf ("  -i interface - use interface named interface (i.e. eth0) as network interface\n");
   printf ("  -W timeout   - set the timeout at the opening of the io layer\n");
