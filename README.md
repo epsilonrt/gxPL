@@ -48,11 +48,27 @@ These are installation instructions.
 
 * Build and install the dependencies:
 
+<<<<<<< HEAD
         git clone http://github.com/epsilonrt/sysio.git
         cd sysio
         make
         sudo make install
 
+=======
+    - For Unix/Linux target:
+
+            git clone http://github.com/epsilonrt/sysio.git
+            cd sysio
+            make
+            sudo make install
+
+    - For ATMEL AVR8 target:
+
+            git clone http://github.com/epsilonrt/avrio.git
+            cd avrio
+            make set-profile
+            sudo make install
+>>>>>>> f6f4f727762f68c3b69a2db2c9e53e776758e409
 
 * Clone sources from github.com git repos (or unzip archive file):
 
@@ -65,10 +81,13 @@ These are installation instructions.
         make
         sudo make install
 
+<<<<<<< HEAD
     The shared and static libraries are installed into /usr/local/lib and 
     header files is installed in /usr/local/include.  
     You can changed the prefix in the Makefile if you'd like.
 
+=======
+>>>>>>> f6f4f727762f68c3b69a2db2c9e53e776758e409
 * Build and install the tools (hub, logger ...):
 
         cd tools
@@ -78,9 +97,12 @@ These are installation instructions.
 * Run hub tool as daemon:
 
         gxpl-hub
+<<<<<<< HEAD
     
     **Be sure to open the UDP Port 3865 on your firewall, or your xPL 
     network may not work !**
+=======
+>>>>>>> f6f4f727762f68c3b69a2db2c9e53e776758e409
 
 * Build and run clock example:
 
@@ -89,6 +111,7 @@ These are installation instructions.
         cd clock
         ./gxpl-clock -d
 
+<<<<<<< HEAD
 * If you plan to compile examples for the target AVR8 you must also install avrio:
 
         git clone http://github.com/epsilonrt/avrio.git
@@ -100,6 +123,17 @@ These are installation instructions.
         # AVRIO_ROOT=/home/pascal/src/avrio was added
         #  in /home/pascal/.profile
         # You must log out for this to take effect.
+=======
+**Be sure to open the UDP Port 3865 on your firewall, or your xPL 
+network may not work !**
+
+The shared and static libraries are installed into /usr/local/lib and 
+header files is installed in /usr/local/include.  
+You can changed the destinations in the Makefile if you'd like.
+
+> The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr  
+> xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
+>>>>>>> f6f4f727762f68c3b69a2db2c9e53e776758e409
 
 ---
 gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
