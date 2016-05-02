@@ -1,6 +1,6 @@
 xPL Hub
-> Copyright (c) 2005 -- Gerry Duprey  
-> Copyright (c) 2015, epsilonRT                
+> Copyright (c) 2005 -- Gerry Duprey
+> Copyright (c) 2015, epsilonRT
 
 ## Overview
 
@@ -61,7 +61,7 @@ sudo make install
 Run the hub:
 
 <pre class="fragment">
-gxpl-hub -D
+gxpl-hub -D -ddd
 </pre>
 
 ## Hub service

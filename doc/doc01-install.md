@@ -2,41 +2,61 @@ Basic Installation
 
 These are installation instructions.
 
-Clone sources from epsilonrt.com git repos (or untar archive file):
+* Build and install the dependencies:
+
+    - For Unix/Linux target:
 
 <pre class="fragment">
-git clone http://git.epsilonrt.com/gxPL
+        git clone http://github.com/epsilonrt/sysio.git
+        cd sysio
+        make
+        sudo make install
+</pre>
+    - For ATMEL AVR8 target:
+
+<pre class="fragment">
+        git clone http://github.com/epsilonrt/avrio.git
+        cd avrio
+        make set-profile
+        sudo make install
 </pre>
 
-Build and install the library:
+* Clone sources from github.com git repos (or unzip archive file):
 
 <pre class="fragment">
-cd gxPL
-make
-sudo make install
+        git clone http://github.com/epsilonrt/gxPL.git
 </pre>
 
-Build and install the tools (hub, logger ...):
+
+* Build and install the library:
 
 <pre class="fragment">
-cd tools
-make
-sudo make install
+        cd gxPL
+        make
+        sudo make install
 </pre>
 
-Run hub tool as daemon:
+* Build and install the tools (hub, logger ...):
 
 <pre class="fragment">
-gxpl-hub
+        cd tools
+        make
+        sudo make install
 </pre>
 
-Build and run clock example:
+* Run hub tool as daemon:
 
 <pre class="fragment">
-cd ../examples
-make
-cd clock
-./gxpl-clock -d
+        gxpl-hub
+</pre>
+
+* Build and run clock example:
+
+<pre class="fragment">
+        cd ../examples
+        make
+        cd clock
+        ./gxpl-clock -d
 </pre>
 
 **Be sure to open the UDP Port 3865 on your firewall, or your xPL 

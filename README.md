@@ -42,6 +42,61 @@ You can get the latest development version using git (public, read-only) :
 You can browse the source code on 
 [https://github.com/epsilonrt/gxPL](https://github.com/epsilonrt/gxPL)
 
+##Basic Installation
+
+These are installation instructions.
+
+* Build and install the dependencies:
+
+    - For Unix/Linux target:
+
+            git clone http://github.com/epsilonrt/sysio.git
+            cd sysio
+            make
+            sudo make install
+
+    - For ATMEL AVR8 target:
+
+            git clone http://github.com/epsilonrt/avrio.git
+            cd avrio
+            make set-profile
+            sudo make install
+
+* Clone sources from github.com git repos (or unzip archive file):
+
+        git clone http://github.com/epsilonrt/gxPL.git
+
+
+* Build and install the library:
+
+        cd gxPL
+        make
+        sudo make install
+
+* Build and install the tools (hub, logger ...):
+
+        cd tools
+        make
+        sudo make install
+
+* Run hub tool as daemon:
+
+        gxpl-hub
+
+* Build and run clock example:
+
+        cd ../examples
+        make
+        cd clock
+        ./gxpl-clock -d
+
+**Be sure to open the UDP Port 3865 on your firewall, or your xPL 
+network may not work !**
+
+The shared and static libraries are installed into /usr/local/lib and 
+header files is installed in /usr/local/include.  
+You can changed the destinations in the Makefile if you'd like.
+
 > The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr  
 > xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
 
