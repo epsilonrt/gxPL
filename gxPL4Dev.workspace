@@ -26,12 +26,14 @@
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock/avr/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
   <Project Name="gxpl-hub-service" Path="tools/script/init.d/hub/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge-service" Path="tools/script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
+  <Project Name="doc" Path="doc/doc.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Debug"/>
       <Project Name="gxPLibAvr" ConfigName="Debug"/>
       <Project Name="gxpl-test" ConfigName="Debug"/>
@@ -72,8 +74,10 @@
       <Project Name="gxpl-hub-service" ConfigName="Debug"/>
       <Project Name="gxpl-xbee-bridge-service" ConfigName="Debug"/>
       <Project Name="gxpl-tools" ConfigName="Debug"/>
+      <Project Name="doc" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
       <Project Name="gxPLib" ConfigName="Release"/>
       <Project Name="gxPLibAvr" ConfigName="Release"/>
       <Project Name="gxpl-test" ConfigName="Release"/>
@@ -114,6 +118,7 @@
       <Project Name="gxpl-hub-service" ConfigName="Release"/>
       <Project Name="gxpl-xbee-bridge-service" ConfigName="Release"/>
       <Project Name="gxpl-tools" ConfigName="Release"/>
+      <Project Name="doc" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

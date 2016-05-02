@@ -42,8 +42,64 @@ You can get the latest development version using git (public, read-only) :
 You can browse the source code on 
 [https://github.com/epsilonrt/gxPL](https://github.com/epsilonrt/gxPL)
 
-> The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr  
-> xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
+##Basic Installation
+
+These are installation instructions.
+
+* Build and install the dependencies:
+
+        git clone http://github.com/epsilonrt/sysio.git
+        cd sysio
+        make
+        sudo make install
+
+
+* Clone sources from github.com git repos (or unzip archive file):
+
+        git clone http://github.com/epsilonrt/gxPL.git
+
+
+* Build and install the library:
+
+        cd gxPL
+        make
+        sudo make install
+
+    The shared and static libraries are installed into /usr/local/lib and 
+    header files is installed in /usr/local/include.  
+    You can changed the prefix in the Makefile if you'd like.
+
+* Build and install the tools (hub, logger ...):
+
+        cd tools
+        make
+        sudo make install
+
+* Run hub tool as daemon:
+
+        gxpl-hub
+    
+    **Be sure to open the UDP Port 3865 on your firewall, or your xPL 
+    network may not work !**
+
+* Build and run clock example:
+
+        cd ../examples
+        make
+        cd clock
+        ./gxpl-clock -d
+
+* If you plan to compile examples for the target AVR8 you must also install avrio:
+
+        git clone http://github.com/epsilonrt/avrio.git
+        cd avrio
+        sudo make install
+        
+        make set-profile
+        # Remove AVRIO_ROOT=... in /home/pascal/.profile
+        # AVRIO_ROOT=/home/pascal/src/avrio was added
+        #  in /home/pascal/.profile
+        # You must log out for this to take effect.
 
 ---
 gxPL is licensed under the Apache License, Version 2.0 (the "License"); 
@@ -57,3 +113,5 @@ under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
+> The xPL4Linux project that is no longer updated is Copyright (c) 2006, Gerald R Duprey Jr  
+> xPL4Linux original homepage: [http://www.xpl4java.org/gxPL/](http://www.xpl4java.org/gxPL/)
