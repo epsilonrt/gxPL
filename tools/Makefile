@@ -23,10 +23,10 @@ install: $(SUBDIRS) install_script
 uninstall: uninstall_script $(SUBDIRS)
 
 install_script: 
-	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix)
 
 uninstall_script:
-	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH)
+	$(MAKE) -w -C script $(MAKECMDGOALS) prefix=$(prefix)
 
 $(SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS)

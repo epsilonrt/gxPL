@@ -11,8 +11,8 @@ TARGET = gxpl-hub
 PROJECT_TOPDIR = ../..
 
 # Target architecture
-#ARCH = ARCH_ARM_RASPBERRYPI
-ARCH = ARCH_GENERIC_LINUX
+#BOARD = BOARD_RASPBERRYPI
+#BOARD = BOARD_NANOPI
 
 # Generates a file to retrieve information on the GIT Version
 GIT_VERSION = ON
@@ -108,7 +108,7 @@ VERSION=1.0.0
 #---------------- gxPL Options ----------------
 # Enable debug a gxPL test (ON / OFF). 
 # If set to ON, the target is not linked to the gxPL lib and sources of gxPL 
-# are recompiled. GXPL_ROOT and ARCH must be defined
+# are recompiled. GXPL_ROOT must be defined
 #GXPL_DEBUG_TEST = ON
 
 ifeq ($(GXPL_ROOT),)
@@ -139,22 +139,75 @@ COPY = cp
 #-------------------------------------------------------------------------------
 3RDPARTY_ROOT=$(GXPL_ROOT)/3rdparty
 VPATH+=:$(3RDPARTY_ROOT)
-RPI_CPU=$(shell $(GXPL_ROOT)/util/rpi/rpi-cpu)
-RPI_REV=$(shell $(GXPL_ROOT)/util/rpi/rpi-rev)
+$(info Check the target platform, you can use BOARD to force the target...)
+
+HARDWARE_CPU=$(shell hardware-cpu)
+#$(warning '$(HARDWARE_CPU)')
+
+ifneq ($(findstring bcm27,$(HARDWARE_CPU)),)
+# Raspberry Pi -----------------------------------------------------------------
+
+RPI_CPU=$(shell rpi-cpu)
+RPI_REV=$(shell rpi-rev)
 #$(warning $(RPI_CPU))
 #$(warning $(RPI_REV))
-ifneq ($(RPI_CPU),)
-override ARCH = ARCH_ARM_RASPBERRYPI
+
+$(info Build for Raspberry Pi target !)
+override BOARD = BOARD_RASPBERRYPI
 CDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
 CPPDEFS += -DRPI_CPU=$(RPI_CPU) -DRPI_REV=$(RPI_REV)
+
 else
-ifeq ($(ARCH),ARCH_ARM_RASPBERRYPI)
-override ARCH = ARCH_GENERIC_LINUX
-$(warning this system is not a Raspberry Pi, I compile for linux standard system)
+# Not Raspberry Pi  ------------------------------------------------------------
+
+ifneq ($(findstring sun8i,$(HARDWARE_CPU)),)
+# Allwinner sunxi  -------------------------------------------------------------
+
+ARMBIAN_BOARD=$(shell armbian-board)
+#$(warning '$(ARMBIAN_BOARD)')
+
+ifeq ($(ARMBIAN_BOARD),nanopineo)
+# NanoPi Neo  ------------------------------------------------------------------
+$(info Build for NanoPi Neo target !)
+override BOARD = BOARD_NANOPI_NEO
+# NanoPi Neo  ------------------------------------------------------------------
+else
+ifeq ($(ARMBIAN_BOARD),nanopiair)
+# NanoPi Neo  ------------------------------------------------------------------
+$(info Build for NanoPi Neo Air target !)
+override BOARD = BOARD_NANOPI_AIR
+# NanoPi Neo  ------------------------------------------------------------------
+else
+ifeq ($(ARMBIAN_BOARD),nanopim1)
+# NanoPi Neo  ------------------------------------------------------------------
+$(info Build for NanoPi M1 target !)
+override BOARD = BOARD_NANOPI_M1
+# NanoPi Neo  ------------------------------------------------------------------
+else
 endif
 endif
-CDEFS += -D_REENTRANT -D$(ARCH)
-CPPDEFS += -D_REENTRANT -D$(ARCH)
+endif
+
+# Allwinner sunxi  -------------------------------------------------------------
+endif
+
+# Not Raspberry Pi  ------------------------------------------------------------
+endif
+
+ifeq ($(BOARD),)
+$(info BOARD not defined, Build for linux standard system...)
+override BOARD = BOARD_GENERIC_LINUX
+endif
+
+#$(warning '$(BOARD)')
+
+CDEFS += -D_REENTRANT -D$(BOARD)
+CPPDEFS += -D_REENTRANT -D$(BOARD)
+
+SYS_HAS_GPS_H=$(shell test-header gps.h)
+ifeq ($(SYS_HAS_GPS_H),ON)
+EXTRA_LIBS += gps
+endif
 
 EXTRA_LIBS += pthread rt
 LDFLAGS += -pthread

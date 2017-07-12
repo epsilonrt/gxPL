@@ -6,9 +6,9 @@
 SUBDIRS = unix 
 CLEANER_SUBDIRS = 
 
-# Choix de l'architecture matérielle du système
-ARCH = ARCH_GENERIC_LINUX
-#ARCH = ARCH_ARM_RASPBERRYPI
+# Architecture du système cible
+#BOARD = BOARD_RASPBERRYPI
+#BOARD = BOARD_NANOPI
 
 # Enabling Debug information (ON / OFF)
 #DEBUG = ON
@@ -21,7 +21,7 @@ install: $(SUBDIRS)
 uninstall: $(SUBDIRS)
 
 $(SUBDIRS):
-	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) ARCH=$(ARCH) DEBUG=$(DEBUG)
+	$(MAKE) -w -C $@ $(MAKECMDGOALS) prefix=$(prefix) DEBUG=$(DEBUG)
 
 $(CLEANER_SUBDIRS):
 	$(MAKE) -w -C $@ $(MAKECMDGOALS)

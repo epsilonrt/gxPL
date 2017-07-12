@@ -744,7 +744,7 @@ gxPLXBeeZbCtl (gxPLIo * io, int c, va_list ap) {
 
       if ( (addr->family == gxPLNetFamilyZigbee16) ||
            (addr->family == gxPLNetFamilyZigbee64)) {
-        const char ** str_addr = va_arg (ap, char**);
+        const char ** str_addr = (const char **) va_arg (ap, char**);
 
         *str_addr = prvZbAddrToString (addr->addr, addr->addrlen);
       }

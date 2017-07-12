@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="gxPL4Dev" Database="">
+<CodeLite_Workspace Name="gxPL4Dev" Database="" Version="10.0.0">
   <Project Name="gxPLib" Path="lib/unix/gxPLib.project" Active="No"/>
   <Project Name="gxPLibAvr" Path="lib/avr/gxPLibAvr.project" Active="No"/>
   <Project Name="gxpl-test" Path="test/gxpl-test.project" Active="No"/>
@@ -26,11 +26,11 @@
   <Project Name="gxpl-config-clock-avr" Path="examples/config-clock/avr/gxpl-config-clock-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-avr" Path="test/device-config/avr/gxpl-test-device-config-avr.project" Active="No"/>
   <Project Name="gxpl-test-device-config-unix" Path="test/device-config/unix/gxpl-test-device-config-unix.project" Active="No"/>
-  <Project Name="gxPL" Path="gxPL.project" Active="No"/>
+  <Project Name="gxPL" Path="gxPL.project" Active="Yes"/>
   <Project Name="gxpl-hub-service" Path="tools/script/init.d/hub/gxpl-hub-service.project" Active="No"/>
   <Project Name="gxpl-xbee-bridge-service" Path="tools/script/init.d/xbee-bridge/gxpl-xbee-bridge-service.project" Active="No"/>
   <Project Name="gxpl-tools" Path="tools/gxpl-tools.project" Active="No"/>
-  <Project Name="doc" Path="doc/doc.project" Active="Yes"/>
+  <Project Name="doc" Path="doc/doc.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>

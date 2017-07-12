@@ -753,7 +753,7 @@ gxPLUdpCtl (gxPLIo * io, int c, va_list ap) {
 
     // int gxPLIoCtl (gxPLIo * io, gxPLIoFuncGetLocalAddrList, const xVector ** addr_list)
     case gxPLIoFuncGetLocalAddrList: {
-      const xVector ** addr_list = va_arg (ap, xVector**);
+      const xVector ** addr_list = (const xVector **) va_arg (ap, xVector**);
       *addr_list = &dp->addr_list;
       return 0;
     }

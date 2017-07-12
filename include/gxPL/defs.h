@@ -18,7 +18,7 @@
 #include <sysio/vector.h>
 #include <sysio/serial.h>
 #include <sysio/delay.h>
-#if defined(ARCH_ARM_RASPBERRYPI)
+#if defined(BOARD_RASPBERRYPI)
 #include <sysio/doutput.h>
 #endif
 #define GXPL_TARGET_STR "unix"
@@ -226,7 +226,7 @@ typedef struct _gxPLIoXBeeSetting {
 #if defined(__AVR__)
 #define GXPL_XBEEZB_HAS_HWRESET 1
   xDPin reset_pin;
-#elif defined(ARCH_ARM_RASPBERRYPI)
+#elif defined(BOARD_RASPBERRYPI)
 #define GXPL_XBEEZB_HAS_HWRESET 1
   xDout reset_pin;
 #endif
